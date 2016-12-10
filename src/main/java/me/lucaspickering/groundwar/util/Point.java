@@ -123,9 +123,7 @@ public class Point implements Comparable<Point> {
 
     @Override
     public int hashCode() {
-        int result = x;
-        result = 31 * result + y;
-        return result;
+        return x * 31 + y;
     }
 
     @Override

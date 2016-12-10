@@ -11,18 +11,17 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
-import java.io.IOException;
 import java.net.URL;
 
-import me.lucaspickering.groundwar.board.Board;
 import me.lucaspickering.groundwar.render.Renderer;
 import me.lucaspickering.groundwar.render.event.KeyEvent;
 import me.lucaspickering.groundwar.render.event.MouseButtonEvent;
-import me.lucaspickering.groundwar.render.screen.MainMenuScreen;
 import me.lucaspickering.groundwar.render.screen.MainScreen;
+import me.lucaspickering.groundwar.render.screen.WorldScreen;
 import me.lucaspickering.groundwar.util.Colors;
 import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Point;
+import me.lucaspickering.groundwar.world.World;
 
 public class TerrainGen {
 
@@ -43,7 +42,7 @@ public class TerrainGen {
     private int windowHeight;
     private Point mousePos = new Point();
 
-    private Board board;
+    private World world;
 
     private void run() {
         try {
@@ -101,8 +100,8 @@ public class TerrainGen {
         GLFW.glfwSetWindowSizeCallback(window, windowResizeHandler);
 
         renderer = new Renderer();
-        loadNewBoard();
-        currentScreen = new MainMenuScreen(); // Initialize the current screen
+        world = new World();
+        currentScreen = new WorldScreen(world); // Initialize the current screen
     }
 
     private void gameLoop() {
@@ -139,21 +138,6 @@ public class TerrainGen {
         GLFW.glfwTerminate(); // Terminate GLFW
         GLFW.glfwDestroyWindow(window); // Destroy the window
         GLFW.glfwSetErrorCallback(null); // Need to wipe this out
-    }
-
-    /**
-     * Loads a new board from the default file.
-     *
-     * @return the new {@link Board}
-     */
-    public Board loadNewBoard() {
-        try {
-            board = new Board();
-        } catch (IOException e) {
-            System.err.printf("Error loading board");
-            e.printStackTrace();
-        }
-        return board;
     }
 
     public Renderer getRenderer() {

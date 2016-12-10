@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import me.lucaspickering.groundwar.board.tile.Tile;
+import me.lucaspickering.groundwar.world.tile.Tile;
 
 /**
  * Represents a path of tiles. Two paths are considered equal if they share the same origin and

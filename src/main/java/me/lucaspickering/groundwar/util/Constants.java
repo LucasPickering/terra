@@ -26,11 +26,11 @@ public class Constants {
      */
     public static final int RES_HEIGHT = 2160;
 
-    // Board constants
+    // World constants
     public static final Point BOARD_CENTER = new Point((RES_WIDTH - TILE_WIDTH) / 2,
                                                        (RES_HEIGHT - TILE_HEIGHT) / 2 + 75);
     /**
-     * The combat strength factor specified by {@link me.lucaspickering.groundwar.board.unit.Unit#getStrengthVs} is
+     * The combat strength factor specified by {@link me.lucaspickering.groundwar.world.unit.Unit#getStrengthVs} is
      * randomized to be within this value of it's original. For example, if it original value is x
      * and this value is 0.1, then the randomized value will be in the range [0.9x, 1.1x].
      */
