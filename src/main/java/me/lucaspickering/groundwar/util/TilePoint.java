@@ -9,6 +9,8 @@ package me.lucaspickering.groundwar.util;
  */
 public class TilePoint {
 
+    private static final String STRING_FORMAT = "(%d, %d, %d)";
+
     private final int x;
     private final int y;
     private final int z;
@@ -61,6 +63,11 @@ public class TilePoint {
      */
     public final int distanceTo(TilePoint other) {
         return (Math.abs(x - other.x()) + Math.abs(y - other.y()) + Math.abs(z + other.z())) / 2;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(STRING_FORMAT, x, y, z);
     }
 
     @Override

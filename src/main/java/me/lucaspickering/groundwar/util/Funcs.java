@@ -1,5 +1,8 @@
 package me.lucaspickering.groundwar.util;
 
+import org.lwjgl.opengl.GL11;
+
+import java.awt.Color;
 import java.util.Random;
 
 public class Funcs {
@@ -39,5 +42,20 @@ public class Funcs {
         final int g = input << 4;
         final int b = input;
         return a | r | g | b;
+    }
+
+    public static void setGlColor(Color color) {
+        GL11.glColor4f(color.getRed() / 255f,
+                       color.getGreen() / 255f,
+                       color.getBlue() / 255f,
+                       color.getAlpha() / 255f);
+    }
+
+    public static Color colorFromArgb(int argb) {
+        final int alpha = argb >> 24 & 0xff;
+        final int red = argb >> 16 & 0xff;
+        final int green = argb >> 8 & 0xff;
+        final int blue = argb & 0xff;
+        return new Color(red, green, blue, alpha);
     }
 }

@@ -10,7 +10,7 @@ import me.lucaspickering.groundwar.render.HorizAlignment;
 import me.lucaspickering.groundwar.render.VertAlignment;
 import me.lucaspickering.groundwar.render.event.KeyEvent;
 import me.lucaspickering.groundwar.render.screen.gui.TextDisplay;
-import me.lucaspickering.groundwar.util.Constants;
+import me.lucaspickering.groundwar.util.Funcs;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.world.World;
 import me.lucaspickering.groundwar.world.tile.Tile;
@@ -34,9 +34,6 @@ public class WorldScreen extends MainScreen {
 
     @Override
     public void draw(Point mousePos) {
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-
         final Collection<Tile> tiles = world.getTiles().values();
 
         tiles.forEach(tile -> drawTile(tile, mousePos)); // Draw each tile
@@ -44,18 +41,14 @@ public class WorldScreen extends MainScreen {
         // Update mouseOverTileInfo for the unit that the mouse is over
         for (Tile tile : tiles) {
             if (tile.contains(mousePos)) {
-                mouseOverTileInfo.setText("hello i am a potato"); // todo tile info
+                mouseOverTileInfo.setText(tile.info());
                 mouseOverTileInfo.setPos(mousePos.plus(TILE_INFO_POS));
                 mouseOverTileInfo.setWidth(TILE_INFO_WIDTH);
                 mouseOverTileInfo.setHeight(TILE_INFO_HEIGHT);
-                mouseOverTileInfo.setTextColor(0); // tile color
                 mouseOverTileInfo.setVisible(true);
                 break; // We don't need to check the rest of the tiles
             }
         }
-
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_BLEND);
 
         super.draw(mousePos); // Draw GUI elements
         mouseOverTileInfo.setVisible(false); // Hide the unit info, to be updated on the next frame
@@ -69,18 +62,46 @@ public class WorldScreen extends MainScreen {
      */
     private void drawTile(Tile tile, Point mousePos) {
         GL11.glPushMatrix();
-        GL11.glTranslatef(tile.screenPos().x(), tile.screenPos().y(), 0f);
 
-        final int width = Constants.TILE_WIDTH;
-        final int height = Constants.TILE_HEIGHT;
+        // Translate to the center of the tile
+        final Point tilePos = tile.center();
+        GL11.glTranslatef(tilePos.x(), tilePos.y(), 0f);
 
-        // Draw the regular background
-        renderer().drawTexture(Constants.TILE_BG_NAME, 0, 0, width, height,
-                               tile.backgroundColor());
+        final int width = Tile.TILE_WIDTH;
+        final int height = Tile.TILE_HEIGHT;
 
-        // Draw the regular foreground
-        renderer().drawTexture(Constants.TILE_OUTLINE_NAME, 0, 0, width, height,
-                               tile.outlineColor());
+        // Draw the tile background
+        Funcs.setGlColor(tile.backgroundColor());
+        GL11.glBegin(GL11.GL_POLYGON);
+        for (Point vertex : Tile.VERTICES) {
+            // Draw each vertex
+            GL11.glVertex2i(vertex.x(), vertex.y());
+        }
+        GL11.glEnd();
+
+        // Draw the outline by drawing each side as an individual line.
+        Funcs.setGlColor(tile.outlineColor());
+        GL11.glLineWidth(Tile.OUTLINE_WIDTH);
+        for (int i = 0; i < Tile.NUM_SIDES; i++) {
+            // Get the two vertices that the line will be between
+            final Point vertex1 = Tile.VERTICES[i];
+            final Point vertex2 = Tile.VERTICES[(i + 1) % Tile.NUM_SIDES];
+            GL11.glBegin(GL11.GL_LINES);
+            GL11.glVertex2i(vertex1.x(), vertex1.y());
+            GL11.glVertex2i(vertex2.x(), vertex2.y());
+            GL11.glEnd();
+        }
+
+//        GL11.glEnable(GL11.GL_BLEND);
+//        GL11.glEnable(GL11.GL_TEXTURE_2D);
+//        // Draw the regular foreground
+//        renderer().drawTexture(Constants.TILE_OUTLINE_NAME, 0, 0, width, height,
+//                               tile.outlineColor());
+//        GL11.glDisable(GL11.GL_TEXTURE_2D);
+//        GL11.glDisable(GL11.GL_BLEND);
+
+        // Translate to the top-left of the tile
+        GL11.glTranslatef(-Tile.TILE_WIDTH / 2, -Tile.TILE_HEIGHT / 2, 0f);
 
         drawTileOverlays(tile, mousePos); // Draw the tile overlays on top of everything else
 
@@ -94,8 +115,8 @@ public class WorldScreen extends MainScreen {
      * @param mousePos the position of the mouse
      */
     private void drawTileOverlays(Tile tile, Point mousePos) {
-        final int width = Constants.TILE_WIDTH;
-        final int height = Constants.TILE_HEIGHT;
+        final int width = Tile.TILE_WIDTH;
+        final int height = Tile.TILE_HEIGHT;
 
         // Draw mouse-over overlays
         if (tile.contains(mousePos)) { // If the mouse is over this tile...

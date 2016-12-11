@@ -2,16 +2,6 @@ package me.lucaspickering.groundwar.util;
 
 public class Constants {
 
-    // Tile constants
-    /**
-     * The distance between the center point of the hexagon and the center-point of one side of the
-     * hexagon.
-     */
-    public static final int TILE_RADIUS = 100;
-    public static final int TILE_WIDTH = (int) (TILE_RADIUS * 4 / Math.sqrt(3));
-    public static final int TILE_HEIGHT = TILE_RADIUS * 2;
-    public static final int NUM_SIDES = Direction.values().length;
-
     // Renderer constants
     /**
      * The width of the window that will be assumed when all textures, words, etc. are drawn to the
@@ -24,8 +14,8 @@ public class Constants {
     public static final int RES_HEIGHT = 2160;
 
     // World constants
-    public static final Point BOARD_CENTER = new Point((RES_WIDTH - TILE_WIDTH) / 2,
-                                                       (RES_HEIGHT - TILE_HEIGHT) / 2 + 75);
+    public static final Point BOARD_CENTER = new Point(RES_WIDTH / 2,
+                                                       RES_HEIGHT / 2 + 75);
 
     // File paths
     public static final String TEXTURE_PATH = "/textures/%s.png";

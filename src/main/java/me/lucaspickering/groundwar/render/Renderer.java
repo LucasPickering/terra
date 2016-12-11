@@ -4,6 +4,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import java.awt.Color;
 import java.awt.FontFormatException;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -14,7 +15,9 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import me.lucaspickering.groundwar.TerrainGen;
+import me.lucaspickering.groundwar.util.Colors;
 import me.lucaspickering.groundwar.util.Constants;
+import me.lucaspickering.groundwar.util.Funcs;
 
 public class Renderer {
 
@@ -114,9 +117,8 @@ public class Renderer {
         return textures.get(name);
     }
 
-    public void drawRect(int x, int y, int width, int height, int color) {
-        GL11.glColor4f((color >> 16 & 0xff) / 255.0f, (color >> 8 & 0xff) / 255.0f,
-                       (color & 0xff) / 255.0f, (color >> 24 & 0xff) / 255.0f);
+    public void drawRect(int x, int y, int width, int height, Color color) {
+        Funcs.setGlColor(color);
 
         // Draw a rectangle
         GL11.glBegin(GL11.GL_QUADS);
@@ -139,10 +141,10 @@ public class Renderer {
      * @param height the height of the texture
      * @throws IllegalArgumentException if there is no texture with the given name in the texture
      *                                  map
-     * @see #drawTexture(String, int, int, int, int, int)
+     * @see #drawTexture(String, int, int, int, int, Color)
      */
     public void drawTexture(String name, int x, int y, int width, int height) {
-        drawTexture(name, x, y, width, height, 0xffffffff);
+        drawTexture(name, x, y, width, height, Colors.WHITE);
     }
 
     /**
@@ -155,7 +157,7 @@ public class Renderer {
      * @param height the height of the texture
      * @param color  the color of the texture
      */
-    public void drawTexture(String name, int x, int y, int width, int height, int color) {
+    public void drawTexture(String name, int x, int y, int width, int height, Color color) {
         if (!textures.containsKey(name)) {
             loadTexture(name);
         }
@@ -165,28 +167,28 @@ public class Renderer {
     /**
      * Draw text in white with left alignment.
      *
-     * @see #drawString(float, String, int, int, int, HorizAlignment, VertAlignment)
+     * @see #drawString(float, String, int, int, Color, HorizAlignment, VertAlignment)
      */
     public void drawString(float size, String text, int x, int y) {
-        drawString(size, text, x, y, 0xffffffff, HorizAlignment.LEFT, VertAlignment.TOP);
+        drawString(size, text, x, y, Colors.WHITE, HorizAlignment.LEFT, VertAlignment.TOP);
     }
 
     /**
      * Draw text with left alignment.
      *
-     * @see #drawString(float, String, int, int, int, HorizAlignment, VertAlignment)
+     * @see #drawString(float, String, int, int, Color, HorizAlignment, VertAlignment)
      */
-    public void drawString(float size, String text, int x, int y, int color) {
+    public void drawString(float size, String text, int x, int y, Color color) {
         drawString(size, text, x, y, color, HorizAlignment.LEFT, VertAlignment.TOP);
     }
 
     /**
      * Draw text in white.
      *
-     * @see #drawString(float, String, int, int, int, HorizAlignment, VertAlignment)
+     * @see #drawString(float, String, int, int, Color, HorizAlignment, VertAlignment)
      */
     public void drawString(float size, String text, int x, int y, HorizAlignment alignment) {
-        drawString(size, text, x, y, 0xffffffff, alignment, VertAlignment.TOP);
+        drawString(size, text, x, y, Colors.WHITE, alignment, VertAlignment.TOP);
     }
 
     /**
@@ -201,7 +203,7 @@ public class Renderer {
      * @param horizAlign the text alignment (left, center, right)
      * @param vertAlign  the vertical text alignment (top, center, bottom)
      */
-    public void drawString(float size, String text, int x, int y, int color,
+    public void drawString(float size, String text, int x, int y, Color color,
                            HorizAlignment horizAlign, VertAlignment vertAlign) {
         if (!fonts.containsKey(size)) {
             loadFont(Constants.FONT1, size);

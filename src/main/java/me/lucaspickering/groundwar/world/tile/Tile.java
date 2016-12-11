@@ -1,9 +1,11 @@
 package me.lucaspickering.groundwar.world.tile;
 
+import java.awt.Color;
 import java.util.Objects;
 
 import me.lucaspickering.groundwar.util.Colors;
 import me.lucaspickering.groundwar.util.Constants;
+import me.lucaspickering.groundwar.util.Direction;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.Biome;
@@ -45,6 +47,49 @@ public class Tile {
         }
     }
 
+    public static final int NUM_SIDES = Direction.values().length;
+
+    // UI constants
+    /**
+     * The distance between the center point of the hexagon and the center-point of one side of the
+     * hexagon, in pixels.
+     */
+    public static final int TILE_RADIUS = 50;
+
+    /**
+     * Distance in pixels from the left-most vertex to the right-most vertex.
+     */
+    public static final int TILE_WIDTH = (int) (TILE_RADIUS * 4 / Math.sqrt(3));
+
+    /**
+     * Distance in pixels from the top side to the bottom side.
+     */
+    public static final int TILE_HEIGHT = TILE_RADIUS * 2;
+
+    /**
+     * The width of the lines drawn to outline the tile.
+     */
+    public static final float OUTLINE_WIDTH = 1.5f;
+
+    /**
+     * An array of coordinates referring to each vertex of a tile, with coordinates being
+     * relative to the center of the tile. The first vertex is the top-left, and they move
+     * clockwise from there.
+     */
+    public static final Point[] VERTICES = new Point[NUM_SIDES];
+
+    static {
+        // Populate VERTICES
+        VERTICES[0] = new Point(-TILE_WIDTH / 4, -TILE_HEIGHT / 2);
+        VERTICES[1] = new Point(TILE_WIDTH / 4, -TILE_HEIGHT / 2);
+        VERTICES[2] = new Point(TILE_WIDTH / 2, 0);
+        VERTICES[3] = new Point(TILE_WIDTH / 4, TILE_HEIGHT / 2);
+        VERTICES[4] = new Point(-TILE_WIDTH / 4, TILE_HEIGHT / 2);
+        VERTICES[5] = new Point(-TILE_WIDTH / 2, 0);
+    }
+
+    private static final String INFO_STRING = "Pos: %s%nBiome: %s%nElevation: %d";
+
     /**
      * The position of this tile within the world. Non-null.
      */
@@ -55,7 +100,8 @@ public class Tile {
     /**
      * The position of the top-left corner of the texture of this tile on the screen.
      */
-    private final Point screenPos;
+    private final Point center;
+    private final Point topLeft;
 
     private Tile(TilePoint pos, Biome biome, int elevation) {
         Objects.requireNonNull(pos);
@@ -63,9 +109,10 @@ public class Tile {
         this.pos = pos;
         this.biome = biome;
         this.elevation = elevation;
-        this.screenPos = Constants.BOARD_CENTER.plus(
-            (int) (Constants.TILE_WIDTH * pos.x() * 0.75f),
-            (int) (-Constants.TILE_HEIGHT * (pos.x() / 2.0f + pos.y())));
+        this.center = Constants.BOARD_CENTER.plus(
+            (int) (TILE_WIDTH * pos.x() * 0.75f),
+            (int) (-TILE_HEIGHT * (pos.x() / 2.0f + pos.y())));
+        this.topLeft = center.plus(-TILE_WIDTH / 2, -TILE_HEIGHT / 2);
     }
 
     public final TilePoint pos() {
@@ -76,20 +123,24 @@ public class Tile {
         return elevation;
     }
 
-    public final Point screenPos() {
-        return screenPos;
+    public final Point center() {
+        return center.plus(TILE_WIDTH / 2, TILE_HEIGHT / 2);
     }
 
-    public final Point centerPOs() {
-        return screenPos.plus(Constants.TILE_WIDTH / 2, Constants.TILE_HEIGHT / 2);
+    public final Point topLeft() {
+        return topLeft;
     }
 
-    public final int backgroundColor() {
+    public final Color backgroundColor() {
         return biome.color();
     }
 
-    public final int outlineColor() {
+    public final Color outlineColor() {
         return Colors.TILE_OUTLINE;
+    }
+
+    public String info() {
+        return String.format(INFO_STRING, pos, biome, elevation);
     }
 
     /**
@@ -107,13 +158,15 @@ public class Tile {
 
     /**
      * Does this tile contain the {@link Point} p? p is a point in screen-space, not in tile-space.
-     * This is essentially used to check if the mouse is over this tile.
+     * This is generally used to check if the mouse is over this tile.
      *
      * @param p the point
      * @return true if this tile contains p, false otherwise
      */
     public final boolean contains(Point p) {
-        return centerPOs().distanceTo(p) <= Constants.TILE_RADIUS;
+        // This checks distance to the center of the tile, i.e. it treats the tile as a circle.
+        // This is a close enough approximation.
+        return center().distanceTo(p) <= TILE_RADIUS;
     }
 
     @Override

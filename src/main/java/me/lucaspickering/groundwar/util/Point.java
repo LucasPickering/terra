@@ -74,17 +74,6 @@ public class Point {
     }
 
     /**
-     * Creates a new point whose coordinates are the difference of this point's and the given
-     * point's. In other words, this creates a {@code new Point(this.x - p.x, this.y - p.y)}.
-     *
-     * @param p the point to be added with this one
-     * @return the new {@code Point}
-     */
-    public Point minus(Point p) {
-        return plus(-p.x(), -p.y());
-    }
-
-    /**
      * Gets the Euclidean distance between this point and another point.
      *
      * @param p the other point (non-null)

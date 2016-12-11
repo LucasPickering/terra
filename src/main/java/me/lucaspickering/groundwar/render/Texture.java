@@ -2,6 +2,10 @@ package me.lucaspickering.groundwar.render;
 
 import org.lwjgl.opengl.GL11;
 
+import java.awt.Color;
+
+import me.lucaspickering.groundwar.util.Funcs;
+
 public class Texture {
 
     private final int textureID;
@@ -19,10 +23,9 @@ public class Texture {
      * @param height the height of the texture
      * @param color  the color of the texture
      */
-    public void draw(int x, int y, int width, int height, int color) {
+    public void draw(int x, int y, int width, int height, Color color) {
         // Set the color (aren't bitshifts cool?)
-        GL11.glColor4f((color >> 16 & 0xff) / 255.0f, (color >> 8 & 0xff) / 255.0f,
-                       (color & 0xff) / 255.0f, (color >> 24 & 0xff) / 255.0f);
+        Funcs.setGlColor(color);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID); // Bind the texture
 
         // Draw a rectangle

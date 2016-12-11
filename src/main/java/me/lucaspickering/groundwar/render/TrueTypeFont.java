@@ -21,6 +21,7 @@ import java.util.Objects;
 
 import me.lucaspickering.groundwar.TerrainGen;
 import me.lucaspickering.groundwar.util.Constants;
+import me.lucaspickering.groundwar.util.Funcs;
 
 public class TrueTypeFont {
 
@@ -102,7 +103,7 @@ public class TrueTypeFont {
         return fontMetrics.charWidth(c);
     }
 
-    public float getStringWidth(String s) {
+    private float getStringWidth(String s) {
         int width = 0;
         for (char c : s.toCharArray()) {
             width += getCharWidth(c);
@@ -160,12 +161,11 @@ public class TrueTypeFont {
      * @param vertAlign  the {@link VertAlignment} to draw with
      * @throws NullPointerException if {@code text == null}
      */
-    public void draw(String text, int x, int y, int color,
+    public void draw(String text, int x, int y, Color color,
                      HorizAlignment horizAlign, VertAlignment vertAlign) {
         Objects.requireNonNull(text);
         // Set the color (aren't bitshifts cool?)
-        GL11.glColor4f((color >> 16 & 0xff) / 255.0f, (color >> 8 & 0xff) / 255.0f,
-                       (color & 0xff) / 255.0f, (color >> 24 & 0xff) / 255.0f);
+        Funcs.setGlColor(color);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, fontTextureId);
         String[] lines = text.split("\n");
 

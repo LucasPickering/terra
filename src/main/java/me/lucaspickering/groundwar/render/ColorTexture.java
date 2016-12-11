@@ -1,5 +1,7 @@
 package me.lucaspickering.groundwar.render;
 
+import java.awt.Color;
+
 import me.lucaspickering.groundwar.TerrainGen;
 import me.lucaspickering.groundwar.util.Colors;
 import me.lucaspickering.groundwar.util.Constants;
@@ -14,9 +16,9 @@ public class ColorTexture {
     }
 
     private final Texture texture;
-    private final int color;
+    private final Color color;
 
-    private ColorTexture(String texName, int color) {
+    private ColorTexture(String texName, Color color) {
         final Renderer renderer = TerrainGen.instance().renderer();
         if (!renderer.hasTexture(texName)) {
             renderer.loadTexture(texName);

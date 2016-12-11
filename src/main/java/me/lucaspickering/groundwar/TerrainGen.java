@@ -97,8 +97,8 @@ public class TerrainGen {
         GLFW.glfwSwapInterval(1); // Enable v-sync
         GLFW.glfwShowWindow(window); // Make the window visible
         GL.createCapabilities(); // LWJGL needs this
-        GL11.glClearColor((Colors.CLEAR >> 16 & 0xff) / 255.0f, (Colors.CLEAR >> 8 & 0xff) / 255.0f,
-                          (Colors.CLEAR & 0xff) / 255.0f, 1.0f);
+        GL11.glClearColor(Colors.CLEAR.getRed() / 255f, Colors.CLEAR.getGreen() / 255f,
+                          Colors.CLEAR.getBlue() / 255f, Colors.CLEAR.getAlpha() / 255f);
         GL11.glOrtho(0, Constants.RES_WIDTH, Constants.RES_HEIGHT, 0, -1, 1);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
