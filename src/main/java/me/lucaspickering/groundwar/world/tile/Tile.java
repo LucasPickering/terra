@@ -54,7 +54,7 @@ public class Tile {
      * The distance between the center point of the hexagon and the center-point of one side of the
      * hexagon, in pixels.
      */
-    public static final int TILE_RADIUS = 50;
+    public static final int TILE_RADIUS = 75;
 
     /**
      * Distance in pixels from the left-most vertex to the right-most vertex.
@@ -80,12 +80,12 @@ public class Tile {
 
     static {
         // Populate VERTICES
-        VERTICES[0] = new Point(-TILE_WIDTH / 4, -TILE_HEIGHT / 2);
-        VERTICES[1] = new Point(TILE_WIDTH / 4, -TILE_HEIGHT / 2);
-        VERTICES[2] = new Point(TILE_WIDTH / 2, 0);
-        VERTICES[3] = new Point(TILE_WIDTH / 4, TILE_HEIGHT / 2);
-        VERTICES[4] = new Point(-TILE_WIDTH / 4, TILE_HEIGHT / 2);
-        VERTICES[5] = new Point(-TILE_WIDTH / 2, 0);
+        VERTICES[0] = new Point(TILE_WIDTH / 4, 0);
+        VERTICES[1] = new Point(TILE_WIDTH * 3 / 4, 0);
+        VERTICES[2] = new Point(TILE_WIDTH, TILE_HEIGHT / 2);
+        VERTICES[3] = new Point(TILE_WIDTH * 3 / 4, TILE_HEIGHT);
+        VERTICES[4] = new Point(TILE_WIDTH / 4, TILE_HEIGHT);
+        VERTICES[5] = new Point(0, TILE_HEIGHT / 2);
     }
 
     private static final String INFO_STRING = "Pos: %s%nBiome: %s%nElevation: %d";
@@ -109,7 +109,7 @@ public class Tile {
         this.pos = pos;
         this.biome = biome;
         this.elevation = elevation;
-        this.center = Constants.BOARD_CENTER.plus(
+        this.center = Constants.WORLD_CENTER.plus(
             (int) (TILE_WIDTH * pos.x() * 0.75f),
             (int) (-TILE_HEIGHT * (pos.x() / 2.0f + pos.y())));
         this.topLeft = center.plus(-TILE_WIDTH / 2, -TILE_HEIGHT / 2);
@@ -124,7 +124,7 @@ public class Tile {
     }
 
     public final Point center() {
-        return center.plus(TILE_WIDTH / 2, TILE_HEIGHT / 2);
+        return center;
     }
 
     public final Point topLeft() {
@@ -135,7 +135,14 @@ public class Tile {
         return biome.color();
     }
 
-    public final Color outlineColor() {
+    /**
+     * Get the color of the side of the outline in the given direction. Each side of the outline
+     * can have its own color.
+     *
+     * @param dir the direction of the side to get the color for
+     * @return the color of the request side
+     */
+    public final Color outlineColor(Direction dir) {
         return Colors.TILE_OUTLINE;
     }
 

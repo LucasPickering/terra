@@ -10,6 +10,8 @@ import me.lucaspickering.groundwar.render.HorizAlignment;
 import me.lucaspickering.groundwar.render.VertAlignment;
 import me.lucaspickering.groundwar.render.event.KeyEvent;
 import me.lucaspickering.groundwar.render.screen.gui.TextDisplay;
+import me.lucaspickering.groundwar.util.Constants;
+import me.lucaspickering.groundwar.util.Direction;
 import me.lucaspickering.groundwar.util.Funcs;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.world.World;
@@ -64,46 +66,46 @@ public class WorldScreen extends MainScreen {
         GL11.glPushMatrix();
 
         // Translate to the center of the tile
-        final Point tilePos = tile.center();
+        final Point tilePos = tile.topLeft();
         GL11.glTranslatef(tilePos.x(), tilePos.y(), 0f);
 
-        final int width = Tile.TILE_WIDTH;
-        final int height = Tile.TILE_HEIGHT;
+        // Start drawing textures
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         // Draw the tile background
-        Funcs.setGlColor(tile.backgroundColor());
-        GL11.glBegin(GL11.GL_POLYGON);
-        for (Point vertex : Tile.VERTICES) {
-            // Draw each vertex
-            GL11.glVertex2i(vertex.x(), vertex.y());
-        }
-        GL11.glEnd();
+        renderer().drawTexture(Constants.TILE_BG_NAME, 0, 0, Tile.TILE_WIDTH, Tile.TILE_HEIGHT,
+                               tile.backgroundColor());
+
+        // Stop drawing textures
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_BLEND);
 
         // Draw the outline by drawing each side as an individual line.
-        Funcs.setGlColor(tile.outlineColor());
         GL11.glLineWidth(Tile.OUTLINE_WIDTH);
         for (int i = 0; i < Tile.NUM_SIDES; i++) {
             // Get the two vertices that the line will be between
             final Point vertex1 = Tile.VERTICES[i];
             final Point vertex2 = Tile.VERTICES[(i + 1) % Tile.NUM_SIDES];
+            final Direction dir = Direction.values()[i];
+
+            Funcs.setGlColor(tile.outlineColor(dir));
             GL11.glBegin(GL11.GL_LINES);
             GL11.glVertex2i(vertex1.x(), vertex1.y());
             GL11.glVertex2i(vertex2.x(), vertex2.y());
             GL11.glEnd();
         }
 
-//        GL11.glEnable(GL11.GL_BLEND);
-//        GL11.glEnable(GL11.GL_TEXTURE_2D);
-//        // Draw the regular foreground
-//        renderer().drawTexture(Constants.TILE_OUTLINE_NAME, 0, 0, width, height,
-//                               tile.outlineColor());
-//        GL11.glDisable(GL11.GL_TEXTURE_2D);
-//        GL11.glDisable(GL11.GL_BLEND);
+        // Start drawing textures
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         // Translate to the top-left of the tile
-        GL11.glTranslatef(-Tile.TILE_WIDTH / 2, -Tile.TILE_HEIGHT / 2, 0f);
-
         drawTileOverlays(tile, mousePos); // Draw the tile overlays on top of everything else
+
+        // Stop drawing textures
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_BLEND);
 
         GL11.glPopMatrix();
     }

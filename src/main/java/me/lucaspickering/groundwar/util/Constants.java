@@ -14,8 +14,7 @@ public class Constants {
     public static final int RES_HEIGHT = 2160;
 
     // World constants
-    public static final Point BOARD_CENTER = new Point(RES_WIDTH / 2,
-                                                       RES_HEIGHT / 2 + 75);
+    public static final Point WORLD_CENTER = new Point(RES_WIDTH / 2, RES_HEIGHT / 2);
 
     // File paths
     public static final String TEXTURE_PATH = "/textures/%s.png";
