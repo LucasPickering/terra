@@ -6,7 +6,7 @@ import java.util.Random;
 
 import me.lucaspickering.groundwar.TerrainGen;
 import me.lucaspickering.groundwar.util.Funcs;
-import me.lucaspickering.groundwar.util.Point;
+import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.tile.Tile;
 
 public class World {
@@ -15,7 +15,7 @@ public class World {
     private static final int Y_SIZE = 5;
 
     private final Random random;
-    private final Map<Point, Tile> tiles;
+    private final Map<TilePoint, Tile> tiles;
 
     public World() {
         random = TerrainGen.instance().random();
@@ -33,7 +33,7 @@ public class World {
                         final int elevation = Funcs.randomInRange(random,
                                                                   lastElevation - 2,
                                                                   lastElevation + 2);
-                        final Tile.Builder builder = Tile.Builder.fromPos(new Point(x, y));
+                        final Tile.Builder builder = Tile.Builder.fromPos(new TilePoint(x, y, z));
                         builder.biome(Biome.PLAINS).elevation(elevation);
                         addTile(builder.build());
                     }
@@ -43,10 +43,10 @@ public class World {
     }
 
     private void addTile(Tile tile) {
-        tiles.put(tile.getPos(), tile);
+        tiles.put(tile.pos(), tile);
     }
 
-    public Map<Point, Tile> getTiles() {
+    public Map<TilePoint, Tile> getTiles() {
         return tiles;
     }
 }

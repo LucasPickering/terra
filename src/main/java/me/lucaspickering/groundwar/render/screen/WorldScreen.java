@@ -69,18 +69,18 @@ public class WorldScreen extends MainScreen {
      */
     private void drawTile(Tile tile, Point mousePos) {
         GL11.glPushMatrix();
-        GL11.glTranslatef(tile.getScreenPos().getX(), tile.getScreenPos().getY(), 0f);
+        GL11.glTranslatef(tile.screenPos().x(), tile.screenPos().y(), 0f);
 
         final int width = Constants.TILE_WIDTH;
         final int height = Constants.TILE_HEIGHT;
 
         // Draw the regular background
         renderer().drawTexture(Constants.TILE_BG_NAME, 0, 0, width, height,
-                               tile.getBackgroundColor());
+                               tile.backgroundColor());
 
         // Draw the regular foreground
         renderer().drawTexture(Constants.TILE_OUTLINE_NAME, 0, 0, width, height,
-                               tile.getOutlineColor());
+                               tile.outlineColor());
 
         drawTileOverlays(tile, mousePos); // Draw the tile overlays on top of everything else
 

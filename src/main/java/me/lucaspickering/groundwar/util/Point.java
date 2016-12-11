@@ -7,7 +7,7 @@ import java.util.Objects;
  *
  * Points are compared first by x, then by y.
  */
-public class Point implements Comparable<Point> {
+public class Point {
 
     private final int x;
     private final int y;
@@ -42,11 +42,11 @@ public class Point implements Comparable<Point> {
         this.y = p.y;
     }
 
-    public int getX() {
+    public int x() {
         return x;
     }
 
-    public int getY() {
+    public int y() {
         return y;
     }
 
@@ -58,7 +58,7 @@ public class Point implements Comparable<Point> {
      * @return the new {@code Point}
      */
     public Point plus(Point p) {
-        return plus(p.getX(), p.getY());
+        return plus(p.x(), p.y());
     }
 
     /**
@@ -81,7 +81,7 @@ public class Point implements Comparable<Point> {
      * @return the new {@code Point}
      */
     public Point minus(Point p) {
-        return plus(-p.getX(), -p.getY());
+        return plus(-p.x(), -p.y());
     }
 
     /**
@@ -116,8 +116,7 @@ public class Point implements Comparable<Point> {
             return false;
         }
 
-        Point point = (Point) o;
-
+        final Point point = (Point) o;
         return x == point.x && y == point.y;
     }
 
@@ -129,11 +128,5 @@ public class Point implements Comparable<Point> {
     @Override
     public String toString() {
         return String.format("(%d, %d)", x, y);
-    }
-
-    @Override
-    public int compareTo(Point p) {
-        final int xcomp = Integer.compare(x, p.x);
-        return xcomp != 0 ? xcomp : Integer.compare(y, p.y);
     }
 }

@@ -64,11 +64,11 @@ public abstract class GuiElement implements ScreenElement {
     }
 
     public int getX() {
-        return pos.getX();
+        return pos.x();
     }
 
     public int getY() {
-        return pos.getY();
+        return pos.y();
     }
 
     public int getWidth() {
@@ -142,7 +142,7 @@ public abstract class GuiElement implements ScreenElement {
 
     @Override
     public boolean contains(Point p) {
-        return pos.getX() <= p.getX() && p.getX() <= pos.getX() + width
-               && pos.getY() <= p.getY() && p.getY() <= pos.getY() + height;
+        return pos.x() <= p.x() && p.x() <= pos.x() + width
+               && pos.y() <= p.y() && p.y() <= pos.y() + height;
     }
 }

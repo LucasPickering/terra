@@ -4,15 +4,15 @@ import java.util.Objects;
 
 import me.lucaspickering.groundwar.util.Colors;
 import me.lucaspickering.groundwar.util.Constants;
-import me.lucaspickering.groundwar.util.Direction;
 import me.lucaspickering.groundwar.util.Point;
+import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.Biome;
 
 public class Tile {
 
     public static final class Builder {
 
-        private final Point pos;
+        private final TilePoint pos;
         private Biome biome;
         private int elevation;
 
@@ -21,12 +21,12 @@ public class Tile {
          *
          * @param pos the position of this tile
          */
-        private Builder(Point pos) {
+        private Builder(TilePoint pos) {
             // Privet o force usage of fromPos
             this.pos = pos;
         }
 
-        public static Builder fromPos(Point pos) {
+        public static Builder fromPos(TilePoint pos) {
             return new Builder(pos);
         }
 
@@ -48,7 +48,7 @@ public class Tile {
     /**
      * The position of this tile within the world. Non-null.
      */
-    private final Point pos;
+    private final TilePoint pos;
     private final Biome biome;
     private final int elevation;
 
@@ -56,89 +56,40 @@ public class Tile {
      * The position of the top-left corner of the texture of this tile on the screen.
      */
     private final Point screenPos;
-    private final Tile[] adjacentTiles = new Tile[Constants.NUM_SIDES];
 
-    private Tile(Point pos, Biome biome, int elevation) {
+    private Tile(TilePoint pos, Biome biome, int elevation) {
         Objects.requireNonNull(pos);
         Objects.requireNonNull(biome);
         this.pos = pos;
         this.biome = biome;
         this.elevation = elevation;
         this.screenPos = Constants.BOARD_CENTER.plus(
-            (int) (Constants.TILE_WIDTH * pos.getX() * 0.75f),
-            (int) (-Constants.TILE_HEIGHT * (pos.getX() / 2.0f + pos.getY())));
+            (int) (Constants.TILE_WIDTH * pos.x() * 0.75f),
+            (int) (-Constants.TILE_HEIGHT * (pos.x() / 2.0f + pos.y())));
     }
 
-    public final Tile[] getAdjacentTiles() {
-        return adjacentTiles;
-    }
-
-    public final Tile getAdjacentTile(Direction dir) {
-        return adjacentTiles[dir.ordinal()];
-    }
-
-    /**
-     * Copies the contents of {@code adjTiles} into {@link #adjacentTiles}.
-     *
-     * @param adjTiles the array to be copied from
-     * @throws NullPointerException     if {@code adjTiles == null}
-     * @throws IllegalArgumentException if {@code adjTiles.length != {@link Constants#NUM_SIDES}}
-     */
-    public final void setAdjacentTiles(Tile[] adjTiles) {
-        Objects.requireNonNull(adjTiles);
-        if (adjTiles.length != Constants.NUM_SIDES) {
-            throw new IllegalArgumentException("I need " + Constants.NUM_SIDES + " sides!");
-        }
-        System.arraycopy(adjTiles, 0, adjacentTiles, 0, Constants.NUM_SIDES);
-        onSetAdjacents();
-    }
-
-    public final Point getPos() {
+    public final TilePoint pos() {
         return pos;
     }
 
-    public final int getElevation() {
+    public final int elevation() {
         return elevation;
     }
 
-    public final Point getScreenPos() {
+    public final Point screenPos() {
         return screenPos;
     }
 
-    public final Point getCenterPos() {
+    public final Point centerPOs() {
         return screenPos.plus(Constants.TILE_WIDTH / 2, Constants.TILE_HEIGHT / 2);
     }
 
-    public final int getBackgroundColor() {
+    public final int backgroundColor() {
         return biome.color();
     }
 
-    public final int getOutlineColor() {
+    public final int outlineColor() {
         return Colors.TILE_OUTLINE;
-    }
-
-    /**
-     * Gets the distance between this tile and another tile located at the given point.
-     *
-     * @param p the other point
-     * @return the distance between this tile and {@param p}
-     */
-    public final int distanceTo(Point p) {
-        final int x1 = pos.getX();
-        final int y1 = pos.getY();
-        final int x2 = p.getX();
-        final int y2 = p.getY();
-        return (Math.abs(x1 - x2) + Math.abs(y1 - y2) + Math.abs(-x1 - y1 + x2 + y2)) / 2;
-    }
-
-    /**
-     * Convenice method for {@link #distanceTo(Point)}.
-     *
-     * @param tile the other tile
-     * @return {@code distanceTo(tile.getPos()}
-     */
-    public final int distanceTo(Tile tile) {
-        return distanceTo(tile.getPos());
     }
 
     /**
@@ -151,7 +102,7 @@ public class Tile {
      */
     public boolean isAdjacentTo(Tile tile) {
         Objects.requireNonNull(tile);
-        return distanceTo(tile) == 1;
+        return pos.distanceTo(tile.pos()) == 1;
     }
 
     /**
@@ -162,7 +113,7 @@ public class Tile {
      * @return true if this tile contains p, false otherwise
      */
     public final boolean contains(Point p) {
-        return getCenterPos().distanceTo(p) <= Constants.TILE_RADIUS;
+        return centerPOs().distanceTo(p) <= Constants.TILE_RADIUS;
     }
 
     @Override
@@ -188,11 +139,4 @@ public class Tile {
         return "Tile@" + pos.toString();
     }
 
-    // Events
-
-    /**
-     * Called <i>directly after</i> {@link #adjacentTiles} is populated.
-     */
-    public void onSetAdjacents() {
-    }
 }
