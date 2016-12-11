@@ -28,8 +28,6 @@ public class TerrainGen {
 
     private static final TerrainGen TERRAIN_GEN = new TerrainGen();
 
-    private GLFWErrorCallback errorCallback;
-
     // These event handlers are initialized at the bottom
     private GLFWKeyCallback keyHandler;
     private GLFWMouseButtonCallback mouseButtonHandler;
@@ -69,7 +67,7 @@ public class TerrainGen {
 
     private void initGame() {
         // Setup error callback to print to System.err
-        GLFW.glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
+        GLFW.glfwSetErrorCallback(GLFWErrorCallback.createPrint(System.err));
 
         // Initialize GLFW. Most GLFW functions will not work before doing this.
         if (!GLFW.glfwInit()) {
@@ -115,14 +113,12 @@ public class TerrainGen {
         renderer = new Renderer();
         world = new World();
         currentScreen = new WorldScreen(world); // Initialize the current screen
-
     }
 
     private void gameLoop() {
         while (!GLFW.glfwWindowShouldClose(window)) {
             GLFW.glfwPollEvents(); // Poll for events (key, mouse, etc.)
-            GL11.glClear(
-                GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); // Clear the framebuffer
+            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); // Clear framebuffer
             currentScreen.draw(mousePos.copy());
             GLFW.glfwSwapBuffers(window); // Swap the color buffers
 
@@ -147,11 +143,10 @@ public class TerrainGen {
         mouseButtonHandler.free();
         cursorPosHandler.free();
         windowResizeHandler.free();
-        errorCallback.free();
 
-        GLFW.glfwTerminate(); // Terminate GLFW
         GLFW.glfwDestroyWindow(window); // Destroy the window
-        GLFW.glfwSetErrorCallback(null); // Need to wipe this out
+        GLFW.glfwTerminate(); // Terminate GLFW
+        GLFW.glfwSetErrorCallback(null).free(); // Need to wipe this out
     }
 
     public Random random() {
