@@ -6,34 +6,67 @@ import me.lucaspickering.groundwar.util.Colors;
 import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Direction;
 import me.lucaspickering.groundwar.util.Point;
+import me.lucaspickering.groundwar.world.Biome;
 
 public class Tile {
+
+    public static final class Builder {
+
+        private final Point pos;
+        private Biome biome;
+        private int elevation;
+
+        /**
+         * Every tile has to have a position, so make it required by the constructor.
+         *
+         * @param pos the position of this tile
+         */
+        private Builder(Point pos) {
+            // Privet o force usage of fromPos
+            this.pos = pos;
+        }
+
+        public static Builder fromPos(Point pos) {
+            return new Builder(pos);
+        }
+
+        public Builder biome(Biome biome) {
+            this.biome = biome;
+            return this;
+        }
+
+        public Builder elevation(int elevation) {
+            this.elevation = elevation;
+            return this;
+        }
+
+        public Tile build() {
+            return new Tile(pos, biome, elevation);
+        }
+    }
 
     /**
      * The position of this tile within the world. Non-null.
      */
     private final Point pos;
+    private final Biome biome;
+    private final int elevation;
 
     /**
      * The position of the top-left corner of the texture of this tile on the screen.
      */
     private final Point screenPos;
-    private int backgroundColor;
-    private int outlineColor;
     private final Tile[] adjacentTiles = new Tile[Constants.NUM_SIDES];
 
-    public Tile(Point pos) {
-        this(pos, Colors.TILE_BG, Colors.TILE_OUTLINE);
-    }
-
-    public Tile(Point pos, int backgroundColor, int outlineColor) {
-        Objects.nonNull(pos);
+    private Tile(Point pos, Biome biome, int elevation) {
+        Objects.requireNonNull(pos);
+        Objects.requireNonNull(biome);
         this.pos = pos;
+        this.biome = biome;
+        this.elevation = elevation;
         this.screenPos = Constants.BOARD_CENTER.plus(
             (int) (Constants.TILE_WIDTH * pos.getX() * 0.75f),
             (int) (-Constants.TILE_HEIGHT * (pos.getX() / 2.0f + pos.getY())));
-        this.backgroundColor = backgroundColor;
-        this.outlineColor = outlineColor;
     }
 
     public final Tile[] getAdjacentTiles() {
@@ -64,6 +97,10 @@ public class Tile {
         return pos;
     }
 
+    public final int getElevation() {
+        return elevation;
+    }
+
     public final Point getScreenPos() {
         return screenPos;
     }
@@ -73,11 +110,11 @@ public class Tile {
     }
 
     public final int getBackgroundColor() {
-        return backgroundColor;
+        return biome.color();
     }
 
     public final int getOutlineColor() {
-        return outlineColor;
+        return Colors.TILE_OUTLINE;
     }
 
     /**

@@ -27,6 +27,6 @@ public interface ScreenElement {
     boolean contains(Point p);
 
     default Renderer renderer() {
-        return TerrainGen.TERRAIN_GEN.getRenderer();
+        return TerrainGen.instance().renderer();
     }
 }

@@ -2,9 +2,6 @@ package me.lucaspickering.groundwar.util;
 
 public class Constants {
 
-    // Game constants
-    public static final int STARTING_GOLD = 10;
-
     // Tile constants
     /**
      * The distance between the center point of the hexagon and the center-point of one side of the
@@ -29,15 +26,8 @@ public class Constants {
     // World constants
     public static final Point BOARD_CENTER = new Point((RES_WIDTH - TILE_WIDTH) / 2,
                                                        (RES_HEIGHT - TILE_HEIGHT) / 2 + 75);
-    /**
-     * The combat strength factor specified by {@link me.lucaspickering.groundwar.world.unit.Unit#getStrengthVs} is
-     * randomized to be within this value of it's original. For example, if it original value is x
-     * and this value is 0.1, then the randomized value will be in the range [0.9x, 1.1x].
-     */
-    public static final float DAMAGE_MARGIN = 0.1f;
 
     // File paths
-    public static final String BOARD_PATH = "/boards/%s.csv";
     public static final String TEXTURE_PATH = "/textures/%s.png";
     public static final String FONT_PATH = "/fonts/%s.ttf";
     public static final String SAVE_PATH = "/saves/%s.csv";
@@ -45,7 +35,6 @@ public class Constants {
     // Texture names
     public static final String TILE_BG_NAME = "tile_background";
     public static final String TILE_OUTLINE_NAME = "tile_outline";
-    public static final String FLAG_NAME = "flag";
     public static final String BUTTON_NAME = "button";
 
     // Font names

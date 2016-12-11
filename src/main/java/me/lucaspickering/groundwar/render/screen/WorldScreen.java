@@ -44,7 +44,7 @@ public class WorldScreen extends MainScreen {
         // Update mouseOverTileInfo for the unit that the mouse is over
         for (Tile tile : tiles) {
             if (tile.contains(mousePos)) {
-                mouseOverTileInfo.setText(null); // todo tile info
+                mouseOverTileInfo.setText("hello i am a potato"); // todo tile info
                 mouseOverTileInfo.setPos(mousePos.plus(TILE_INFO_POS));
                 mouseOverTileInfo.setWidth(TILE_INFO_WIDTH);
                 mouseOverTileInfo.setHeight(TILE_INFO_HEIGHT);

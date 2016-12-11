@@ -12,6 +12,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
 import java.net.URL;
+import java.util.Random;
 
 import me.lucaspickering.groundwar.render.Renderer;
 import me.lucaspickering.groundwar.render.event.KeyEvent;
@@ -25,7 +26,7 @@ import me.lucaspickering.groundwar.world.World;
 
 public class TerrainGen {
 
-    public static final TerrainGen TERRAIN_GEN = new TerrainGen();
+    private static final TerrainGen TERRAIN_GEN = new TerrainGen();
 
     private GLFWErrorCallback errorCallback;
 
@@ -35,6 +36,8 @@ public class TerrainGen {
     private GLFWCursorPosCallback cursorPosHandler;
     private GLFWWindowSizeCallback windowResizeHandler;
 
+    private Random random;
+
     private long window;
     private Renderer renderer;
     private MainScreen currentScreen;
@@ -43,6 +46,14 @@ public class TerrainGen {
     private Point mousePos = new Point();
 
     private World world;
+
+    public static void main(String[] args) {
+        TERRAIN_GEN.run();
+    }
+
+    public static TerrainGen instance() {
+        return TERRAIN_GEN;
+    }
 
     private void run() {
         try {
@@ -99,9 +110,12 @@ public class TerrainGen {
         GLFW.glfwSetCursorPosCallback(window, cursorPosHandler);
         GLFW.glfwSetWindowSizeCallback(window, windowResizeHandler);
 
+        random = new Random(); // Set up our Random instance
+
         renderer = new Renderer();
         world = new World();
         currentScreen = new WorldScreen(world); // Initialize the current screen
+
     }
 
     private void gameLoop() {
@@ -140,7 +154,11 @@ public class TerrainGen {
         GLFW.glfwSetErrorCallback(null); // Need to wipe this out
     }
 
-    public Renderer getRenderer() {
+    public Random random() {
+        return random;
+    }
+
+    public Renderer renderer() {
         return renderer;
     }
 
@@ -149,10 +167,6 @@ public class TerrainGen {
      */
     private void exitGame() {
         GLFW.glfwSetWindowShouldClose(window, true);
-    }
-
-    public static void main(String[] args) {
-        TERRAIN_GEN.run();
     }
 
     public static URL getResource(String path, String fileName) {
