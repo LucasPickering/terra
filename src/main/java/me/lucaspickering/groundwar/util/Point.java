@@ -9,8 +9,7 @@ import java.util.Objects;
  */
 public class Point {
 
-    private final int x;
-    private final int y;
+    private final int x, y;
 
     /**
      * Constructs a new {@code Point} with an x and y of 0.

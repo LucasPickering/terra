@@ -4,6 +4,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
+import java.util.Map;
 
 import me.lucaspickering.groundwar.render.ColorTexture;
 import me.lucaspickering.groundwar.render.HorizAlignment;
@@ -14,6 +15,7 @@ import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Direction;
 import me.lucaspickering.groundwar.util.Funcs;
 import me.lucaspickering.groundwar.util.Point;
+import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.World;
 import me.lucaspickering.groundwar.world.tile.Tile;
 
@@ -28,7 +30,8 @@ public class WorldScreen extends MainScreen {
 
     public WorldScreen(World world) {
         this.world = world;
-        addGuiElement(mouseOverTileInfo = new TextDisplay(null, new Point(), 0, 0,
+        addGuiElement(mouseOverTileInfo = new TextDisplay(null, new Point(),
+                                                          TILE_INFO_WIDTH, TILE_INFO_HEIGHT,
                                                           HorizAlignment.LEFT,
                                                           VertAlignment.BOTTOM));
         mouseOverTileInfo.setVisible(false);
@@ -36,7 +39,8 @@ public class WorldScreen extends MainScreen {
 
     @Override
     public void draw(Point mousePos) {
-        final Collection<Tile> tiles = world.getTiles().values();
+        final Map<TilePoint, Tile> tileMap = world.getTiles();
+        final Collection<Tile> tiles = tileMap.values();
 
         tiles.forEach(tile -> drawTile(tile, mousePos)); // Draw each tile
 
@@ -45,15 +49,13 @@ public class WorldScreen extends MainScreen {
             if (tile.contains(mousePos)) {
                 mouseOverTileInfo.setText(tile.info());
                 mouseOverTileInfo.setPos(mousePos.plus(TILE_INFO_POS));
-                mouseOverTileInfo.setWidth(TILE_INFO_WIDTH);
-                mouseOverTileInfo.setHeight(TILE_INFO_HEIGHT);
                 mouseOverTileInfo.setVisible(true);
                 break; // We don't need to check the rest of the tiles
             }
         }
 
         super.draw(mousePos); // Draw GUI elements
-        mouseOverTileInfo.setVisible(false); // Hide the unit info, to be updated on the next frame
+        mouseOverTileInfo.setVisible(false); // Hide the tile info, to be updated on the next frame
     }
 
     /**

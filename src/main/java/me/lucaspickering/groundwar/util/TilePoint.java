@@ -11,9 +11,7 @@ public class TilePoint {
 
     private static final String STRING_FORMAT = "(%d, %d, %d)";
 
-    private final int x;
-    private final int y;
-    private final int z;
+    private final int x, y, z;
 
     /**
      * Constructs a new TilePoint using the given x and y, inferring the z coordinate (as

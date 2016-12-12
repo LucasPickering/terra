@@ -6,7 +6,7 @@ import me.lucaspickering.groundwar.util.Colors;
 
 public enum Biome {
 
-    PLAINS(Colors.TILE_BG);
+    PLAINS(Colors.TILE_BG), DEBUG(Colors.RED);
 
     private final Color color;
 

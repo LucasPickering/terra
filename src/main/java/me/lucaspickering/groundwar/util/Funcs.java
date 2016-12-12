@@ -3,30 +3,26 @@ package me.lucaspickering.groundwar.util;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
+import java.util.Collection;
 import java.util.Random;
 
 public class Funcs {
 
     /**
-     * Generates a random number in the range [min, max].
+     * Randomly selects one element from the given non-empty collection. Each element has an
+     * equal chance of being chosen.
      *
-     * @param random the random generator to be used
-     * @param min    the minimum of the number
-     * @param max    the maximum of the number
+     * @param random the {@link Random} to generate numbers from
+     * @param coll   the collection to be chosen from (non-null, non-empty)
+     * @param <T>    the type of the element in the collection
+     * @return one randomly-selected, even-distributed element from the given collection
      */
-    public static float randomInRange(Random random, float min, float max) {
-        return random.nextFloat() * (max - min) + min;
-    }
+    public static <T> T randomFromCollection(Random random, Collection<T> coll) {
+        assert coll != null && !coll.isEmpty() : "Collection cannot be null or empty";
 
-    /**
-     * Generates a random number in the range [min, max].
-     *
-     * @param random the random generator to be used
-     * @param min    the minimum of the number
-     * @param max    the maximum of the number
-     */
-    public static int randomInRange(Random random, int min, int max) {
-        return random.nextInt(max - min + 1) + min;
+        // Select a random element from the collection. The error should never be thrown.
+        return coll.stream().skip(random.nextInt(coll.size())).findFirst().orElseThrow(
+            () -> new AssertionError("No random element selected despite non-empty collection"));
     }
 
     /**
