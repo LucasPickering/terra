@@ -45,13 +45,20 @@ public class WorldScreen extends MainScreen {
         tiles.forEach(tile -> drawTile(tile, mousePos)); // Draw each tile
 
         // Update mouseOverTileInfo for the unit that the mouse is over
-        for (Tile tile : tiles) {
-            if (tile.contains(mousePos)) {
-                mouseOverTileInfo.setText(tile.info());
-                mouseOverTileInfo.setPos(mousePos.plus(TILE_INFO_POS));
-                mouseOverTileInfo.setVisible(true);
-                break; // We don't need to check the rest of the tiles
-            }
+//        for (Tile tile : tiles) {
+//            if (tile.contains(mousePos)) {
+//                mouseOverTileInfo.setText(tile.info());
+//                mouseOverTileInfo.setPos(mousePos.plus(TILE_INFO_POS));
+//                mouseOverTileInfo.setVisible(true);
+//                break; // We don't need to check the rest of the tiles
+//            }
+//        }
+        final TilePoint mouseOverPos = Funcs.tilePosFromScreenPos(mousePos);
+        final Tile mouseOverTile = tileMap.get(mouseOverPos);
+        if (mouseOverTile != null) {
+            mouseOverTileInfo.setText(mouseOverTile.info());
+            mouseOverTileInfo.setPos(mousePos.plus(TILE_INFO_POS));
+            mouseOverTileInfo.setVisible(true);
         }
 
         super.draw(mousePos); // Draw GUI elements

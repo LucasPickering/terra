@@ -112,7 +112,7 @@ public class Tile {
         this.center = Constants.WORLD_CENTER.plus(
             (int) (TILE_WIDTH * pos.x() * 0.75f),
             (int) (-TILE_HEIGHT * (pos.x() / 2.0f + pos.y())));
-        this.topLeft = center.plus(-TILE_WIDTH / 2, -TILE_HEIGHT / 2);
+        this.topLeft = center.minus(TILE_WIDTH / 2, TILE_HEIGHT / 2);
     }
 
     public final TilePoint pos() {

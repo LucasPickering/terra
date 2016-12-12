@@ -72,6 +72,14 @@ public class Point {
         return new Point(this.x + x, this.y + y);
     }
 
+    public Point minus(Point p) {
+        return minus(p.x(), p.y());
+    }
+
+    public Point minus(int x, int y) {
+        return new Point(this.x - x, this.y - y);
+    }
+
     /**
      * Gets the Euclidean distance between this point and another point.
      *

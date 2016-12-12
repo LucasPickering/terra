@@ -6,11 +6,13 @@ import java.awt.Color;
 import java.util.Collection;
 import java.util.Random;
 
+import me.lucaspickering.groundwar.world.tile.Tile;
+
 public class Funcs {
 
     /**
-     * Randomly selects one element from the given non-empty collection. Each element has an
-     * equal chance of being chosen.
+     * Randomly selects one element from the given non-empty collection. Each element has an equal
+     * chance of being chosen.
      *
      * @param random the {@link Random} to generate numbers from
      * @param coll   the collection to be chosen from (non-null, non-empty)
@@ -25,9 +27,16 @@ public class Funcs {
             () -> new AssertionError("No random element selected despite non-empty collection"));
     }
 
+    public static TilePoint tilePosFromScreenPos(Point pos) {
+        final Point shiftedPos = pos.minus(Constants.WORLD_CENTER);
+        final int x = (int) (shiftedPos.x() / (Tile.TILE_WIDTH * 0.75f));
+        final int y = -x / 2 - shiftedPos.y() / Tile.TILE_HEIGHT;
+        return new TilePoint(x, y);
+    }
+
     /**
-     * Make an ARGB color where {@code A = 255}, and {@code R = G = B = input}. If the input is
-     * not in the range [0, 255], it will be masked to fall into that range.
+     * Make an ARGB color where {@code A = 255}, and {@code R = G = B = input}. If the input is not in
+     * the range [0, 255], it will be masked to fall into that range.
      *
      * @return the color hex code
      */
