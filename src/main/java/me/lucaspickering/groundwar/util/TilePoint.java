@@ -63,6 +63,10 @@ public class TilePoint {
         return (Math.abs(x - other.x()) + Math.abs(y - other.y()) + Math.abs(z + other.z())) / 2;
     }
 
+    public final TilePoint plus(TilePoint other) {
+        return new TilePoint(x + other.x(), y + other.y(), z + other.z());
+    }
+
     @Override
     public String toString() {
         return String.format(STRING_FORMAT, x, y, z);

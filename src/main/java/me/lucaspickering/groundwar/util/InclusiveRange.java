@@ -2,7 +2,7 @@ package me.lucaspickering.groundwar.util;
 
 import java.util.Random;
 
-public final class InclusiveRange {
+public class InclusiveRange {
 
     private final int min, max;
 

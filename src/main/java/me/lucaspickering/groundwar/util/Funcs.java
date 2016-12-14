@@ -6,8 +6,6 @@ import java.awt.Color;
 import java.util.Collection;
 import java.util.Random;
 
-import me.lucaspickering.groundwar.world.tile.Tile;
-
 public class Funcs {
 
     /**
@@ -25,13 +23,6 @@ public class Funcs {
         // Select a random element from the collection. The error should never be thrown.
         return coll.stream().skip(random.nextInt(coll.size())).findFirst().orElseThrow(
             () -> new AssertionError("No random element selected despite non-empty collection"));
-    }
-
-    public static TilePoint tilePosFromScreenPos(Point pos) {
-        final Point shiftedPos = pos.minus(Constants.WORLD_CENTER);
-        final int x = (int) (shiftedPos.x() / (Tile.TILE_WIDTH * 0.75f));
-        final int y = -x / 2 - shiftedPos.y() / Tile.TILE_HEIGHT;
-        return new TilePoint(x, y);
     }
 
     /**

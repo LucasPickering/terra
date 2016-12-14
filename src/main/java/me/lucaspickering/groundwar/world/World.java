@@ -19,9 +19,7 @@ public class World {
 
     // Generation parameters
     private static final InclusiveRange PEAKS_RANGE = new InclusiveRange(3, 5);
-    private static final int MIN_PEAK_SEPARATION = 3; // Min distance between two peaks
-    // How many times we can fail to generate a valid peak before giving up
-    private static final int FAILED_PEAK_THRESHOLD = 10; //
+    private static final int MIN_PEAK_SEPARATION = 2; // Min distance between two peaks
 
     private final Random random;
     private final Map<TilePoint, Tile> tiles;
@@ -49,28 +47,21 @@ public class World {
         }
 
         // Generate peaks
-        final Set<TilePoint> tilePoints = builders.keySet();
+        // Copy the key set because we're going to be modifying it
+        final Set<TilePoint> potentialPeaks = new HashSet<>(builders.keySet());
         final Set<TilePoint> peaks = new HashSet<>();
         final int peaksToGen = PEAKS_RANGE.randomIn(random);
-        int failedPeaks = 0; // Number of invalid peaks we've generated
 
-        while (peaks.size() < peaksToGen && failedPeaks < FAILED_PEAK_THRESHOLD) {
-            final TilePoint peak = Funcs.randomFromCollection(random, tilePoints);
+        while (peaks.size() < peaksToGen && !potentialPeaks.isEmpty()) {
+            // Pick a random peak from the set of potential peaks
+            final TilePoint peak = Funcs.randomFromCollection(random, potentialPeaks);
+            peaks.add(peak); // Add it to the set
 
-            // If this peak is too close to any other peak, call it a failure and try again
-            boolean valid = true;
-            for (TilePoint otherPeak : peaks) {
-                if (peak.distanceTo(otherPeak) < MIN_PEAK_SEPARATION) {
-                    failedPeaks++; // Count this as a failure
-                    valid = false;
-                    break; // Don't need to check any more peaks
-                }
-            }
-
-            // If this peak is valid
-            if (valid) {
-                peaks.add(peak); // This peak is valid, so add it to the set
-            }
+            // Get all the tiles that are too close to this one to be peaks themselves,
+            // and remove them from the set of potential peaks
+            final Set<TilePoint> tooClose = WorldHelper.getTilesInRange(builders.keySet(), peak,
+                                                                        MIN_PEAK_SEPARATION);
+            potentialPeaks.removeAll(tooClose);
         }
 
         for (TilePoint peak : peaks) {
@@ -81,6 +72,11 @@ public class World {
         builders.forEach((pos, builder) -> tiles.put(pos, builder.build()));
     }
 
+    /**
+     * Gets the world's copy of tiles. This is NOT a copy, so DO NOT MODIFY IT.
+     *
+     * @return the world's copy of tiles
+     */
     public Map<TilePoint, Tile> getTiles() {
         return tiles;
     }
