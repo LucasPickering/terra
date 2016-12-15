@@ -4,13 +4,6 @@ import java.awt.Color;
 
 public class Colors {
 
-    // Stock colors
-    public static final Color BLACK = Funcs.colorFromRgb(0xffffff);
-    public static final Color RED = Funcs.colorFromRgb(0xff0000);
-    public static final Color GREEN = Funcs.colorFromRgb(0x00ff00);
-    public static final Color BLUE = Funcs.colorFromRgb(0x0000ff);
-    public static final Color WHITE = Funcs.colorFromRgb(0xffffff);
-
     // General
     public static final Color CLEAR = Funcs.colorFromRgb(0x777777);
     public static final Color MENU_SHADER = Funcs.colorFromArgb(0xcc101010);
@@ -24,8 +17,8 @@ public class Colors {
     public static final Color TILE_INFO_BG = Funcs.colorFromArgb(0xee444444);
 
     // Button colors
-    public static final Color BUTTON_NORMAL = BLACK;
-    public static final Color BUTTON_HIGHLIGHT = RED;
-    public static final Color BUTTON_TEXT_NORMAL = WHITE;
-    public static final Color BUTTON_TEXT_HIGHLIGHT = BLUE;
+    public static final Color BUTTON_NORMAL = Color.BLACK;
+    public static final Color BUTTON_HIGHLIGHT = Color.RED;
+    public static final Color BUTTON_TEXT_NORMAL = Color.WHITE;
+    public static final Color BUTTON_TEXT_HIGHLIGHT = Color.BLUE;
 }

@@ -26,17 +26,20 @@ public abstract class MainScreen implements ScreenElement {
 
     @Override
     public void draw(Point mousePos) {
-        // Draw all the GUI elements
+        // Draw all visible GUI elements
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        guiElements.stream().filter(GuiElement::isVisible).forEach(element -> {
-            GL11.glPushMatrix();
-            GL11.glTranslatef(element.getX(), element.getY(), 0f);
-            element.draw(mousePos);
-            GL11.glPopMatrix();
-        });
+        guiElements.stream().filter(GuiElement::isVisible).forEach(element -> drawElement(mousePos,
+                                                                                          element));
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
+    }
+
+    private void drawElement(Point mousePos, GuiElement element) {
+        GL11.glPushMatrix();
+        GL11.glTranslatef(element.getX(), element.getY(), 0f);
+        element.draw(mousePos);
+        GL11.glPopMatrix();
     }
 
     protected final void setNextScreen(MainScreen nextScreen) {

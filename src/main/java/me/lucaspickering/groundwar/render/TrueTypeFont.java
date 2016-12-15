@@ -103,14 +103,6 @@ public class TrueTypeFont {
         return fontMetrics.charWidth(c);
     }
 
-    private float getStringWidth(String s) {
-        int width = 0;
-        for (char c : s.toCharArray()) {
-            width += getCharWidth(c);
-        }
-        return width;
-    }
-
     private ByteBuffer asByteBuffer() {
         ByteBuffer byteBuffer;
 
@@ -150,6 +142,10 @@ public class TrueTypeFont {
         return byteBuffer;
     }
 
+    private String[] splitLines(String text) {
+        return text.split("\n");
+    }
+
     /**
      * Draw the given text in this font.
      *
@@ -167,7 +163,7 @@ public class TrueTypeFont {
         // Set the color (aren't bitshifts cool?)
         Funcs.setGlColor(color);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, fontTextureId);
-        String[] lines = text.split("\n");
+        final String[] lines = splitLines(text);
 
         int xTmp = x;
         int yTmp = y;
@@ -228,6 +224,32 @@ public class TrueTypeFont {
             yTmp += charHeight;
         }
         GL11.glEnd();
+    }
+
+    /**
+     * Gets the width of the given string, in pixels.
+     *
+     * @param s the string to get the width of (non-null)
+     * @return the width of s in pixels
+     */
+    public float getStringWidth(String s) {
+        Objects.requireNonNull(s);
+        int width = 0;
+        for (char c : s.toCharArray()) {
+            width += getCharWidth(c);
+        }
+        return width;
+    }
+
+    /**
+     * Gets the height of the given string, in pixels. The height is based on the number of lines
+     * in the string and the height of each line for this font.
+     *
+     * @param s the string to get the width of (non-null)
+     * @return the height of s in pixels
+     */
+    public float getStringHeight(String s) {
+        return charHeight * splitLines(s).length;
     }
 
     public void delete() {

@@ -20,14 +20,6 @@ public enum Font {
         this.size = size;
     }
 
-    public String fontName() {
-        return fontName;
-    }
-
-    public float size() {
-        return size;
-    }
-
     public TrueTypeFont load() throws IOException, FontFormatException {
         return new TrueTypeFont(fontName, size);
     }

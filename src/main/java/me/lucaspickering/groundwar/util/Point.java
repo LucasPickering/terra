@@ -4,8 +4,6 @@ import java.util.Objects;
 
 /**
  * A class representing an immutable 2-dimensional integer point. Used mostly for points on-screen.
- *
- * Points are compared first by x, then by y.
  */
 public class Point {
 
@@ -27,18 +25,6 @@ public class Point {
     public Point(int x, int y) {
         this.x = x;
         this.y = y;
-    }
-
-    /**
-     * Constructs a new {@code Point} with the same x and y values as the given {@code Point}.
-     *
-     * @param p the {@code Point} to be copied (non-null)
-     * @throws NullPointerException if {@code p == null}
-     */
-    public Point(Point p) {
-        Objects.requireNonNull(p);
-        this.x = p.x;
-        this.y = p.y;
     }
 
     public int x() {

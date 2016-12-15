@@ -7,7 +7,7 @@ import me.lucaspickering.groundwar.util.Funcs;
 
 public enum Biome {
 
-    PLAINS(Colors.TILE_BG), MOUNTAIN(Funcs.gray(0xbb)), DEBUG(Colors.RED);
+    PLAINS(Colors.TILE_BG), MOUNTAIN(Funcs.gray(0xbb)), DEBUG(Color.RED);
 
     private final Color color;
 

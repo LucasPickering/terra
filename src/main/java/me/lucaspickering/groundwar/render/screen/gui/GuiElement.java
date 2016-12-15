@@ -18,7 +18,18 @@ public abstract class GuiElement implements ScreenElement {
     private boolean enabled = true;
 
     /**
-     * Constructs a new {@code GuiElement} with the given coordinates and size.
+     * Constructs a new {@code GuiElement} with the given position.
+     *
+     * @param pos the position of the element
+     */
+    protected GuiElement(Point pos) {
+        this.pos = pos;
+        this.horizAlign = HorizAlignment.LEFT;
+        this.vertAlign = VertAlignment.TOP;
+    }
+
+    /**
+     * Constructs a new {@code GuiElement} with the given position and size.
      *
      * @param pos    the position of the element
      * @param width  the width of the element (non-negative)
@@ -30,7 +41,7 @@ public abstract class GuiElement implements ScreenElement {
     }
 
     /**
-     * Constructs a new {@code GuiElement} with the given coordinates, size, and alignments.
+     * Constructs a new {@code GuiElement} with the given position, size, and alignments.
      *
      * @param pos        the position of the element
      * @param width      the width of the element (non-negative)
@@ -55,65 +66,65 @@ public abstract class GuiElement implements ScreenElement {
         setPos(pos);
     }
 
-    public Point getPos() {
+    public final Point getPos() {
         return pos;
     }
 
-    public void setPos(Point pos) {
+    public final void setPos(Point pos) {
         this.pos = adjustForAlignment(pos);
     }
 
-    public int getX() {
+    public final int getX() {
         return pos.x();
     }
 
-    public int getY() {
+    public final int getY() {
         return pos.y();
     }
 
-    public int getWidth() {
+    public final int getWidth() {
         return width;
     }
 
-    public void setWidth(int width) {
+    public final void setWidth(int width) {
         this.width = width;
     }
 
-    public int getHeight() {
+    public final int getHeight() {
         return height;
     }
 
-    public void setHeight(int height) {
+    public final void setHeight(int height) {
         this.height = height;
     }
 
-    public void setHorizAlign(HorizAlignment horizAlign) {
+    public final void setHorizAlign(HorizAlignment horizAlign) {
         this.horizAlign = horizAlign;
         pos = adjustForAlignment(pos);
     }
 
-    public void setVertAlign(VertAlignment vertAlign) {
+    public final void setVertAlign(VertAlignment vertAlign) {
         this.vertAlign = vertAlign;
         pos = adjustForAlignment(pos);
     }
 
-    public boolean isVisible() {
+    public final boolean isVisible() {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
+    public final void setVisible(boolean visible) {
         this.visible = visible;
     }
 
-    public boolean isEnabled() {
+    public final boolean isEnabled() {
         return visible && enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public final void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
-    private Point adjustForAlignment(Point p) {
+    private final Point adjustForAlignment(Point p) {
         int adjX = 0;
         int adjY = 0;
 

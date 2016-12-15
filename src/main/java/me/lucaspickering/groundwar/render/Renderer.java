@@ -16,7 +16,6 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import me.lucaspickering.groundwar.TerrainGen;
-import me.lucaspickering.groundwar.util.Colors;
 import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Funcs;
 
@@ -147,7 +146,7 @@ public class Renderer {
      * @see #drawTexture(String, int, int, int, int, Color)
      */
     public void drawTexture(String name, int x, int y, int width, int height) {
-        drawTexture(name, x, y, width, height, Colors.WHITE);
+        drawTexture(name, x, y, width, height, Color.WHITE);
     }
 
     /**
@@ -173,7 +172,7 @@ public class Renderer {
      * @see #drawString(Font, String, int, int, Color, HorizAlignment, VertAlignment)
      */
     public void drawString(Font font, String text, int x, int y) {
-        drawString(font, text, x, y, Colors.WHITE, HorizAlignment.LEFT, VertAlignment.TOP);
+        drawString(font, text, x, y, Color.WHITE, HorizAlignment.LEFT, VertAlignment.TOP);
     }
 
     /**
@@ -191,7 +190,7 @@ public class Renderer {
      * @see #drawString(Font, String, int, int, Color, HorizAlignment, VertAlignment)
      */
     public void drawString(Font font, String text, int x, int y, HorizAlignment alignment) {
-        drawString(font, text, x, y, Colors.WHITE, alignment, VertAlignment.TOP);
+        drawString(font, text, x, y, Color.WHITE, alignment, VertAlignment.TOP);
     }
 
     /**
@@ -208,5 +207,43 @@ public class Renderer {
     public void drawString(Font font, String text, int x, int y, Color color,
                            HorizAlignment horizAlign, VertAlignment vertAlign) {
         fonts.get(font).draw(text, x, y, color, horizAlign, vertAlign);
+    }
+
+    /**
+     * Get the width of the given string in pixels, when drawn in the given font.
+     *
+     * @param text the string to be drawn
+     * @param font the font that the string would be drawn in
+     * @return the width of text when drawn in font
+     * @throws IllegalArgumentException if the given font isn't in the map
+     */
+    public int getStringWidth(String text, Font font) {
+        // Try to get the font out of the map. If we get a value, use it to the dimensions.
+        // Otherwise, throw an exception. The only reason a font wouldn't be in the map is if it
+        // failed to load at startup.
+        final TrueTypeFont fontObj = fonts.get(font);
+        if (fontObj != null) {
+            return (int) fontObj.getStringWidth(text);
+        }
+        throw new IllegalArgumentException("Could not get font from map.");
+    }
+
+    /**
+     * Get the height of the given string in pixels, when drawn in the given font.
+     *
+     * @param text the string to be drawn
+     * @param font the font that the string would be drawn in
+     * @return the height of text when drawn in font
+     * @throws IllegalArgumentException if the given font isn't in the map
+     */
+    public int getStringHeight(String text, Font font) {
+        // Try to get the font out of the map. If we get a value, use it to the dimensions.
+        // Otherwise, throw an exception. The only reason a font wouldn't be in the map is if it
+        // failed to load at startup.
+        final TrueTypeFont fontObj = fonts.get(font);
+        if (fontObj != null) {
+            return (int) fontObj.getStringHeight(text);
+        }
+        throw new IllegalArgumentException("Could not get font from map.");
     }
 }

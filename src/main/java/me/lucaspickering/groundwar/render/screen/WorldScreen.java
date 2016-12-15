@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import me.lucaspickering.groundwar.render.ColorTexture;
-import me.lucaspickering.groundwar.render.HorizAlignment;
-import me.lucaspickering.groundwar.render.VertAlignment;
 import me.lucaspickering.groundwar.render.event.KeyEvent;
 import me.lucaspickering.groundwar.render.screen.gui.TextDisplay;
 import me.lucaspickering.groundwar.util.Constants;
@@ -22,18 +20,13 @@ import me.lucaspickering.groundwar.world.tile.Tile;
 public class WorldScreen extends MainScreen {
 
     private static final Point TILE_INFO_POS = new Point(20, -10);
-    private static final int TILE_INFO_WIDTH = 370;
-    private static final int TILE_INFO_HEIGHT = 200;
 
     private final World world;
     private final TextDisplay mouseOverTileInfo;
 
     public WorldScreen(World world) {
         this.world = world;
-        addGuiElement(mouseOverTileInfo = new TextDisplay(null, new Point(),
-                                                          TILE_INFO_WIDTH, TILE_INFO_HEIGHT,
-                                                          HorizAlignment.LEFT,
-                                                          VertAlignment.BOTTOM));
+        addGuiElement(mouseOverTileInfo = new TextDisplay("", new Point()));
         mouseOverTileInfo.setVisible(false);
     }
 
