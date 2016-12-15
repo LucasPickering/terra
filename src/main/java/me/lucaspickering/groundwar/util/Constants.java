@@ -27,12 +27,6 @@ public class Constants {
     public static final String BUTTON_NAME = "button";
 
     // Font names
-    public static final String FONT1 = "bombardier";
-
-    // Font sizes
-    public static final float FONT_SIZE_TILE = 60f;
-    public static final float FONT_SIZE_UI = 100f;
-    public static final float FONT_SIZE_UI_LARGE = 150f;
-    public static final float FONT_SIZE_TITLE = 250f;
+    public static final String FONT_BOMBARDIER = "bombardier";
 
 }

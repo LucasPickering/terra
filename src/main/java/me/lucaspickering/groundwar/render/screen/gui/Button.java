@@ -1,5 +1,6 @@
 package me.lucaspickering.groundwar.render.screen.gui;
 
+import me.lucaspickering.groundwar.render.Font;
 import me.lucaspickering.groundwar.render.HorizAlignment;
 import me.lucaspickering.groundwar.render.VertAlignment;
 import me.lucaspickering.groundwar.util.Colors;
@@ -35,7 +36,7 @@ public class Button extends GuiElement {
     public void draw(Point mousePos) {
         final boolean mouseOver = contains(mousePos);
         renderer().drawTexture(Constants.BUTTON_NAME, 0, 0, getWidth(), getHeight());
-        renderer().drawString(Constants.FONT_SIZE_UI, text, getWidth() / 2, getHeight() / 2,
+        renderer().drawString(Font.UI, text, getWidth() / 2, getHeight() / 2,
                               mouseOver ? Colors.BUTTON_TEXT_HIGHLIGHT : Colors.BUTTON_TEXT_NORMAL,
                               HorizAlignment.CENTER, VertAlignment.CENTER);
     }

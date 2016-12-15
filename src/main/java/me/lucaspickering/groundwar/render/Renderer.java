@@ -9,6 +9,7 @@ import java.awt.FontFormatException;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +25,19 @@ public class Renderer {
     private static final int BYTES_PER_PIXEL = 4; // RGBA
 
     private final Map<String, Texture> textures = new HashMap<>();
-    private final Map<Float, TrueTypeFont> fonts = new HashMap<>();
+    private final Map<Font, TrueTypeFont> fonts = new EnumMap<>(Font.class);
 
+    public Renderer() {
+        // Load all fonts
+        for (Font font : Font.values()) {
+            try {
+                fonts.put(font, font.load());
+            } catch (IOException | FontFormatException e) {
+                System.err.println("Error loading font: " + font);
+                e.printStackTrace();
+            }
+        }
+    }
 
     /**
      * Loads the texture from the file with the given name and places it into the texture map.
@@ -97,15 +109,6 @@ public class Renderer {
         fonts.values().forEach(TrueTypeFont::delete);
     }
 
-    public void loadFont(String name, float size) {
-        try {
-            fonts.put(size, new TrueTypeFont(name, size));
-        } catch (IOException | FontFormatException e) {
-            System.err.println("Error creating font: " + name);
-            e.printStackTrace();
-        }
-    }
-
     public boolean hasTexture(String name) {
         return textures.containsKey(name);
     }
@@ -167,35 +170,34 @@ public class Renderer {
     /**
      * Draw text in white with left alignment.
      *
-     * @see #drawString(float, String, int, int, Color, HorizAlignment, VertAlignment)
+     * @see #drawString(Font, String, int, int, Color, HorizAlignment, VertAlignment)
      */
-    public void drawString(float size, String text, int x, int y) {
-        drawString(size, text, x, y, Colors.WHITE, HorizAlignment.LEFT, VertAlignment.TOP);
+    public void drawString(Font font, String text, int x, int y) {
+        drawString(font, text, x, y, Colors.WHITE, HorizAlignment.LEFT, VertAlignment.TOP);
     }
 
     /**
      * Draw text with left alignment.
      *
-     * @see #drawString(float, String, int, int, Color, HorizAlignment, VertAlignment)
+     * @see #drawString(Font, String, int, int, Color, HorizAlignment, VertAlignment)
      */
-    public void drawString(float size, String text, int x, int y, Color color) {
-        drawString(size, text, x, y, color, HorizAlignment.LEFT, VertAlignment.TOP);
+    public void drawString(Font font, String text, int x, int y, Color color) {
+        drawString(font, text, x, y, color, HorizAlignment.LEFT, VertAlignment.TOP);
     }
 
     /**
      * Draw text in white.
      *
-     * @see #drawString(float, String, int, int, Color, HorizAlignment, VertAlignment)
+     * @see #drawString(Font, String, int, int, Color, HorizAlignment, VertAlignment)
      */
-    public void drawString(float size, String text, int x, int y, HorizAlignment alignment) {
-        drawString(size, text, x, y, Colors.WHITE, alignment, VertAlignment.TOP);
+    public void drawString(Font font, String text, int x, int y, HorizAlignment alignment) {
+        drawString(font, text, x, y, Colors.WHITE, alignment, VertAlignment.TOP);
     }
 
     /**
-     * Draw the given text in the given size, at the given position. A font for the given size must
-     * have been loaded already using {@link #loadFont}.
+     * Draw the given text in the given font, at the given position.
      *
-     * @param size       the size of the font
+     * @param font       the font/size to draw the string in
      * @param text       the text to draw
      * @param x          the x position to draw at
      * @param y          the y position to draw at
@@ -203,11 +205,8 @@ public class Renderer {
      * @param horizAlign the text alignment (left, center, right)
      * @param vertAlign  the vertical text alignment (top, center, bottom)
      */
-    public void drawString(float size, String text, int x, int y, Color color,
+    public void drawString(Font font, String text, int x, int y, Color color,
                            HorizAlignment horizAlign, VertAlignment vertAlign) {
-        if (!fonts.containsKey(size)) {
-            loadFont(Constants.FONT1, size);
-        }
-        fonts.get(size).draw(text, x, y, color, horizAlign, vertAlign);
+        fonts.get(font).draw(text, x, y, color, horizAlign, vertAlign);
     }
 }

@@ -4,10 +4,10 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
+import me.lucaspickering.groundwar.render.Font;
 import me.lucaspickering.groundwar.render.HorizAlignment;
 import me.lucaspickering.groundwar.render.VertAlignment;
 import me.lucaspickering.groundwar.util.Colors;
-import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Point;
 
 public class TextDisplay extends GuiElement {
@@ -41,6 +41,6 @@ public class TextDisplay extends GuiElement {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         renderer().drawRect(0, 0, getWidth(), getHeight(), Colors.TILE_INFO_BG);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        renderer().drawString(Constants.FONT_SIZE_TILE, text, TEXT_OFFSET_X, 0, textColor);
+        renderer().drawString(Font.TILE, text, TEXT_OFFSET_X, 0, textColor);
     }
 }

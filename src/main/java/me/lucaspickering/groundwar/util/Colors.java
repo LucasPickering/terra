@@ -5,19 +5,19 @@ import java.awt.Color;
 public class Colors {
 
     // Stock colors
-    public static final Color BLACK = Funcs.colorFromArgb(0xffffffff);
-    public static final Color RED = Funcs.colorFromArgb(0xffff0000);
-    public static final Color GREEN = Funcs.colorFromArgb(0xff00ff00);
-    public static final Color BLUE = Funcs.colorFromArgb(0xff0000ff);
-    public static final Color WHITE = Funcs.colorFromArgb(0xffffffff);
+    public static final Color BLACK = Funcs.colorFromRgb(0xffffff);
+    public static final Color RED = Funcs.colorFromRgb(0xff0000);
+    public static final Color GREEN = Funcs.colorFromRgb(0x00ff00);
+    public static final Color BLUE = Funcs.colorFromRgb(0x0000ff);
+    public static final Color WHITE = Funcs.colorFromRgb(0xffffff);
 
     // General
-    public static final Color CLEAR = Funcs.colorFromArgb(0xff777777);
+    public static final Color CLEAR = Funcs.colorFromRgb(0x777777);
     public static final Color MENU_SHADER = Funcs.colorFromArgb(0xcc101010);
 
     // Tile colors
-    public static final Color TILE_BG = Funcs.colorFromArgb(0xff6aa84f);
-    public static final Color TILE_OUTLINE = Funcs.colorFromArgb(0xff434343);
+    public static final Color TILE_BG = Funcs.colorFromRgb(0x6aa84f);
+    public static final Color TILE_OUTLINE = Funcs.colorFromRgb(0x434343);
 
     // Tile overlay colors
     public static final Color MOUSE_OVER = Funcs.colorFromArgb(0x60999999);

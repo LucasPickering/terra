@@ -14,6 +14,27 @@ import me.lucaspickering.groundwar.world.tile.Tile;
 
 public class WorldHelper {
 
+    /**
+     * Converts a {@link TilePoint} in the world to a {@link Point} on the screen.
+     *
+     * @param pos the position of the tile as a {@link TilePoint}
+     * @return the position of that tile's center on the screen
+     */
+    public static Point screenPosFromTilePos(TilePoint pos) {
+        final float x = Tile.TILE_WIDTH * pos.x() * 0.75f;
+        final float y = -Tile.TILE_HEIGHT * (pos.x() / 2.0f + pos.y());
+        return Constants.WORLD_CENTER.plus((int) x, (int) y);
+    }
+
+    /**
+     * Converts a {@link Point} on the screen to a {@link TilePoint} in the world. The returned
+     * point is the location of the tile that contains the given screen point. It doesn't
+     * necessarily exist in the world; it is just the position of a theoretical tile that could
+     * exist there.
+     *
+     * @param pos any point on the screen
+     * @return the position of the tile that encloses the given point
+     */
     public static TilePoint tilePosFromScreenPos(Point pos) {
         // todo fix
         final Point shiftedPos = pos.minus(Constants.WORLD_CENTER);
@@ -54,8 +75,8 @@ public class WorldHelper {
      * @param range  (non-negative)
      * @return all tiles in range of the given origin
      * @throws NullPointerException     if {@code origin == null}
-     * @throws IllegalArgumentException if {@code origin} is not in {@code world} or {@code range
-     *                                  < 0}
+     * @throws IllegalArgumentException if {@code origin} is not in {@code world} or {@code range <
+     *                                  0}
      */
     public static Set<TilePoint> getTilesInRange(Set<TilePoint> world, TilePoint origin,
                                                  int range) {

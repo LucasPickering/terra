@@ -25,21 +25,6 @@ public class Funcs {
             () -> new AssertionError("No random element selected despite non-empty collection"));
     }
 
-    /**
-     * Make an ARGB color where {@code A = 255}, and {@code R = G = B = input}. If the input is not in
-     * the range [0, 255], it will be masked to fall into that range.
-     *
-     * @return the color hex code
-     */
-    public static int makeGray(int input) {
-        input &= 0xff; // Mask the input to be in the range [0, 255]
-        final int a = 0xff000000;
-        final int r = input << 8;
-        final int g = input << 4;
-        final int b = input;
-        return a | r | g | b;
-    }
-
     public static void setGlColor(Color color) {
         GL11.glColor4f(color.getRed() / 255f,
                        color.getGreen() / 255f,
@@ -47,11 +32,42 @@ public class Funcs {
                        color.getAlpha() / 255f);
     }
 
+    /**
+     * Creates a {@link Color} from the given RGB code with alpha 255 (opaque).
+     *
+     * @param rgb the RGB code
+     * @return the given color as a {@link Color} with alpha 255
+     */
+    public static Color colorFromRgb(int rgb) {
+        return colorFromArgb(0xff000000 | rgb); // Set alpha to 255
+    }
+
+    /**
+     * Creates a {@link Color} from the given ARGB (alpha-red-green-blue) code.
+     *
+     * @param argb the ARGB code
+     * @return the given color as a {@link Color}
+     */
     public static Color colorFromArgb(int argb) {
         final int alpha = argb >> 24 & 0xff;
         final int red = argb >> 16 & 0xff;
         final int green = argb >> 8 & 0xff;
         final int blue = argb & 0xff;
         return new Color(red, green, blue, alpha);
+    }
+
+    /**
+     * Creates a shade of gray as a {@link Color} from the given value (brightness). The returned
+     * gray will have red, green, and blue values equal to the given value and alpha of 255.
+     *
+     * @param value the value (brightness) of the gray (larger is lighter) [0, 255]
+     * @return a shade of gray as a {@link Color} with alpha 255
+     */
+    public static Color gray(int value) {
+        final int alpha = 0xff000000;
+        final int red = value << 16;
+        final int green = value << 8;
+        final int blue = value;
+        return colorFromRgb(alpha | red | green | blue); // Set alpha to 255
     }
 }

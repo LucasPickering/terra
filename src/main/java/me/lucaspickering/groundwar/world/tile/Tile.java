@@ -4,11 +4,11 @@ import java.awt.Color;
 import java.util.Objects;
 
 import me.lucaspickering.groundwar.util.Colors;
-import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Direction;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.Biome;
+import me.lucaspickering.groundwar.world.WorldHelper;
 
 public class Tile {
 
@@ -109,9 +109,7 @@ public class Tile {
         this.pos = pos;
         this.biome = biome;
         this.elevation = elevation;
-        this.center = Constants.WORLD_CENTER.plus(
-            (int) (TILE_WIDTH * pos.x() * 0.75f),
-            (int) (-TILE_HEIGHT * (pos.x() / 2.0f + pos.y())));
+        this.center = WorldHelper.screenPosFromTilePos(pos);
         this.topLeft = center.minus(TILE_WIDTH / 2, TILE_HEIGHT / 2);
     }
 

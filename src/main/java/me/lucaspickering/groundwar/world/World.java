@@ -65,7 +65,7 @@ public class World {
         }
 
         for (TilePoint peak : peaks) {
-            builders.get(peak).biome(Biome.DEBUG).elevation(5); // Modify the peak tile
+            builders.get(peak).biome(Biome.MOUNTAIN).elevation(5); // Modify the peak tile
         }
 
         // Build each tile and put it into the final map
