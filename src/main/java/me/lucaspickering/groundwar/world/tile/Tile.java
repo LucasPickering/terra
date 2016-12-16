@@ -76,17 +76,14 @@ public class Tile {
      * relative to the center of the tile. The first vertex is the top-left, and they move
      * clockwise from there.
      */
-    public static final Point[] VERTICES = new Point[NUM_SIDES];
-
-    static {
-        // Populate VERTICES
-        VERTICES[0] = new Point(WIDTH / 4, 0);
-        VERTICES[1] = new Point(WIDTH * 3 / 4, 0);
-        VERTICES[2] = new Point(WIDTH, HEIGHT / 2);
-        VERTICES[3] = new Point(WIDTH * 3 / 4, HEIGHT);
-        VERTICES[4] = new Point(WIDTH / 4, HEIGHT);
-        VERTICES[5] = new Point(0, HEIGHT / 2);
-    }
+    public static final Point[] VERTICES = new Point[]{
+        new Point(WIDTH / 4, 0),
+        new Point(WIDTH * 3 / 4, 0),
+        new Point(WIDTH, HEIGHT / 2),
+        new Point(WIDTH * 3 / 4, HEIGHT),
+        new Point(WIDTH / 4, HEIGHT),
+        new Point(0, HEIGHT / 2)
+    };
 
     private static final String INFO_STRING = "Pos: %s%nBiome: %s%nElevation: %d";
 

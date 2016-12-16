@@ -9,11 +9,8 @@ import me.lucaspickering.groundwar.util.Constants;
 public class ColorTexture {
 
     // Tile overlays
-    public static final ColorTexture mouseOver;
-
-    static {
-        mouseOver = new ColorTexture(Constants.TILE_BG_NAME, Colors.MOUSE_OVER);
-    }
+    public static final ColorTexture mouseOver = new ColorTexture(Constants.TILE_BG_NAME,
+                                                                  Colors.MOUSE_OVER);
 
     private final Texture texture;
     private final Color color;

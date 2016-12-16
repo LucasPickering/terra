@@ -9,6 +9,7 @@ import me.lucaspickering.groundwar.render.Font;
 import me.lucaspickering.groundwar.render.HorizAlignment;
 import me.lucaspickering.groundwar.render.VertAlignment;
 import me.lucaspickering.groundwar.util.Colors;
+import me.lucaspickering.groundwar.util.Pair;
 import me.lucaspickering.groundwar.util.Point;
 
 public class TextDisplay extends GuiElement {
@@ -37,8 +38,9 @@ public class TextDisplay extends GuiElement {
     public void setText(String text) {
         Objects.requireNonNull(text);
         this.text = text;
-        setWidth(renderer().getStringWidth(text, FONT) + BORDER_PADDING_X * 2);
-        setHeight(renderer().getStringHeight(text, FONT) + BORDER_PADDING_Y * 2);
+        final Pair<Integer, Integer> stringSize = renderer().getStringSize(text, FONT);
+        setWidth(stringSize.first() + BORDER_PADDING_X * 2);
+        setHeight(stringSize.second() + BORDER_PADDING_Y * 2);
     }
 
     @Override

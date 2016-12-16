@@ -16,12 +16,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import me.lucaspickering.groundwar.TerrainGen;
 import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Funcs;
+import me.lucaspickering.groundwar.util.Pair;
 
 public class TrueTypeFont {
 
@@ -58,8 +60,10 @@ public class TrueTypeFont {
         fontMetrics = graphics.getFontMetrics();
 
         // Get font measurements
-        fontImageWidth = CHARS.stream().mapToInt(e -> (int) fontMetrics.getStringBounds(e, null)
-            .getWidth()).max().getAsInt();
+        fontImageWidth = CHARS.stream()
+            .mapToInt(e -> (int) fontMetrics.getStringBounds(e, null).getWidth())
+            .max()
+            .orElse(0);
         charHeight = fontMetrics.getMaxAscent() + fontMetrics.getMaxDescent();
         fontImageHeight = (int) (CHARS.size() * charHeight);
 
@@ -103,14 +107,52 @@ public class TrueTypeFont {
         return fontMetrics.charWidth(c);
     }
 
+    private int getStringWidth(String s) {
+        return (int) s.chars()
+            .mapToDouble(c -> getCharWidth((char) c)) // Get the width of each character
+            .sum(); // Sum up all the widths
+    }
+
+    /**
+     * @see #getStringSize(String)
+     */
+    private Pair<Integer, Integer> getStringSize(List<String> lines) {
+        // Calculate width as the max of the width of each line
+        final int width = lines.stream()
+            .mapToInt(this::getStringWidth) // Get the width of each string
+            .max() // Find max of each width
+            .orElse(0); // Get the max or 0 if there is none
+
+        // Calculate height as the sum of the height of each line
+        final int height = (int) (charHeight * lines.size());
+
+        return new Pair<>(width, height);
+    }
+
+    /**
+     * Gets the size of the given string in pixels when drawn. The size is given as a
+     * (width, height) pair.
+     *
+     * @param text the string to be drawn
+     * @return the size of the string in (width, height) format
+     */
+    public Pair<Integer, Integer> getStringSize(String text) {
+        Objects.requireNonNull(text);
+        return getStringSize(splitLines(text));
+    }
+
+    private List<String> splitLines(String text) {
+        return Arrays.asList(text.split("\n"));
+    }
+
     private ByteBuffer asByteBuffer() {
         ByteBuffer byteBuffer;
 
         // Draw the characters on our image
         Graphics2D imageGraphics = (Graphics2D) bufferedImage.getGraphics();
         imageGraphics.setFont(font);
-        imageGraphics
-            .setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        imageGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                       RenderingHints.VALUE_ANTIALIAS_OFF);
         imageGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
@@ -142,10 +184,6 @@ public class TrueTypeFont {
         return byteBuffer;
     }
 
-    private String[] splitLines(String text) {
-        return text.split("\n");
-    }
-
     /**
      * Draw the given text in this font.
      *
@@ -163,33 +201,14 @@ public class TrueTypeFont {
         // Set the color (aren't bitshifts cool?)
         Funcs.setGlColor(color);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, fontTextureId);
-        final String[] lines = splitLines(text);
+        final List<String> lines = splitLines(text);
+        final Pair<Integer, Integer> size = getStringSize(lines);
 
-        int xTmp = x;
-        int yTmp = y;
-
-        // Adjust y for vertical alignment
-        switch (vertAlign) {
-            case CENTER:
-                yTmp -= charHeight * lines.length / 2;
-                break;
-            case BOTTOM:
-                yTmp -= charHeight * lines.length;
-                break;
-        }
+        int xTmp = x + horizAlign.leftAdjustment(size.first());
+        int yTmp = y + vertAlign.topAdjustment(size.second());
 
         GL11.glBegin(GL11.GL_QUADS);
         for (String line : lines) {
-            // Adjust x for horizontal alignment
-            switch (horizAlign) {
-                case CENTER:
-                    xTmp = x - (int) getStringWidth(line) / 2;
-                    break;
-                case RIGHT:
-                    xTmp = x - (int) getStringWidth(line);
-                    break;
-            }
-
             // Draw each character
             for (char c : line.toCharArray()) {
                 final float width = getCharWidth(c);
@@ -224,32 +243,6 @@ public class TrueTypeFont {
             yTmp += charHeight;
         }
         GL11.glEnd();
-    }
-
-    /**
-     * Gets the width of the given string, in pixels.
-     *
-     * @param s the string to get the width of (non-null)
-     * @return the width of s in pixels
-     */
-    public float getStringWidth(String s) {
-        Objects.requireNonNull(s);
-        int width = 0;
-        for (char c : s.toCharArray()) {
-            width += getCharWidth(c);
-        }
-        return width;
-    }
-
-    /**
-     * Gets the height of the given string, in pixels. The height is based on the number of lines
-     * in the string and the height of each line for this font.
-     *
-     * @param s the string to get the width of (non-null)
-     * @return the height of s in pixels
-     */
-    public float getStringHeight(String s) {
-        return charHeight * splitLines(s).length;
     }
 
     public void delete() {
