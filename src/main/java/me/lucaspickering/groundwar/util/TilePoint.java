@@ -54,13 +54,15 @@ public class TilePoint {
     /**
      * Gets the distance between this point and another one.
      *
-     * The forumla used is {@code (|x1 - x1| + |y1 - y2| + |z1 - z1|) / 2}.
+     * The formula used is {@code (|x1 - x2| + |y1 - y2| + |z1 - z2|) / 2}.
      *
      * @param other the other point
      * @return the distance between this tile and {@param p}
      */
     public final int distanceTo(TilePoint other) {
-        return (Math.abs(x - other.x()) + Math.abs(y - other.y()) + Math.abs(z + other.z())) / 2;
+        return (Math.abs(x - other.x())
+                + Math.abs(y - other.y())
+                + Math.abs(z - other.z())) / 2;
     }
 
     public final TilePoint plus(TilePoint other) {
