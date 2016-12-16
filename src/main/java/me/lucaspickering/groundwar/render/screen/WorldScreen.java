@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import me.lucaspickering.groundwar.render.ColorTexture;
+import me.lucaspickering.groundwar.render.HorizAlignment;
+import me.lucaspickering.groundwar.render.VertAlignment;
 import me.lucaspickering.groundwar.render.event.KeyEvent;
 import me.lucaspickering.groundwar.render.screen.gui.TextDisplay;
 import me.lucaspickering.groundwar.util.Constants;
@@ -27,7 +29,9 @@ public class WorldScreen extends MainScreen {
 
     public WorldScreen(World world) {
         this.world = world;
-        addGuiElement(mouseOverTileInfo = new TextDisplay("", new Point()));
+        addGuiElement(mouseOverTileInfo = new TextDisplay("", new Point(),
+                                                          HorizAlignment.LEFT,
+                                                          VertAlignment.BOTTOM));
         mouseOverTileInfo.setVisible(false);
     }
 

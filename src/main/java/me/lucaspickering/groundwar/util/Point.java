@@ -2,6 +2,9 @@ package me.lucaspickering.groundwar.util;
 
 import java.util.Objects;
 
+import me.lucaspickering.groundwar.render.HorizAlignment;
+import me.lucaspickering.groundwar.render.VertAlignment;
+
 /**
  * A class representing an immutable 2-dimensional integer point. Used mostly for points on-screen.
  */
@@ -64,6 +67,23 @@ public class Point {
 
     public Point minus(int x, int y) {
         return new Point(this.x - x, this.y - y);
+    }
+
+    /**
+     * Creates a new point, adjusting this one based on the given alignments and dimensions.
+     *
+     * The returned value will be this point, but adjusted to be the top-left corner of the
+     * element with the given properties.
+     *
+     * @param horizAlign the horizontal alignment
+     * @param vertAlign  the vertical alignment
+     * @param width      the height
+     * @param height     the height
+     * @return a new point that has been adjusted to be the top-left corner of an element
+     */
+    public Point adjustForAlignment(HorizAlignment horizAlign, VertAlignment vertAlign,
+                                    int width, int height) {
+        return plus(horizAlign.leftAdjustment(width), vertAlign.topAdjustment(height));
     }
 
     /**

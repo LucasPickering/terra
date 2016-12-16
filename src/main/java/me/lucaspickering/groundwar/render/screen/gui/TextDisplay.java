@@ -6,6 +6,8 @@ import java.awt.Color;
 import java.util.Objects;
 
 import me.lucaspickering.groundwar.render.Font;
+import me.lucaspickering.groundwar.render.HorizAlignment;
+import me.lucaspickering.groundwar.render.VertAlignment;
 import me.lucaspickering.groundwar.util.Colors;
 import me.lucaspickering.groundwar.util.Point;
 
@@ -20,6 +22,11 @@ public class TextDisplay extends GuiElement {
 
     public TextDisplay(String text, Point pos) {
         super(pos);
+        setText(text);
+    }
+
+    public TextDisplay(String text, Point pos, HorizAlignment horizAlign, VertAlignment vertAlign) {
+        super(pos, horizAlign, vertAlign);
         setText(text);
     }
 

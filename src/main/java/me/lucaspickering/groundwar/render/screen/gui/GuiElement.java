@@ -29,7 +29,7 @@ public abstract class GuiElement implements ScreenElement {
     }
 
     /**
-     * Constructs a new {@code GuiElement} with the given position and size.
+     * Constructs a new {@code GuiElement} with the given coordinates and size.
      *
      * @param pos    the position of the element
      * @param width  the width of the element (non-negative)
@@ -41,7 +41,24 @@ public abstract class GuiElement implements ScreenElement {
     }
 
     /**
-     * Constructs a new {@code GuiElement} with the given position, size, and alignments.
+     * Constructs a new {@code GuiElement} with the given coordinates and alignments.
+     *
+     * @param pos        the position of the element
+     * @param horizAlign the horizontal alignment of the element (non-null)
+     * @param vertAlign  the vertical alignment of the element (non-null)
+     * @throws NullPointerException if {@code horizAlign == null} or {@code vertAlign == null}
+     */
+    protected GuiElement(Point pos, HorizAlignment horizAlign, VertAlignment vertAlign) {
+        Objects.requireNonNull(horizAlign);
+        Objects.requireNonNull(vertAlign);
+
+        this.horizAlign = horizAlign;
+        this.vertAlign = vertAlign;
+        setPos(pos);
+    }
+
+    /**
+     * Constructs a new {@code GuiElement} with the given coordinates, size, and alignments.
      *
      * @param pos        the position of the element
      * @param width      the width of the element (non-negative)
@@ -71,7 +88,7 @@ public abstract class GuiElement implements ScreenElement {
     }
 
     public final void setPos(Point pos) {
-        this.pos = adjustForAlignment(pos);
+        this.pos = pos.adjustForAlignment(horizAlign, vertAlign, width, height);
     }
 
     public final int getX() {
@@ -98,16 +115,6 @@ public abstract class GuiElement implements ScreenElement {
         this.height = height;
     }
 
-    public final void setHorizAlign(HorizAlignment horizAlign) {
-        this.horizAlign = horizAlign;
-        pos = adjustForAlignment(pos);
-    }
-
-    public final void setVertAlign(VertAlignment vertAlign) {
-        this.vertAlign = vertAlign;
-        pos = adjustForAlignment(pos);
-    }
-
     public final boolean isVisible() {
         return visible;
     }
@@ -122,33 +129,6 @@ public abstract class GuiElement implements ScreenElement {
 
     public final void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    private final Point adjustForAlignment(Point p) {
-        int adjX = 0;
-        int adjY = 0;
-
-        // Adjust x for horizontal alignment
-        switch (horizAlign) {
-            case CENTER:
-                adjX = -width / 2;
-                break;
-            case RIGHT:
-                adjX = -width;
-                break;
-        }
-
-        // Adjust y for vertical alignment
-        switch (vertAlign) {
-            case CENTER:
-                adjY = -height / 2;
-                break;
-            case BOTTOM:
-                adjY = -height;
-                break;
-        }
-
-        return p.plus(adjX, adjY);
     }
 
     @Override
