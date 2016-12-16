@@ -15,6 +15,7 @@ import me.lucaspickering.groundwar.util.Funcs;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.World;
+import me.lucaspickering.groundwar.world.WorldHelper;
 import me.lucaspickering.groundwar.world.tile.Tile;
 
 public class WorldScreen extends MainScreen {
@@ -37,15 +38,8 @@ public class WorldScreen extends MainScreen {
 
         tiles.forEach(tile -> drawTile(tile, mousePos)); // Draw each tile
 
-        // Update mouseOverTileInfo for the unit that the mouse is over
-//        final TilePos mouseOverPos = WorldHelper.tilePosFromScreenPos(mousePos);
-        TilePoint mouseOverPos = null;
-        for (Tile tile : tiles) {
-            if (tile.contains(mousePos)) {
-                mouseOverPos = tile.pos();
-                break; // We don't need to check the rest of the tiles
-            }
-        }
+        // Update mouseOverTileInfo for the tile that the mouse is over
+        final TilePoint mouseOverPos = WorldHelper.pixelToTile(mousePos);
         final Tile mouseOverTile = tileMap.get(mouseOverPos);
         if (mouseOverTile != null) {
             mouseOverTileInfo.setText(mouseOverTile.info());
@@ -66,16 +60,16 @@ public class WorldScreen extends MainScreen {
     private void drawTile(Tile tile, Point mousePos) {
         GL11.glPushMatrix();
 
-        // Translate to the center of the tile
-        final Point tilePos = tile.topLeft();
-        GL11.glTranslatef(tilePos.x(), tilePos.y(), 0f);
+        // Translate to the top-left corner of the tile
+        final Point tileTopLeft = tile.topLeft();
+        GL11.glTranslatef(tileTopLeft.x(), tileTopLeft.y(), 0f);
 
         // Start drawing textures
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         // Draw the tile background
-        renderer().drawTexture(Constants.TILE_BG_NAME, 0, 0, Tile.TILE_WIDTH, Tile.TILE_HEIGHT,
+        renderer().drawTexture(Constants.TILE_BG_NAME, 0, 0, Tile.WIDTH, Tile.HEIGHT,
                                tile.backgroundColor());
 
         // Stop drawing textures
@@ -118,8 +112,8 @@ public class WorldScreen extends MainScreen {
      * @param mousePos the position of the mouse
      */
     private void drawTileOverlays(Tile tile, Point mousePos) {
-        final int width = Tile.TILE_WIDTH;
-        final int height = Tile.TILE_HEIGHT;
+        final int width = Tile.WIDTH;
+        final int height = Tile.HEIGHT;
 
         // Draw mouse-over overlays
         if (tile.contains(mousePos)) { // If the mouse is over this tile...

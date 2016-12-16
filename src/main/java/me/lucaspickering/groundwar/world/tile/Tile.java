@@ -51,20 +51,20 @@ public class Tile {
 
     // UI constants
     /**
-     * The distance between the center point of the hexagon and the center-point of one side of the
-     * hexagon, in pixels.
+     * The distance between the center point of the hexagon and each vertex. Also the length of
+     * one side of the tile.
      */
-    public static final int TILE_RADIUS = 75;
+    public static final int RADIUS = 74;
 
     /**
      * Distance in pixels from the left-most vertex to the right-most vertex.
      */
-    public static final int TILE_WIDTH = (int) (TILE_RADIUS * 4 / Math.sqrt(3));
+    public static final int WIDTH = RADIUS * 2;
 
     /**
      * Distance in pixels from the top side to the bottom side.
      */
-    public static final int TILE_HEIGHT = TILE_RADIUS * 2;
+    public static final int HEIGHT = (int) (Math.sqrt(3) * RADIUS);
 
     /**
      * The width of the lines drawn to outline the tile.
@@ -80,12 +80,12 @@ public class Tile {
 
     static {
         // Populate VERTICES
-        VERTICES[0] = new Point(TILE_WIDTH / 4, 0);
-        VERTICES[1] = new Point(TILE_WIDTH * 3 / 4, 0);
-        VERTICES[2] = new Point(TILE_WIDTH, TILE_HEIGHT / 2);
-        VERTICES[3] = new Point(TILE_WIDTH * 3 / 4, TILE_HEIGHT);
-        VERTICES[4] = new Point(TILE_WIDTH / 4, TILE_HEIGHT);
-        VERTICES[5] = new Point(0, TILE_HEIGHT / 2);
+        VERTICES[0] = new Point(WIDTH / 4, 0);
+        VERTICES[1] = new Point(WIDTH * 3 / 4, 0);
+        VERTICES[2] = new Point(WIDTH, HEIGHT / 2);
+        VERTICES[3] = new Point(WIDTH * 3 / 4, HEIGHT);
+        VERTICES[4] = new Point(WIDTH / 4, HEIGHT);
+        VERTICES[5] = new Point(0, HEIGHT / 2);
     }
 
     private static final String INFO_STRING = "Pos: %s%nBiome: %s%nElevation: %d";
@@ -109,8 +109,8 @@ public class Tile {
         this.pos = pos;
         this.biome = biome;
         this.elevation = elevation;
-        this.center = WorldHelper.screenPosFromTilePos(pos);
-        this.topLeft = center.minus(TILE_WIDTH / 2, TILE_HEIGHT / 2);
+        this.center = WorldHelper.tileToPixel(pos);
+        this.topLeft = center.minus(WIDTH / 2, HEIGHT / 2);
     }
 
     public final TilePoint pos() {
@@ -171,7 +171,7 @@ public class Tile {
     public final boolean contains(Point p) {
         // This checks distance to the center of the tile, i.e. it treats the tile as a circle.
         // This is a close enough approximation.
-        return center().distanceTo(p) <= TILE_RADIUS;
+        return center().distanceTo(p) <= HEIGHT / 2;
     }
 
     @Override

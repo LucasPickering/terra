@@ -17,12 +17,12 @@ public class WorldHelper {
     /**
      * Converts a {@link TilePoint} in the world to a {@link Point} on the screen.
      *
-     * @param pos the position of the tile as a {@link TilePoint}
+     * @param tile the position of the tile as a {@link TilePoint}
      * @return the position of that tile's center on the screen
      */
-    public static Point screenPosFromTilePos(TilePoint pos) {
-        final float x = Tile.TILE_WIDTH * pos.x() * 0.75f;
-        final float y = -Tile.TILE_HEIGHT * (pos.x() / 2.0f + pos.y());
+    public static Point tileToPixel(TilePoint tile) {
+        final float x = Tile.WIDTH * tile.x() * 0.75f;
+        final float y = -Tile.HEIGHT * (tile.x() / 2.0f + tile.y());
         return Constants.WORLD_CENTER.plus((int) x, (int) y);
     }
 
@@ -35,12 +35,39 @@ public class WorldHelper {
      * @param pos any point on the screen
      * @return the position of the tile that encloses the given point
      */
-    public static TilePoint tilePosFromScreenPos(Point pos) {
-        // todo fix
-        final Point shiftedPos = pos.minus(Constants.WORLD_CENTER);
-        final float x = shiftedPos.x() / (Tile.TILE_WIDTH * 0.75f);
-        final float y = -x / 2 - shiftedPos.y() / Tile.TILE_HEIGHT;
-        return new TilePoint(Math.round(x), Math.round(y));
+    public static TilePoint pixelToTile(Point pos) {
+        // Shift the point so that the origin is the middle of the screen
+        final Point shifted = pos.minus(Constants.WORLD_CENTER);
+
+        // Convert it to a fractional tile point
+        final float fracX = shifted.x() * 2f / 3f / Tile.RADIUS;
+        final float fracY = -(shifted.x() + (float) Math.sqrt(3) * shifted.y())
+                            / (Tile.RADIUS * 3f);
+        final float fracZ = -fracX - fracY; // We'll need this later
+
+        // Convert the fraction tile coordinates to regular coordinates
+        // First, get rounded versions of each coord
+        int roundX = Math.round(fracX);
+        int roundY = Math.round(fracY);
+        int roundZ = Math.round(fracZ);
+
+        // roundX + roundY + roundZ == 0 is not guaranteed, so we need to recalculate one of them
+
+        // Find how much each one needed to be rounded
+        final float xDiff = Math.abs(fracX - roundX);
+        final float yDiff = Math.abs(fracY - roundY);
+        final float zDiff = Math.abs(fracZ - roundZ);
+
+        // Recalculate the one that rounded the most
+        if (xDiff > yDiff && xDiff > zDiff) {
+            roundX = -roundY - roundZ;
+        } else if (yDiff > zDiff) {
+            roundY = -roundX - roundZ;
+        } else {
+            roundZ = -roundX - roundY;
+        }
+
+        return new TilePoint(roundX, roundY, roundZ);
     }
 
     /**
