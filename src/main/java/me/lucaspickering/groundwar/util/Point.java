@@ -8,16 +8,16 @@ import me.lucaspickering.groundwar.render.VertAlignment;
 /**
  * A class representing an immutable 2-dimensional integer point. Used mostly for points on-screen.
  */
-public class Point {
-
-    private final int x, y;
+public class Point implements Cloneable {
 
     /**
-     * Constructs a new {@code Point} with an x and y of 0.
+     * {@link Point}s are immutable, so this globally-available zero point can save some time &
+     * space. This can be used as a placeholder {@link Point} without having to instantiate a new
+     * object.
      */
-    public Point() {
-        this(0, 0);
-    }
+    public static final Point ZERO = new Point(0, 0);
+
+    private final int x, y;
 
     /**
      * Constructs a new {@code Point} with the given x and y.
@@ -98,15 +98,6 @@ public class Point {
         final int xDiff = x - p.x;
         final int yDiff = y - p.y;
         return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-    }
-
-    /**
-     * Creates a copy of this point.
-     *
-     * @return a copy of this point, with the same x and y values
-     */
-    public Point copy() {
-        return new Point(x, y);
     }
 
     @Override

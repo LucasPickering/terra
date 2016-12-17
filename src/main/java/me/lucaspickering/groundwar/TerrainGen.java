@@ -41,7 +41,7 @@ public class TerrainGen {
     private MainScreen currentScreen;
     private int windowWidth;
     private int windowHeight;
-    private Point mousePos = new Point();
+    private Point mousePos = Point.ZERO;
 
     private World world;
 
@@ -58,7 +58,7 @@ public class TerrainGen {
             initGame(); // Initialize
             gameLoop(); // Run the game
         } catch (Exception e) {
-            System.err.println("Error in Ground War:");
+            System.err.println("Error in Terrain Gen:");
             e.printStackTrace();
         } finally {
             tearDown(); // Shutdown
@@ -119,7 +119,7 @@ public class TerrainGen {
         while (!GLFW.glfwWindowShouldClose(window)) {
             GLFW.glfwPollEvents(); // Poll for events (key, mouse, etc.)
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); // Clear framebuffer
-            currentScreen.draw(mousePos.copy());
+            currentScreen.draw(mousePos);
             GLFW.glfwSwapBuffers(window); // Swap the color buffers
 
             // Change to the next screen (usually nextScreen() returns the same screen)

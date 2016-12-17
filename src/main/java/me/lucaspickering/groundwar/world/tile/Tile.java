@@ -32,12 +32,20 @@ public class Tile {
             return new Builder(pos);
         }
 
-        public Builder biome(Biome biome) {
+        public Biome getBiome() {
+            return biome;
+        }
+
+        public Builder setBiome(Biome biome) {
             this.biome = biome;
             return this;
         }
 
-        public Builder elevation(int elevation) {
+        public int getElevation() {
+            return elevation;
+        }
+
+        public Builder setElevation(int elevation) {
             this.elevation = elevation;
             return this;
         }
@@ -159,16 +167,17 @@ public class Tile {
     }
 
     /**
-     * Does this tile contain the {@link Point} p? p is a point in screen-space, not in tile-space.
-     * This is generally used to check if the mouse is over this tile.
+     * Does this tile contain the given {@link Point} p? p is a point in screen-space, not in
+     * tile-space.
+     *
+     * This is used to check if the mouse is over.
      *
      * @param p the point
      * @return true if this tile contains p, false otherwise
      */
     public final boolean contains(Point p) {
-        // This checks distance to the center of the tile, i.e. it treats the tile as a circle.
-        // This is a close enough approximation.
-        return center().distanceTo(p) <= HEIGHT / 2;
+        // Convert the given pixel location to a tile point, then check if that point is
+        return pos.equals(WorldHelper.pixelToTile(p));
     }
 
     @Override

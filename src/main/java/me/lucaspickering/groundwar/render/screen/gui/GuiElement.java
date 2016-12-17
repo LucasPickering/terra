@@ -88,6 +88,7 @@ public abstract class GuiElement implements ScreenElement {
     }
 
     public final void setPos(Point pos) {
+        Objects.requireNonNull(pos);
         this.pos = pos.adjustForAlignment(horizAlign, vertAlign, width, height);
     }
 

@@ -51,8 +51,7 @@ public class TrueTypeFont {
         // Generate buffered image
         GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment()
             .getDefaultScreenDevice().getDefaultConfiguration();
-        Graphics2D
-            graphics =
+        Graphics2D graphics =
             gc.createCompatibleImage(1, 1, Transparency.TRANSLUCENT).createGraphics();
         graphics.setFont(font);
 

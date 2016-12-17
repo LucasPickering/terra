@@ -29,7 +29,7 @@ public class WorldScreen extends MainScreen {
 
     public WorldScreen(World world) {
         this.world = world;
-        addGuiElement(mouseOverTileInfo = new TextDisplay("", new Point(),
+        addGuiElement(mouseOverTileInfo = new TextDisplay("", Point.ZERO,
                                                           HorizAlignment.LEFT,
                                                           VertAlignment.BOTTOM));
         mouseOverTileInfo.setVisible(false);
@@ -40,10 +40,12 @@ public class WorldScreen extends MainScreen {
         final Map<TilePoint, Tile> tileMap = world.getTiles();
         final Collection<Tile> tiles = tileMap.values();
 
-        tiles.forEach(tile -> drawTile(tile, mousePos)); // Draw each tile
-
-        // Update mouseOverTileInfo for the tile that the mouse is over
+        // Draw each tile. For each one, check if it is the
         final TilePoint mouseOverPos = WorldHelper.pixelToTile(mousePos);
+        tiles.forEach(tile -> drawTile(tile, tile.pos().equals(mouseOverPos)));
+
+        // Update mouseOverTileInfo for the tile that the mouse is over. This HAS to be done
+        // after all the tiles are drawn, otherwise it would be underneath some of them.
         final Tile mouseOverTile = tileMap.get(mouseOverPos);
         if (mouseOverTile != null) {
             mouseOverTileInfo.setText(mouseOverTile.info());
@@ -58,10 +60,10 @@ public class WorldScreen extends MainScreen {
     /**
      * Draws the given tile.
      *
-     * @param tile     the tile to draw
-     * @param mousePos the position of the mouse
+     * @param tile      the tile to draw
+     * @param mouseOver is the mouse currently over this tile?
      */
-    private void drawTile(Tile tile, Point mousePos) {
+    private void drawTile(Tile tile, boolean mouseOver) {
         GL11.glPushMatrix();
 
         // Translate to the top-left corner of the tile
@@ -100,7 +102,7 @@ public class WorldScreen extends MainScreen {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         // Translate to the top-left of the tile
-        drawTileOverlays(tile, mousePos); // Draw the tile overlays on top of everything else
+        drawTileOverlays(tile, mouseOver); // Draw the tile overlays on top of everything else
 
         // Stop drawing textures
         GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -112,15 +114,15 @@ public class WorldScreen extends MainScreen {
     /**
      * Draw the appropriate overlays for the given tile.
      *
-     * @param tile     the tile to draw
-     * @param mousePos the position of the mouse
+     * @param tile      the tile to draw
+     * @param mouseOver is the mouse currently over this tile?
      */
-    private void drawTileOverlays(Tile tile, Point mousePos) {
+    private void drawTileOverlays(Tile tile, boolean mouseOver) {
         final int width = Tile.WIDTH;
         final int height = Tile.HEIGHT;
 
         // Draw mouse-over overlays
-        if (tile.contains(mousePos)) { // If the mouse is over this tile...
+        if (mouseOver) { // If the mouse is over this tile...
             ColorTexture.mouseOver.draw(0, 0, width, height); // Draw the mouse-over overlay
         }
     }
