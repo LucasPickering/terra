@@ -14,7 +14,8 @@ import me.lucaspickering.groundwar.world.tile.Tile;
 public class PeakGenerator implements Generator {
 
     // Generation parameters
-    private static final InclusiveRange PEAKS_RANGE = new InclusiveRange(3, 5);
+    private static final InclusiveRange PEAK_COUNT_RANGE = new InclusiveRange(4, 7);
+    private static final InclusiveRange PEAK_ELEVATION_RANGE = new InclusiveRange(45, 60);
     private static final int MIN_PEAK_SEPARATION = 2; // Min distance between two peak
 
     @Override
@@ -23,7 +24,7 @@ public class PeakGenerator implements Generator {
         // Copy the key set because we're going to be modifying it
         final Set<TilePoint> potentialPeaks = new HashSet<>(world.keySet());
         final Set<TilePoint> peaks = new HashSet<>();
-        final int peaksToGen = PEAKS_RANGE.randomIn(random);
+        final int peaksToGen = PEAK_COUNT_RANGE.randomIn(random);
 
         while (peaks.size() < peaksToGen && !potentialPeaks.isEmpty()) {
             // Pick a random peak from the set of potential peaks
@@ -38,7 +39,11 @@ public class PeakGenerator implements Generator {
         }
 
         for (TilePoint peak : peaks) {
-            world.get(peak).setElevation(5); // Modify the peak tile
+            // Pick a random elevation for the peak and assign it
+            final int elev = PEAK_ELEVATION_RANGE.randomIn(random);
+            world.get(peak).setElevation(elev);
         }
+
+
     }
 }
