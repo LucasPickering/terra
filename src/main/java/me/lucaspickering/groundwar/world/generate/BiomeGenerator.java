@@ -1,20 +1,20 @@
 package me.lucaspickering.groundwar.world.generate;
 
-import java.util.Map;
 import java.util.Random;
 
-import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.Biome;
+import me.lucaspickering.groundwar.world.WorldBuilder;
 import me.lucaspickering.groundwar.world.tile.Tile;
 
 public class BiomeGenerator implements Generator {
 
     // Generation parameters
-    private static final int MIN_MOUNTAIN_ELEV = 4;
+    // Minimum elevation needed to be considered a mountain
+    private static final int MIN_MOUNTAIN_ELEV = 40;
 
     @Override
-    public void generate(Map<TilePoint, Tile.Builder> world, Random random) {
-        for (Tile.Builder builder : world.values()) {
+    public void generate(WorldBuilder worldBuilder, Random random) {
+        for (Tile.Builder builder : worldBuilder.builders().values()) {
             final Biome biome;
             if (builder.getElevation() >= MIN_MOUNTAIN_ELEV) {
                 biome = Biome.MOUNTAIN;

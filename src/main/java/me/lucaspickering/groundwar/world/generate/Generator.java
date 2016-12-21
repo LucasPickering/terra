@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Random;
 
 import me.lucaspickering.groundwar.util.TilePoint;
+import me.lucaspickering.groundwar.world.WorldBuilder;
 import me.lucaspickering.groundwar.world.tile.Tile;
 
 /**
@@ -17,9 +18,9 @@ public interface Generator {
     /**
      * Modifies the given world, generating new terrain features.
      *
-     * @param world  the world to modify
-     * @param random the source of random for generation
+     * @param worldBuilder the world to modify
+     * @param random       the source of random for generation
      */
-    void generate(Map<TilePoint, Tile.Builder> world, Random random);
+    void generate(WorldBuilder worldBuilder, Random random);
 
 }

@@ -8,6 +8,7 @@ import java.util.Set;
 import me.lucaspickering.groundwar.util.Funcs;
 import me.lucaspickering.groundwar.util.InclusiveRange;
 import me.lucaspickering.groundwar.util.TilePoint;
+import me.lucaspickering.groundwar.world.WorldBuilder;
 import me.lucaspickering.groundwar.world.WorldHelper;
 import me.lucaspickering.groundwar.world.tile.Tile;
 
@@ -19,10 +20,11 @@ public class PeakGenerator implements Generator {
     private static final int MIN_PEAK_SEPARATION = 2; // Min distance between two peak
 
     @Override
-    public void generate(Map<TilePoint, Tile.Builder> world, Random random) {
-        // Generate peaks
+    public void generate(WorldBuilder worldBuilder, Random random) {
+        final Map<TilePoint, Tile.Builder> builders = worldBuilder.builders();
+
         // Copy the key set because we're going to be modifying it
-        final Set<TilePoint> potentialPeaks = new HashSet<>(world.keySet());
+        final Set<TilePoint> potentialPeaks = new HashSet<>(builders.keySet());
         final Set<TilePoint> peaks = new HashSet<>();
         final int peaksToGen = PEAK_COUNT_RANGE.randomIn(random);
 
@@ -33,7 +35,7 @@ public class PeakGenerator implements Generator {
 
             // Get all the tiles that are too close to this one to be peaks themselves,
             // and remove them from the set of potential peaks
-            final Set<TilePoint> tooClose = WorldHelper.getTilesInRange(world.keySet(), peak,
+            final Set<TilePoint> tooClose = WorldHelper.getTilesInRange(builders.keySet(), peak,
                                                                         MIN_PEAK_SEPARATION);
             potentialPeaks.removeAll(tooClose);
         }
@@ -41,9 +43,9 @@ public class PeakGenerator implements Generator {
         for (TilePoint peak : peaks) {
             // Pick a random elevation for the peak and assign it
             final int elev = PEAK_ELEVATION_RANGE.randomIn(random);
-            world.get(peak).setElevation(elev);
+            builders.get(peak).setElevation(elev);
         }
 
-
+        // TODO Grade tiles around peak
     }
 }
