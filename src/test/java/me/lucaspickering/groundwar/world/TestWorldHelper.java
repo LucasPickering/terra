@@ -3,9 +3,11 @@ package me.lucaspickering.groundwar.world;
 import org.junit.Test;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import me.lucaspickering.groundwar.util.Constants;
+import me.lucaspickering.groundwar.util.Direction;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.tile.Tile;
@@ -93,7 +95,7 @@ public class TestWorldHelper {
             }
         }
 
-        Set<TilePoint> result;
+        Map<Direction, TilePoint> result;
 
         // Center tile has 6 adjacents
         result = WorldHelper.getAdjacentTiles(world, new TilePoint(0, 0, 0));

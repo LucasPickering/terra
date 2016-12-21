@@ -2,12 +2,13 @@ package me.lucaspickering.groundwar.world;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Direction;
+import me.lucaspickering.groundwar.util.Pair;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.tile.Tile;
@@ -75,10 +76,11 @@ public class WorldHelper {
      *
      * @param world  the set of tiles in the world
      * @param origin the center of the search
-     * @return tiles adjacent to {@code origin}
+     * @return tiles adjacent to {@code origin}, in a direction:point map
      * @throws IllegalArgumentException if {@code origin} is not in {@code world}
      */
-    public static Set<TilePoint> getAdjacentTiles(Set<TilePoint> world, TilePoint origin) {
+    public static Map<Direction, TilePoint> getAdjacentTiles(Set<TilePoint> world,
+                                                             TilePoint origin) {
         Objects.requireNonNull(origin);
         if (!world.contains(origin)) {
             throw new IllegalArgumentException("Origin is not in the world");
@@ -86,9 +88,9 @@ public class WorldHelper {
 
         // Collect all tiles that are adjacent to origin and also in the world
         return Arrays.stream(Direction.values())
-            .map(dir -> origin.plus(dir.delta())) // Map each direction to a point in that direction
-            .filter(world::contains) // Filter out tiles that aren't in the world
-            .collect(Collectors.toSet()); // Collect into a set
+            .map(dir -> new Pair<>(dir, origin.plus(dir.delta()))) // Get the point in each dir
+            .filter(pair -> world.contains(pair.second())) // Only take tiles that are in the world
+            .collect(Pair.mapCollector()); // Collect into a map
     }
 
     /**
@@ -122,9 +124,11 @@ public class WorldHelper {
         // Add everything other than the origin
         Set<TilePoint> lastAdjacents = new HashSet<>(result);
         for (int i = 1; i <= range; i++) {
-            final Set<TilePoint> adjacents = getAdjacentTiles(world, origin);
+            // Start with tiles directly adjacent to this one
+            final Set<TilePoint> adjacents =
+                new HashSet<>(getAdjacentTiles(world, origin).values());
             for (TilePoint adjacent : lastAdjacents) {
-                adjacents.addAll(getAdjacentTiles(world, adjacent));
+                adjacents.addAll(getAdjacentTiles(world, adjacent).values());
             }
 
             result.addAll(adjacents);

@@ -3,12 +3,12 @@ package me.lucaspickering.groundwar.world;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import me.lucaspickering.groundwar.util.Pair;
 import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.tile.Tile;
 
-public final class WorldBuilder {
+public class WorldBuilder {
 
     /**
      * Unmodifiable map of {@link Tile.Builder}
@@ -18,8 +18,8 @@ public final class WorldBuilder {
     public WorldBuilder(Set<TilePoint> points) {
         // Turn each point into a map entry of point:builder
         final Map<TilePoint, Tile.Builder> builders = points.stream()
-            .collect(Collectors.toMap(p -> p, // Key is the point
-                                      Tile.Builder::new)); // Value is a tile builder
+            .map(p -> new Pair<>(p, new Tile.Builder(p))) // Create a builder for each point
+            .collect(Pair.mapCollector());
 
         // TODO add adjacents for each tile builder
 
@@ -38,8 +38,8 @@ public final class WorldBuilder {
     public Map<TilePoint, Tile> build() {
         // Turn the map of point:builder into a map of point:tile
         final Map<TilePoint, Tile> world = builders.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, // Key is still the point
-                                      e -> e.getValue().build())); // Value is the built tile
+            .map(e -> new Pair<>(e.getKey(), e.getValue().build())) // Build each tile
+            .collect(Pair.mapCollector()); // Collect into a map
 
         // TODO add adjacents to each tile
 
