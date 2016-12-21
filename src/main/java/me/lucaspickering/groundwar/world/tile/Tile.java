@@ -17,6 +17,7 @@ public class Tile {
     public static final class Builder {
 
         private final TilePoint pos;
+        private Map<Direction, Tile> adjacents;
         private Biome biome;
         private int elevation;
 
@@ -45,6 +46,14 @@ public class Tile {
         public Builder setElevation(int elevation) {
             this.elevation = elevation;
             return this;
+        }
+
+        public final Map<Direction, Tile> adjacents() {
+            return adjacents;
+        }
+
+        public final void setAdjacents(Map<Direction, Tile> adjacents) {
+            this.adjacents = Collections.unmodifiableMap(adjacents);
         }
 
         public Tile build() {
@@ -146,8 +155,8 @@ public class Tile {
      * @throws IllegalStateException if this tile's adjacent tiles has already been set
      */
     public final void setAdjacents(Map<Direction, Tile> adjacents) {
-        if (this.adjacents == null) {
-            throw new IllegalStateException("Map of adjacent tiles has not yet been initialized");
+        if (this.adjacents != null) {
+            throw new IllegalStateException("Map of adjacent tiles has already been initialized");
         }
         Objects.requireNonNull(adjacents);
         this.adjacents = Collections.unmodifiableMap(adjacents);

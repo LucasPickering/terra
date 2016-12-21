@@ -1,6 +1,6 @@
 package me.lucaspickering.groundwar.world;
 
-import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -8,7 +8,6 @@ import java.util.Set;
 
 import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Direction;
-import me.lucaspickering.groundwar.util.Pair;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.tile.Tile;
@@ -86,11 +85,17 @@ public class WorldHelper {
             throw new IllegalArgumentException("Origin is not in the world");
         }
 
-        // Collect all tiles that are adjacent to origin and also in the world
-        return Arrays.stream(Direction.values())
-            .map(dir -> new Pair<>(dir, origin.plus(dir.delta()))) // Get the point in each dir
-            .filter(pair -> world.contains(pair.second())) // Only take tiles that are in the world
-            .collect(Pair.mapCollector()); // Collect into a map
+        final Map<Direction, TilePoint> result = new EnumMap<>(Direction.class);
+        for (Direction dir : Direction.values()) {
+            final TilePoint point = origin.plus(dir.delta()); // Get the shifted point
+
+            // If the shifted point is in the world, add it to the map
+            if (world.contains(point)) {
+                result.put(dir, point);
+            }
+        }
+
+        return result;
     }
 
     /**
