@@ -21,9 +21,24 @@ public class WorldBuilder {
         // Turn each point into a map entry of point:builder
         final Map<TilePoint, Tile.Builder> builders = points.stream()
             .map(p -> new Pair<>(p, new Tile.Builder(p))) // Create a builder for each point
-            .collect(Pair.mapCollector());
+            .collect(Pair.mapCollector()); // Collect the stream into a map
 
-        // TODO add adjacents for each tile builder
+        for (Map.Entry<TilePoint, Tile.Builder> entry : builders.entrySet()) {
+            final TilePoint point = entry.getKey();
+            final Tile.Builder builder = entry.getValue();
+
+            // Get all tiles adjacent to this one
+            final Map<Direction, Tile.Builder> adjacents = new EnumMap<>(Direction.class);
+            for (Map.Entry<Direction, TilePoint> adjEntry :
+                WorldHelper.getAdjacentTiles(builders.keySet(), point).entrySet()) {
+                final Direction dir = adjEntry.getKey();
+                final TilePoint adjPoint = adjEntry.getValue();
+
+                // Add the corresponding builder to the map of adjacent tiles
+                adjacents.put(dir, builders.get(adjPoint));
+            }
+            builder.setAdjacents(adjacents);
+        }
 
         this.builders = Collections.unmodifiableMap(builders);
     }

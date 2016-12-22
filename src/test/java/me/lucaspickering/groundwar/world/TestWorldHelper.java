@@ -29,10 +29,10 @@ public class TestWorldHelper {
 
         // Unfortunately I can't think an alternative to hardcoding these numbers without
         // basically copying the code we're testing
-        expected = new Point(2049, 705);
+        expected = new Point(2031, 760);
         assertEquals(expected, WorldHelper.tileToPixel(tile1));
 
-        expected = new Point(2309, 1305);
+        expected = new Point(2253, 1272);
         assertEquals(expected, WorldHelper.tileToPixel(tile2));
     }
 

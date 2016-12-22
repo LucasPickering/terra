@@ -17,7 +17,7 @@ public class Tile {
     public static final class Builder {
 
         private final TilePoint pos;
-        private Map<Direction, Tile> adjacents;
+        private Map<Direction, Tile.Builder> adjacents;
         private Biome biome;
         private int elevation;
 
@@ -48,11 +48,11 @@ public class Tile {
             return this;
         }
 
-        public final Map<Direction, Tile> adjacents() {
+        public final Map<Direction, Tile.Builder> adjacents() {
             return adjacents;
         }
 
-        public final void setAdjacents(Map<Direction, Tile> adjacents) {
+        public final void setAdjacents(Map<Direction, Tile.Builder> adjacents) {
             this.adjacents = Collections.unmodifiableMap(adjacents);
         }
 
