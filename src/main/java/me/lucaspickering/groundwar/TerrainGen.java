@@ -62,9 +62,21 @@ public class TerrainGen {
         // Check if we should be in debug mode
         debug = "true".equalsIgnoreCase(System.getProperty("debug"));
 
-        // Set random
-        // TODO seeding
-        random = new Random();
+        // Set random instance
+        // If a seed was provided, use that, otherwise use a default seed
+        final String seedString = System.getProperty("seed");
+        if (seedString != null) {
+            long seed;
+            // Try to parse the seed as a Long, and if that fails, just hash it
+            try {
+                seed = Long.parseLong(seedString);
+            } catch (NumberFormatException e) {
+                seed = seedString.hashCode();
+            }
+            random = new Random(seed);
+        } else {
+            random = new Random();
+        }
 
         // Init event handlers
         keyHandler = new GLFWKeyCallback() {

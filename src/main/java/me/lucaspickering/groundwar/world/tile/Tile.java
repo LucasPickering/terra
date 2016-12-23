@@ -101,7 +101,7 @@ public class Tile {
     };
 
     private static final String INFO_STRING = "Biome: %s%nElevation: %d";
-    private static final String DEBUG_INFO_STRING = "Pos: %s%nColor (RGB): %s%nColor (HSV): %s";
+    private static final String DEBUG_INFO_STRING = "Pos: %s%nColor: %s%n    %s";
 
     /**
      * The position of this tile within the world. Non-null.

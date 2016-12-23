@@ -7,13 +7,13 @@ public enum Biome {
     PLAINS("Plains") {
         @Override
         public Colors.HSVColor color(int elevation) {
-            return new Colors.HSVColor(0.3f, 1f, 1f - elevation / 200f);
+            return new Colors.HSVColor(0.3f, 1f, 1f - (float) elevation / World.MAX_ELEVATION);
         }
     },
-    MOUNTAIN("Alpine") {
+    MOUNTAIN("Mountain") {
         @Override
         public Colors.HSVColor color(int elevation) {
-            return new Colors.HSVColor(0f, 0f, 1f - elevation / 200f);
+            return new Colors.HSVColor(0f, 0f, 1f - (float) elevation / World.MAX_ELEVATION);
         }
     };
 

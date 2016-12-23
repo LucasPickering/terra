@@ -34,7 +34,7 @@ public class Colors {
 
         @Override
         public String toString() {
-            return String.format("h=%f, s=%f, v=%f", hue, saturation, value);
+            return String.format("(h=%f,s=%f,v=%f)", hue, saturation, value);
         }
     }
 

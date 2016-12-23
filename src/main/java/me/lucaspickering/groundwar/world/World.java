@@ -15,13 +15,15 @@ import me.lucaspickering.groundwar.world.tile.Tile;
 
 public class World {
 
+    public static final int MAX_ELEVATION = 100;
+
     // Board size
     private static final int X_SIZE = 5, Y_SIZE = 5, Z_SIZE = 5;
 
     private static final Generator[] GENERATORS = new Generator[]{
         new PeakGenerator(),
-        new BiomeGenerator(),
-        };
+        new BiomeGenerator()
+    };
 
     private final Random random;
     private final Map<TilePoint, Tile> tiles;
