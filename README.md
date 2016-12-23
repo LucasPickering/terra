@@ -1,12 +1,19 @@
 # Terrain Generation
-Generate terrain and civilizations
+Generate terrain and civilizations.
   
 Uses the Lightweight Java Game Library.  
 ### Installation instructions for Development:
 #### IntelliJ
 1. Clone the repo
 2. Import the project from pom.xml
-3. Run the class GroundWar
+3. Run the class TerrainGen
 
-### Extra Info
-You can run the game with LWJGL debugging enabled by putting -Dorg.lwjgl.util.Debug=true in the VM options.
+### JVM Parameters
+#### Debug Mode
+`-Dme.lucaspickering.terraingen.debug=true`
+
+#### Debug Logging
+`-Djava.util.logging.config.file="src/test/resources/logging.properties"`
+
+#### LWJGL Debug Mode
+`-Dorg.lwjgl.util.Debug=true`

@@ -50,7 +50,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>me.lucaspickering.groundwar.TerrainGen</mainClass>
+                            <mainClass>me.lucaspickering.terraingen.TerrainGen</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
