@@ -39,7 +39,7 @@ public class Funcs {
      * @return the given color as a {@link Color} with alpha 255
      */
     public static Color colorFromRgb(int rgb) {
-        return colorFromArgb(0xff000000 | rgb); // Set alpha to 255
+        return new Color(rgb); // Set alpha to 255
     }
 
     /**
@@ -57,8 +57,8 @@ public class Funcs {
     }
 
     /**
-     * Creates a shade of gray as a {@link Color} from the given value (brightness). The returned
-     * gray will have red, green, and blue values equal to the given value and alpha of 255.
+     * Creates a shade of gray as a {@link Color} from the given value (brightness). The returned gray
+     * will have red, green, and blue values equal to the given value and alpha of 255.
      *
      * @param value the value (brightness) of the gray (larger is lighter) [0, 255]
      * @return a shade of gray as a {@link Color} with alpha 255
@@ -69,5 +69,20 @@ public class Funcs {
         final int green = value << 8;
         final int blue = value;
         return colorFromRgb(alpha | red | green | blue); // Set alpha to 255
+    }
+
+    /**
+     * Converts the given color to a Hue-Saturation-Value array.
+     *
+     * @param color the color in RGB form
+     * @return the color as a float array of Hue-Saturation-Value (in that order)
+     */
+    public static Colors.HSVColor toHSV(Color color) {
+        return new Colors.HSVColor(Color.RGBtoHSB(color.getRed(), color.getGreen(),
+                                                  color.getBlue(), null));
+    }
+
+    public static Color toRGB(Colors.HSVColor hsv) {
+        return colorFromRgb(Color.HSBtoRGB(hsv.hue(), hsv.saturation(), hsv.value()));
     }
 }

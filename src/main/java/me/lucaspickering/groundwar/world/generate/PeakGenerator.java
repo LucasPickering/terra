@@ -41,11 +41,16 @@ public class PeakGenerator implements Generator {
         }
 
         for (TilePoint peak : peaks) {
-            // Pick a random elevation for the peak and assign it
+            final Tile.Builder peakBuilder = builders.get(peak);
             final int elev = PEAK_ELEVATION_RANGE.randomIn(random);
-            builders.get(peak).setElevation(elev);
-        }
+            // Pick a random elevation for the peak and assign it
+            peakBuilder.setElevation(elev);
 
-        // TODO Grade tiles around peak
+            // Adjust the elevation of the adjacent tiles
+            for (Tile.Builder adjBuilder : peakBuilder.getAdjacents().values()) {
+                final int adjElev = PEAK_ELEVATION_RANGE.randomIn(random) - 20;
+                adjBuilder.setElevation(adjElev);
+            }
+        }
     }
 }

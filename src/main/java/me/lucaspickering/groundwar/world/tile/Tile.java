@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import me.lucaspickering.groundwar.util.Colors;
 import me.lucaspickering.groundwar.util.Direction;
+import me.lucaspickering.groundwar.util.Funcs;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.Biome;
@@ -48,7 +49,7 @@ public class Tile {
             return this;
         }
 
-        public final Map<Direction, Tile.Builder> adjacents() {
+        public final Map<Direction, Tile.Builder> getAdjacents() {
             return adjacents;
         }
 
@@ -175,7 +176,11 @@ public class Tile {
     }
 
     public final Color backgroundColor() {
-        return biome.color();
+        final float hue = Funcs.toHSV(biome.color()).hue();
+        final float saturation = 1f - elevation / 80f;
+//        final float value = 1f - elevation / 80f;
+        final float value = 1f;
+        return Funcs.toRGB(new Colors.HSVColor(hue, saturation, value));
     }
 
     /**
