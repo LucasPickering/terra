@@ -28,13 +28,15 @@ public class TerrainGen {
 
     private static final TerrainGen TERRAIN_GEN = new TerrainGen();
 
-    // These event handlers are initialized at the bottom
-    private GLFWKeyCallback keyHandler;
-    private GLFWMouseButtonCallback mouseButtonHandler;
-    private GLFWCursorPosCallback cursorPosHandler;
-    private GLFWWindowSizeCallback windowResizeHandler;
+    // True if we are in debug mode (set by a VM argument)
+    private final boolean debug;
+    private final Random random;
 
-    private Random random;
+    // These event handlers are initialized at the bottom
+    private final GLFWKeyCallback keyHandler;
+    private final GLFWMouseButtonCallback mouseButtonHandler;
+    private final GLFWCursorPosCallback cursorPosHandler;
+    private final GLFWWindowSizeCallback windowResizeHandler;
 
     private long window;
     private Renderer renderer;
@@ -53,9 +55,54 @@ public class TerrainGen {
         return TERRAIN_GEN;
     }
 
+    private TerrainGen() {
+        // Basic initialization happens here. GLFW init happens in initWindow()
+
+        // Check if we should be in debug mode
+        debug = System.getProperty("debug").equalsIgnoreCase("true");
+
+        // Set random
+        // TODO seeding
+        random = new Random();
+
+        // Init event handlers
+        keyHandler = new GLFWKeyCallback() {
+            @Override
+            public void invoke(long window, int key, int scancode, int action, int mods) {
+                if (action == GLFW.GLFW_RELEASE) {
+                    currentScreen.onKey(new KeyEvent(window, key, scancode, mods));
+                }
+            }
+        };
+        mouseButtonHandler = new GLFWMouseButtonCallback() {
+            @Override
+            public void invoke(long window, int button, int action, int mods) {
+                if (action == GLFW.GLFW_RELEASE && currentScreen.contains(mousePos)) {
+                    currentScreen.onClick(new MouseButtonEvent(window, button, mods, mousePos));
+                }
+            }
+        };
+        cursorPosHandler = new GLFWCursorPosCallback() {
+            @Override
+            public void invoke(long window, double xPos, double yPos) {
+                // Scale the cursor coordinates to fit the coords that everything is drawn at.
+                mousePos = new Point((int) (xPos * Constants.RES_WIDTH / windowWidth),
+                                     (int) (yPos * Constants.RES_HEIGHT / windowHeight));
+            }
+        };
+        windowResizeHandler = new GLFWWindowSizeCallback() {
+            @Override
+            public void invoke(long window, int width, int height) {
+                windowWidth = width;
+                windowHeight = height;
+                GL11.glViewport(0, 0, windowWidth, windowHeight);
+            }
+        };
+    }
+
     private void run() {
         try {
-            initGame(); // Initialize
+            initWindow(); // Initialize
             gameLoop(); // Run the game
         } catch (Exception e) {
             System.err.println("Error in Terrain Gen:");
@@ -65,7 +112,7 @@ public class TerrainGen {
         }
     }
 
-    private void initGame() {
+    private void initWindow() {
         // Setup error callback to print to System.err
         GLFW.glfwSetErrorCallback(GLFWErrorCallback.createPrint(System.err));
 
@@ -108,10 +155,8 @@ public class TerrainGen {
         GLFW.glfwSetCursorPosCallback(window, cursorPosHandler);
         GLFW.glfwSetWindowSizeCallback(window, windowResizeHandler);
 
-        random = new Random(); // Set up our Random instance
-
         renderer = new Renderer();
-        world = new World();
+        world = new World(); // Generate the world
         currentScreen = new WorldScreen(world); // Initialize the current screen
     }
 
@@ -149,6 +194,10 @@ public class TerrainGen {
         GLFW.glfwSetErrorCallback(null).free(); // Need to wipe this out
     }
 
+    public boolean debug() {
+        return debug;
+    }
+
     public Random random() {
         return random;
     }
@@ -166,44 +215,5 @@ public class TerrainGen {
 
     public static URL getResource(String path, String fileName) {
         return TerrainGen.class.getResource(String.format(path, fileName));
-    }
-
-    // Event handlers
-    {
-        keyHandler = new GLFWKeyCallback() {
-            @Override
-            public void invoke(long window, int key, int scancode, int action, int mods) {
-                if (action == GLFW.GLFW_RELEASE) {
-                    currentScreen.onKey(new KeyEvent(window, key, scancode, mods));
-                }
-            }
-        };
-
-        mouseButtonHandler = new GLFWMouseButtonCallback() {
-            @Override
-            public void invoke(long window, int button, int action, int mods) {
-                if (action == GLFW.GLFW_RELEASE && currentScreen.contains(mousePos)) {
-                    currentScreen.onClick(new MouseButtonEvent(window, button, mods, mousePos));
-                }
-            }
-        };
-
-        cursorPosHandler = new GLFWCursorPosCallback() {
-            @Override
-            public void invoke(long window, double xPos, double yPos) {
-                // Scale the cursor coordinates to fit the coords that everything is drawn at.
-                mousePos = new Point((int) (xPos * Constants.RES_WIDTH / windowWidth),
-                                     (int) (yPos * Constants.RES_HEIGHT / windowHeight));
-            }
-        };
-
-        windowResizeHandler = new GLFWWindowSizeCallback() {
-            @Override
-            public void invoke(long window, int width, int height) {
-                windowWidth = width;
-                windowHeight = height;
-                GL11.glViewport(0, 0, windowWidth, windowHeight);
-            }
-        };
     }
 }
