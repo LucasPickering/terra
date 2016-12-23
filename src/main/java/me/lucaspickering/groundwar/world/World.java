@@ -7,6 +7,8 @@ import java.util.Random;
 import java.util.Set;
 
 import me.lucaspickering.groundwar.TerrainGen;
+import me.lucaspickering.groundwar.render.Renderer;
+import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.generate.BiomeGenerator;
 import me.lucaspickering.groundwar.world.generate.Generator;
@@ -15,6 +17,11 @@ import me.lucaspickering.groundwar.world.tile.Tile;
 
 public class World {
 
+    /**
+     * The on-screen location of the center of the world
+     */
+    public static final Point WORLD_CENTER = new Point(Renderer.RES_WIDTH / 2,
+                                                       Renderer.RES_HEIGHT / 2);
     public static final int MAX_ELEVATION = 100;
 
     // Board size

@@ -23,7 +23,7 @@ public class WorldHelper {
     public static Point tileToPixel(TilePoint tile) {
         final float x = Tile.WIDTH * tile.x() * 0.75f;
         final float y = -Tile.HEIGHT * (tile.x() / 2.0f + tile.y());
-        return Constants.WORLD_CENTER.plus((int) x, (int) y);
+        return World.WORLD_CENTER.plus((int) x, (int) y);
     }
 
     /**
@@ -37,7 +37,7 @@ public class WorldHelper {
      */
     public static TilePoint pixelToTile(Point pos) {
         // Shift the point so that the origin is the middle of the screen
-        final Point shifted = pos.minus(Constants.WORLD_CENTER);
+        final Point shifted = pos.minus(World.WORLD_CENTER);
 
         // Convert it to a fractional tile point
         final float fracX = shifted.x() * 2f / 3f / Tile.RADIUS;

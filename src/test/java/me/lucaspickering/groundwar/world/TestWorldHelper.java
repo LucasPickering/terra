@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Direction;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.util.TilePoint;
 import me.lucaspickering.groundwar.world.tile.Tile;
+
 import static org.junit.Assert.assertEquals;
 
 public class TestWorldHelper {
@@ -24,7 +24,7 @@ public class TestWorldHelper {
         Point expected;
 
         // Simple case
-        expected = Constants.WORLD_CENTER;
+        expected = World.WORLD_CENTER;
         assertEquals(expected, WorldHelper.tileToPixel(origin));
 
         // Unfortunately I can't think an alternative to hardcoding these numbers without
@@ -38,23 +38,23 @@ public class TestWorldHelper {
 
     @Test
     public void testPixelToTile() throws Exception {
-        final Point origin = Constants.WORLD_CENTER;
+        final Point origin = World.WORLD_CENTER;
 
         // Just barely in the origin tile
-        final Point p1 = Constants.WORLD_CENTER.plus(0, -Tile.HEIGHT / 2 + 1);
+        final Point p1 = World.WORLD_CENTER.plus(0, -Tile.HEIGHT / 2 + 1);
         // On the edge - counts as origin
-        final Point p2 = Constants.WORLD_CENTER.plus(0, -Tile.HEIGHT / 2);
+        final Point p2 = World.WORLD_CENTER.plus(0, -Tile.HEIGHT / 2);
         // Just barely outside the origin tile
-        final Point p3 = Constants.WORLD_CENTER.plus(0, -Tile.HEIGHT / 2 - 1);
+        final Point p3 = World.WORLD_CENTER.plus(0, -Tile.HEIGHT / 2 - 1);
 
-        final Point p4 = Constants.WORLD_CENTER.plus(-80, -70); // On the fringes of the tile
+        final Point p4 = World.WORLD_CENTER.plus(-80, -70); // On the fringes of the tile
 
         // Just left of left corner of origin tile
-        final Point p5 = Constants.WORLD_CENTER.plus(-Tile.WIDTH / 2 - 1, 0);
+        final Point p5 = World.WORLD_CENTER.plus(-Tile.WIDTH / 2 - 1, 0);
         // Right onleft corner of origin tile
-        final Point p6 = Constants.WORLD_CENTER.plus(-Tile.WIDTH / 2, 0);
+        final Point p6 = World.WORLD_CENTER.plus(-Tile.WIDTH / 2, 0);
         // Just right of left corner of origin tile
-        final Point p7 = Constants.WORLD_CENTER.plus(-Tile.WIDTH / 2 + 1, 0);
+        final Point p7 = World.WORLD_CENTER.plus(-Tile.WIDTH / 2 + 1, 0);
 
         TilePoint expected;
 

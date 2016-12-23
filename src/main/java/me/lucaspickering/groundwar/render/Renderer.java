@@ -22,6 +22,17 @@ import me.lucaspickering.groundwar.util.Pair;
 
 public class Renderer {
 
+    /**
+     * The width of the window that will be assumed when all textures, words, etc. are drawn to the
+     * screen. Everything will be rendered to this resolution, then scaled to the actual resolution.
+     */
+    public static final int RES_WIDTH = 3840;
+
+    /**
+     * @see #RES_WIDTH
+     */
+    public static final int RES_HEIGHT = 2160;
+
     private static final int BYTES_PER_PIXEL = 4; // RGBA
 
     private final Map<String, Texture> textures = new HashMap<>();
@@ -142,8 +153,7 @@ public class Renderer {
      * @param y      the y-location of the top-left of the texture
      * @param width  the width of the texture
      * @param height the height of the texture
-     * @throws IllegalArgumentException if there is no texture with the given name in the texture
-     *                                  map
+     * @throws IllegalArgumentException if there is no texture with the given name in the texture map
      * @see #drawTexture(String, int, int, int, int, Color)
      */
     public void drawTexture(String name, int x, int y, int width, int height) {
@@ -211,8 +221,8 @@ public class Renderer {
     }
 
     /**
-     * Get the size of the given string in pixels, when drawn in the given font. The size is
-     * given as a (width, height) pair.
+     * Get the size of the given string in pixels, when drawn in the given font. The size is given as
+     * a (width, height) pair.
      *
      * @param text the string to be drawn
      * @param font the font that the string would be drawn in

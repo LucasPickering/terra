@@ -20,7 +20,6 @@ import me.lucaspickering.groundwar.render.event.MouseButtonEvent;
 import me.lucaspickering.groundwar.render.screen.MainScreen;
 import me.lucaspickering.groundwar.render.screen.WorldScreen;
 import me.lucaspickering.groundwar.util.Colors;
-import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Point;
 import me.lucaspickering.groundwar.world.World;
 
@@ -99,8 +98,8 @@ public class TerrainGen {
             @Override
             public void invoke(long window, double xPos, double yPos) {
                 // Scale the cursor coordinates to fit the coords that everything is drawn at.
-                mousePos = new Point((int) (xPos * Constants.RES_WIDTH / windowWidth),
-                                     (int) (yPos * Constants.RES_HEIGHT / windowHeight));
+                mousePos = new Point((int) (xPos * Renderer.RES_WIDTH / windowWidth),
+                                     (int) (yPos * Renderer.RES_HEIGHT / windowHeight));
             }
         };
         windowResizeHandler = new GLFWWindowSizeCallback() {
@@ -159,7 +158,7 @@ public class TerrainGen {
         GL.createCapabilities(); // LWJGL needs this
         GL11.glClearColor(Colors.CLEAR.getRed() / 255f, Colors.CLEAR.getGreen() / 255f,
                           Colors.CLEAR.getBlue() / 255f, Colors.CLEAR.getAlpha() / 255f);
-        GL11.glOrtho(0, Constants.RES_WIDTH, Constants.RES_HEIGHT, 0, -1, 1);
+        GL11.glOrtho(0, Renderer.RES_WIDTH, Renderer.RES_HEIGHT, 0, -1, 1);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         // Initialize input handlers

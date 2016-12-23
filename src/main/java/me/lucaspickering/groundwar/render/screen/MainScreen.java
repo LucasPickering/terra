@@ -5,10 +5,10 @@ import org.lwjgl.opengl.GL11;
 import java.util.LinkedList;
 import java.util.List;
 
+import me.lucaspickering.groundwar.render.Renderer;
 import me.lucaspickering.groundwar.render.event.KeyEvent;
 import me.lucaspickering.groundwar.render.event.MouseButtonEvent;
 import me.lucaspickering.groundwar.render.screen.gui.GuiElement;
-import me.lucaspickering.groundwar.util.Constants;
 import me.lucaspickering.groundwar.util.Point;
 
 /**
@@ -19,8 +19,8 @@ import me.lucaspickering.groundwar.util.Point;
  */
 public abstract class MainScreen implements ScreenElement {
 
-    protected final Point center = new Point(Constants.RES_WIDTH / 2,
-                                             Constants.RES_HEIGHT / 2);
+    protected final Point center = new Point(Renderer.RES_WIDTH / 2,
+                                             Renderer.RES_HEIGHT / 2);
     private List<GuiElement> guiElements = new LinkedList<>();
     private MainScreen nextScreen = this;
 
