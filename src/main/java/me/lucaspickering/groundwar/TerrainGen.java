@@ -58,8 +58,9 @@ public class TerrainGen {
     private TerrainGen() {
         // Basic initialization happens here. GLFW init happens in initWindow()
 
+        // TODO argparsing
         // Check if we should be in debug mode
-        debug = System.getProperty("debug").equalsIgnoreCase("true");
+        debug = "true".equalsIgnoreCase(System.getProperty("debug"));
 
         // Set random
         // TODO seeding

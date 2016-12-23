@@ -1,21 +1,31 @@
 package me.lucaspickering.groundwar.world;
 
-import java.awt.Color;
-
 import me.lucaspickering.groundwar.util.Colors;
-import me.lucaspickering.groundwar.util.Funcs;
 
 public enum Biome {
 
-    PLAINS(Colors.TILE_BG), MOUNTAIN(Funcs.gray(0xbb)), DEBUG(Color.RED);
+    PLAINS("Plains") {
+        @Override
+        public Colors.HSVColor color(int elevation) {
+            return new Colors.HSVColor(0.3f, 1f, 1f - elevation / 200f);
+        }
+    },
+    MOUNTAIN("Alpine") {
+        @Override
+        public Colors.HSVColor color(int elevation) {
+            return new Colors.HSVColor(0f, 0f, 1f - elevation / 200f);
+        }
+    };
 
-    private final Color color;
+    private final String displayName;
 
-    Biome(Color color) {
-        this.color = color;
+    Biome(String displayName) {
+        this.displayName = displayName;
     }
 
-    public Color color() {
-        return color;
+    public String displayName() {
+        return displayName;
     }
+
+    public abstract Colors.HSVColor color(int elevation);
 }

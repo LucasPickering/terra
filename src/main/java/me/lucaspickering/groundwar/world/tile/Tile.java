@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
+import me.lucaspickering.groundwar.TerrainGen;
 import me.lucaspickering.groundwar.util.Colors;
 import me.lucaspickering.groundwar.util.Direction;
 import me.lucaspickering.groundwar.util.Funcs;
@@ -66,8 +67,8 @@ public class Tile {
 
     // UI constants
     /**
-     * The distance between the center point of the hexagon and each vertex. Also the length of
-     * one side of the tile.
+     * The distance between the center point of the hexagon and each vertex. Also the length of one
+     * side of the tile.
      */
     public static final int RADIUS = 74;
 
@@ -87,9 +88,8 @@ public class Tile {
     public static final float OUTLINE_WIDTH = 1.5f;
 
     /**
-     * An array of coordinates referring to each vertex of a tile, with coordinates being
-     * relative to the center of the tile. The first vertex is the top-left, and they move
-     * clockwise from there.
+     * An array of coordinates referring to each vertex of a tile, with coordinates being relative to
+     * the center of the tile. The first vertex is the top-left, and they move clockwise from there.
      */
     public static final Point[] VERTICES = new Point[]{
         new Point(WIDTH / 4, 0),
@@ -100,7 +100,8 @@ public class Tile {
         new Point(0, HEIGHT / 2)
     };
 
-    private static final String INFO_STRING = "Pos: %s%nBiome: %s%nElevation: %d";
+    private static final String INFO_STRING = "Biome: %s%nElevation: %d";
+    private static final String DEBUG_INFO_STRING = "Pos: %s%nColor (RGB): %s%nColor (HSV): %s";
 
     /**
      * The position of this tile within the world. Non-null.
@@ -146,10 +147,10 @@ public class Tile {
     }
 
     /**
-     * Sets the set of tiles adjacent to this one. An unmodifiable map will be created, backed by
-     * the given map, and that will be passed out to callers of {@link #adjacents()}. Any changes
-     * to the map passed to this function will be reflected in this tile's adjacents map so throw
-     * the given map away after calling this function!
+     * Sets the set of tiles adjacent to this one. An unmodifiable map will be created, backed by the
+     * given map, and that will be passed out to callers of {@link #adjacents()}. Any changes to the
+     * map passed to this function will be reflected in this tile's adjacents map so throw the given
+     * map away after calling this function!
      *
      * @param adjacents the tiles adjacent to this one
      * @throws NullPointerException  if {@code adjacents == null}
@@ -176,16 +177,12 @@ public class Tile {
     }
 
     public final Color backgroundColor() {
-        final float hue = Funcs.toHSV(biome.color()).hue();
-        final float saturation = 1f - elevation / 80f;
-//        final float value = 1f - elevation / 80f;
-        final float value = 1f;
-        return Funcs.toRGB(new Colors.HSVColor(hue, saturation, value));
+        return Funcs.toRGB(biome.color(elevation));
     }
 
     /**
-     * Get the color of the side of the outline in the given direction. Each side of the outline
-     * can have its own color.
+     * Get the color of the side of the outline in the given direction. Each side of the outline can
+     * have its own color.
      *
      * @param dir the direction of the side to get the color for
      * @return the color of the request side
@@ -195,12 +192,18 @@ public class Tile {
     }
 
     public String info() {
-        return String.format(INFO_STRING, pos, biome, elevation);
+        // If in debug mode, display extra debug info
+        if (TerrainGen.instance().debug()) {
+            final Color bgColor = backgroundColor();
+            return String.format(INFO_STRING + "%n" + DEBUG_INFO_STRING,
+                                 biome.displayName(), elevation, pos, bgColor, Funcs.toHSV(bgColor));
+        }
+        return String.format(INFO_STRING, biome, elevation);
     }
 
     /**
-     * Is the given tile adjacent to this tile? Two tiles are adjacent if the distance between them
-     * is exactly 1.
+     * Is the given tile adjacent to this tile? Two tiles are adjacent if the distance between them is
+     * exactly 1.
      *
      * @param tile the other tile (non-null)
      * @return true if this tile and the other are adjacent, false otherwise
@@ -209,20 +212,6 @@ public class Tile {
     public boolean isAdjacentTo(Tile tile) {
         Objects.requireNonNull(tile);
         return pos.distanceTo(tile.pos()) == 1;
-    }
-
-    /**
-     * Does this tile contain the given {@link Point} p? p is a point in screen-space, not in
-     * tile-space.
-     *
-     * This is used to check if the mouse is over.
-     *
-     * @param p the point
-     * @return true if this tile contains p, false otherwise
-     */
-    public final boolean contains(Point p) {
-        // Convert the given pixel location to a tile point, then check if that point is
-        return pos.equals(WorldHelper.pixelToTile(p));
     }
 
     @Override

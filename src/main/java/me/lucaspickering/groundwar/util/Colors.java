@@ -31,6 +31,11 @@ public class Colors {
         public float value() {
             return value;
         }
+
+        @Override
+        public String toString() {
+            return String.format("h=%f, s=%f, v=%f", hue, saturation, value);
+        }
     }
 
     // General

@@ -133,6 +133,8 @@ public class WorldScreen extends MainScreen {
             case GLFW.GLFW_KEY_SPACE:
                 // todo pause generation here
                 break;
+            case GLFW.GLFW_KEY_ESCAPE:
+                setNextScreen(null); // Close the game
         }
     }
 }
