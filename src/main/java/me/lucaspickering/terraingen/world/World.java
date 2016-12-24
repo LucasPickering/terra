@@ -12,6 +12,7 @@ import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.generate.BiomeGenerator;
 import me.lucaspickering.terraingen.world.generate.Generator;
+import me.lucaspickering.terraingen.world.generate.OceanGenerator;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -25,10 +26,11 @@ public class World {
     public static final int MAX_ELEVATION = 100;
 
     // Board size
-    private static final int X_SIZE = 5, Y_SIZE = 5, Z_SIZE = 5;
+    private static final int X_SIZE = 10, Y_SIZE = 10, Z_SIZE = 10;
 
     private static final Generator[] GENERATORS = new Generator[]{
         new PeakGenerator(),
+        new OceanGenerator(),
         new BiomeGenerator()
     };
 

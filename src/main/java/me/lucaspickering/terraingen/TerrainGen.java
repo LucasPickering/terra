@@ -65,7 +65,7 @@ public class TerrainGen {
 
         // Check if we should be in debug mode ("me.lucaspickering.terraingen.debug")
         debug = "true".equalsIgnoreCase(System.getProperty(getClass().getPackage().getName() +
-                                                           "debug"));
+                                                           ".debug"));
         if (debug) {
             logger.log(Level.FINE, "Debug mode enabled");
         }

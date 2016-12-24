@@ -1,31 +1,24 @@
 package me.lucaspickering.terraingen.world;
 
-import me.lucaspickering.terraingen.util.Colors;
-
 public enum Biome {
 
-    PLAINS("Plains") {
-        @Override
-        public Colors.HSVColor color(int elevation) {
-            return new Colors.HSVColor(0.3f, 1f, 1f - (float) elevation / World.MAX_ELEVATION);
-        }
-    },
-    MOUNTAIN("Mountain") {
-        @Override
-        public Colors.HSVColor color(int elevation) {
-            return new Colors.HSVColor(0f, 0f, 1f - (float) elevation / World.MAX_ELEVATION);
-        }
-    };
+    OCEAN("Ocean", 0.7f),
+    PLAINS("Plains", 0.3f),
+    MOUNTAIN("Mountain", 0.4f);
 
     private final String displayName;
+    private final float hue;
 
-    Biome(String displayName) {
+    Biome(String displayName, float hue) {
         this.displayName = displayName;
+        this.hue = hue;
     }
 
     public String displayName() {
         return displayName;
     }
 
-    public abstract Colors.HSVColor color(int elevation);
+    public float hue() {
+        return hue;
+    }
 }

@@ -12,6 +12,7 @@ import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
+import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.WorldHelper;
 
 public class Tile {
@@ -30,6 +31,10 @@ public class Tile {
          */
         public Builder(TilePoint pos) {
             this.pos = pos;
+        }
+
+        public TilePoint getPos() {
+            return pos;
         }
 
         public Biome getBiome() {
@@ -88,8 +93,9 @@ public class Tile {
     public static final float OUTLINE_WIDTH = 1.5f;
 
     /**
-     * An array of coordinates referring to each vertex of a tile, with coordinates being relative to
-     * the center of the tile. The first vertex is the top-left, and they move clockwise from there.
+     * An array of coordinates referring to each vertex of a tile, with coordinates being relative
+     * to the center of the tile. The first vertex is the top-left, and they move clockwise from
+     * there.
      */
     public static final Point[] VERTICES = new Point[]{
         new Point(WIDTH / 4, 0),
@@ -147,10 +153,10 @@ public class Tile {
     }
 
     /**
-     * Sets the set of tiles adjacent to this one. An unmodifiable map will be created, backed by the
-     * given map, and that will be passed out to callers of {@link #adjacents()}. Any changes to the
-     * map passed to this function will be reflected in this tile's adjacents map so throw the given
-     * map away after calling this function!
+     * Sets the set of tiles adjacent to this one. An unmodifiable map will be created, backed by
+     * the given map, and that will be passed out to callers of {@link #adjacents()}. Any changes to
+     * the map passed to this function will be reflected in this tile's adjacents map so throw the
+     * given map away after calling this function!
      *
      * @param adjacents the tiles adjacent to this one
      * @throws NullPointerException  if {@code adjacents == null}
@@ -177,7 +183,10 @@ public class Tile {
     }
 
     public final Color backgroundColor() {
-        return Funcs.toRGB(biome.color(elevation));
+        final float hue = biome.hue();
+        final float saturation = Funcs.coerce(0f, 1f - (float) elevation / World.MAX_ELEVATION, 1f);
+        final float value = 1f;
+        return Funcs.toRGB(new Colors.HSVColor(hue, saturation, value));
     }
 
     /**
@@ -196,14 +205,15 @@ public class Tile {
         if (TerrainGen.instance().debug()) {
             final Color bgColor = backgroundColor();
             return String.format(INFO_STRING + "%n" + DEBUG_INFO_STRING,
-                                 biome.displayName(), elevation, pos, bgColor, Funcs.toHSV(bgColor));
+                                 biome.displayName(), elevation, pos, bgColor,
+                                 Funcs.toHSV(bgColor));
         }
         return String.format(INFO_STRING, biome, elevation);
     }
 
     /**
-     * Is the given tile adjacent to this tile? Two tiles are adjacent if the distance between them is
-     * exactly 1.
+     * Is the given tile adjacent to this tile? Two tiles are adjacent if the distance between them
+     * is exactly 1.
      *
      * @param tile the other tile (non-null)
      * @return true if this tile and the other are adjacent, false otherwise

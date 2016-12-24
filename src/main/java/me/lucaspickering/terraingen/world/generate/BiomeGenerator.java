@@ -12,16 +12,16 @@ public class BiomeGenerator implements Generator {
     // Minimum elevation needed to be considered a mountain
     private static final int MIN_MOUNTAIN_ELEV = 40;
 
-    // Minimum elevation needed to be considered foothills
-    private static final int MIN_FOOTHILLS_ELEV = 25;
-
     @Override
     public void generate(WorldBuilder worldBuilder, Random random) {
         for (Tile.Builder builder : worldBuilder.builders().values()) {
+            // If the biome has already been assigned, skip this tile
+            if (builder.getBiome() != null) {
+                continue;
+            }
             final Biome biome;
-            if (builder.getElevation() >= MIN_MOUNTAIN_ELEV) {
-                biome = Biome.PLAINS;
-            } else if (builder.getElevation() >= MIN_FOOTHILLS_ELEV) {
+            final int elevation = builder.getElevation();
+            if (elevation >= MIN_MOUNTAIN_ELEV) {
                 biome = Biome.PLAINS;
             } else {
                 biome = Biome.PLAINS;

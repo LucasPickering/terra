@@ -25,6 +25,18 @@ public class Funcs {
             () -> new AssertionError("No random element selected despite non-empty collection"));
     }
 
+    /**
+     * Coerces {@code x} into the range {@code [min, max]}.
+     *
+     * @param min the minimum of the range (inclusive)
+     * @param x   the value to be coerced
+     * @param max the maximum of the range (inclusive)
+     * @return the coerced value
+     */
+    public static float coerce(float min, float x, float max) {
+        return Math.max(min, Math.min(x, max));
+    }
+
     public static void setGlColor(Color color) {
         GL11.glColor4f(color.getRed() / 255f,
                        color.getGreen() / 255f,
@@ -57,8 +69,8 @@ public class Funcs {
     }
 
     /**
-     * Creates a shade of gray as a {@link Color} from the given value (brightness). The returned gray
-     * will have red, green, and blue values equal to the given value and alpha of 255.
+     * Creates a shade of gray as a {@link Color} from the given value (brightness). The returned
+     * gray will have red, green, and blue values equal to the given value and alpha of 255.
      *
      * @param value the value (brightness) of the gray (larger is lighter) [0, 255]
      * @return a shade of gray as a {@link Color} with alpha 255
