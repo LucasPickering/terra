@@ -57,21 +57,6 @@ public class Funcs {
     }
 
     /**
-     * Creates a shade of gray as a {@link Color} from the given value (brightness). The returned
-     * gray will have red, green, and blue values equal to the given value and alpha of 255.
-     *
-     * @param value the value (brightness) of the gray (larger is lighter) [0, 255]
-     * @return a shade of gray as a {@link Color} with alpha 255
-     */
-    public static Color gray(int value) {
-        final int alpha = 0xff000000;
-        final int red = value << 16;
-        final int green = value << 8;
-        final int blue = value;
-        return colorFromRgb(alpha | red | green | blue); // Set alpha to 255
-    }
-
-    /**
      * Converts the given color to a Hue-Saturation-Value array.
      *
      * @param color the color in RGB form
@@ -82,6 +67,10 @@ public class Funcs {
     }
 
     public static Color toRGB(float[] hsv) {
-        return colorFromRgb(Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]));
+        return toRGB(hsv[0], hsv[1], hsv[2]);
+    }
+
+    public static Color toRGB(float hue, float saturation, float value) {
+        return colorFromRgb(Color.HSBtoRGB(hue, saturation, value));
     }
 }

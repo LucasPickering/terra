@@ -74,37 +74,37 @@ public class TestFuncs {
 
     @Test
     public void testToHSV() throws Exception {
-        Colors.HSVColor hsv;
+        float[] hsv;
 
-//        hsv = Funcs.toHSV(Color.WHITE);
-//        assertEquals("Hue is incorrect", 0f, hsv.hue(), 0f);
-//        assertEquals("Saturation is incorrect", 0f, hsv.saturation(), 0f);
-//        assertEquals("Value is incorrect", 1f, hsv.value(), 0f);
-//
-//        hsv = Funcs.toHSV(Color.BLACK);
-//        assertEquals("Hue is incorrect", 0f, hsv.hue(), 0f);
-//        assertEquals("Saturation is incorrect", 0f, hsv.saturation(), 0f);
-//        assertEquals("Value is incorrect", 0f, hsv.value(), 0f);
-//
-//        hsv = Funcs.toHSV(Color.RED);
-//        assertEquals("Hue is incorrect", 0f, hsv.hue(), 0f);
-//        assertEquals("Saturation is incorrect", 1f, hsv.saturation(), 0f);
-//        assertEquals("Value is incorrect", 1f, hsv.value(), 0f);
-//
-//        hsv = Funcs.toHSV(Color.GREEN);
-//        assertEquals("Hue is incorrect", 1f / 3f, hsv.hue(), 0.00001f);
-//        assertEquals("Saturation is incorrect", 1f, hsv.saturation(), 0f);
-//        assertEquals("Value is incorrect", 1f, hsv.value(), 0f);
-//
-//        hsv = Funcs.toHSV(Color.BLUE);
-//        assertEquals("Hue is incorrect", 2f / 3f, hsv.hue(), 0.00001f);
-//        assertEquals("Saturation is incorrect", 1f, hsv.saturation(), 0f);
-//        assertEquals("Value is incorrect", 1f, hsv.value(), 0f);
-//
-//        hsv = Funcs.toHSV(new Color(150, 40, 30));
-//        assertEquals("Hue is incorrect", 0.0139f, hsv.hue(), 0.0001f);
-//        assertEquals("Saturation is incorrect", 0.8f, hsv.saturation(), 0f);
-//        assertEquals("Value is incorrect", 0.5882f, hsv.value(), 0.0001f);
+        hsv = Funcs.toHSV(Color.WHITE);
+        assertEquals("Hue is incorrect", 0f, hsv[0], 0f);
+        assertEquals("Saturation is incorrect", 0f, hsv[1], 0f);
+        assertEquals("Value is incorrect", 1f, hsv[2], 0f);
+
+        hsv = Funcs.toHSV(Color.BLACK);
+        assertEquals("Hue is incorrect", 0f, hsv[0], 0f);
+        assertEquals("Saturation is incorrect", 0f, hsv[1], 0f);
+        assertEquals("Value is incorrect", 0f, hsv[2], 0f);
+
+        hsv = Funcs.toHSV(Color.RED);
+        assertEquals("Hue is incorrect", 0f, hsv[0], 0f);
+        assertEquals("Saturation is incorrect", 1f, hsv[1], 0f);
+        assertEquals("Value is incorrect", 1f, hsv[2], 0f);
+
+        hsv = Funcs.toHSV(Color.GREEN);
+        assertEquals("Hue is incorrect", 1f / 3f, hsv[0], 0.00001f);
+        assertEquals("Saturation is incorrect", 1f, hsv[1], 0f);
+        assertEquals("Value is incorrect", 1f, hsv[2], 0f);
+
+        hsv = Funcs.toHSV(Color.BLUE);
+        assertEquals("Hue is incorrect", 2f / 3f, hsv[0], 0.00001f);
+        assertEquals("Saturation is incorrect", 1f, hsv[1], 0f);
+        assertEquals("Value is incorrect", 1f, hsv[2], 0f);
+
+        hsv = Funcs.toHSV(new Color(150, 40, 30));
+        assertEquals("Hue is incorrect", 0.0139f, hsv[0], 0.0001f);
+        assertEquals("Saturation is incorrect", 0.8f, hsv[1], 0f);
+        assertEquals("Value is incorrect", 0.5882f, hsv[2], 0.0001f);
     }
 
     @Test
@@ -112,45 +112,45 @@ public class TestFuncs {
         Color rgb;
 
         // White
-//        rgb = Funcs.toRGB(new Colors.HSVColor(0f, 0f, 1f));
-//        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
-//        assertEquals("Red is incorrect", 255, rgb.getRed());
-//        assertEquals("Green is incorrect", 255, rgb.getGreen());
-//        assertEquals("Blue is incorrect", 255, rgb.getBlue());
-//
-//        // Black
-//        rgb = Funcs.toRGB(new Colors.HSVColor(0f, 0f, 0f));
-//        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
-//        assertEquals("Red is incorrect", 0, rgb.getRed());
-//        assertEquals("Green is incorrect", 0, rgb.getGreen());
-//        assertEquals("Blue is incorrect", 0, rgb.getBlue());
-//
-//        // Red
-//        rgb = Funcs.toRGB(new Colors.HSVColor(0f, 1f, 1f));
-//        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
-//        assertEquals("Red is incorrect", 255, rgb.getRed());
-//        assertEquals("Green is incorrect", 0, rgb.getGreen());
-//        assertEquals("Blue is incorrect", 0, rgb.getBlue());
-//
-//        // Green
-//        rgb = Funcs.toRGB(new Colors.HSVColor(1f / 3f, 1f, 1f));
-//        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
-//        assertEquals("Red is incorrect", 0, rgb.getRed());
-//        assertEquals("Green is incorrect", 255, rgb.getGreen());
-//        assertEquals("Blue is incorrect", 0, rgb.getBlue());
-//
-//        // Blue
-//        rgb = Funcs.toRGB(new Colors.HSVColor(2f / 3f, 1f, 1f));
-//        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
-//        assertEquals("Red is incorrect", 0, rgb.getRed());
-//        assertEquals("Green is incorrect", 0, rgb.getGreen());
-//        assertEquals("Blue is incorrect", 255, rgb.getBlue());
-//
-//        // Yellowish/gold
-//        rgb = Funcs.toRGB(new Colors.HSVColor(0.1f, 0.5f, 0.75f));
-//        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
-//        assertEquals("Red is incorrect", 191, rgb.getRed());
-//        assertEquals("Green is incorrect", 153, rgb.getGreen());
-//        assertEquals("Blue is incorrect", 96, rgb.getBlue());
+        rgb = Funcs.toRGB(0f, 0f, 1f);
+        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
+        assertEquals("Red is incorrect", 255, rgb.getRed());
+        assertEquals("Green is incorrect", 255, rgb.getGreen());
+        assertEquals("Blue is incorrect", 255, rgb.getBlue());
+
+        // Black
+        rgb = Funcs.toRGB(0f, 0f, 0f);
+        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
+        assertEquals("Red is incorrect", 0, rgb.getRed());
+        assertEquals("Green is incorrect", 0, rgb.getGreen());
+        assertEquals("Blue is incorrect", 0, rgb.getBlue());
+
+        // Red
+        rgb = Funcs.toRGB(0f, 1f, 1f);
+        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
+        assertEquals("Red is incorrect", 255, rgb.getRed());
+        assertEquals("Green is incorrect", 0, rgb.getGreen());
+        assertEquals("Blue is incorrect", 0, rgb.getBlue());
+
+        // Green
+        rgb = Funcs.toRGB(1f / 3f, 1f, 1f);
+        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
+        assertEquals("Red is incorrect", 0, rgb.getRed());
+        assertEquals("Green is incorrect", 255, rgb.getGreen());
+        assertEquals("Blue is incorrect", 0, rgb.getBlue());
+
+        // Blue
+        rgb = Funcs.toRGB(2f / 3f, 1f, 1f);
+        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
+        assertEquals("Red is incorrect", 0, rgb.getRed());
+        assertEquals("Green is incorrect", 0, rgb.getGreen());
+        assertEquals("Blue is incorrect", 255, rgb.getBlue());
+
+        // Yellowish/gold
+        rgb = Funcs.toRGB(0.1f, 0.5f, 0.75f);
+        assertEquals("Alpha is incorrect", 255, rgb.getAlpha());
+        assertEquals("Red is incorrect", 191, rgb.getRed());
+        assertEquals("Green is incorrect", 153, rgb.getGreen());
+        assertEquals("Blue is incorrect", 96, rgb.getBlue());
     }
 }
