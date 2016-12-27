@@ -6,7 +6,7 @@ import me.lucaspickering.terraingen.util.Funcs;
 
 public enum Biome {
 
-    OCEAN("Ocean", Color.BLUE) {
+    OCEAN("Ocean", Color.BLUE, false) {
         @Override
         public Color color(int elevation) {
             final float[] hsv = Funcs.toHSV(baseColor());
@@ -37,10 +37,16 @@ public enum Biome {
 
     private final String displayName;
     private final Color baseColor;
+    private final boolean isLand;
 
     Biome(String displayName, Color baseColor) {
+        this(displayName, baseColor, true);
+    }
+
+    Biome(String displayName, Color baseColor, boolean isLand) {
         this.displayName = displayName;
         this.baseColor = baseColor;
+        this.isLand = isLand;
     }
 
     public String displayName() {
@@ -49,6 +55,10 @@ public enum Biome {
 
     public Color baseColor() {
         return baseColor;
+    }
+
+    public boolean isLand() {
+        return isLand;
     }
 
     public abstract Color color(int elevation);

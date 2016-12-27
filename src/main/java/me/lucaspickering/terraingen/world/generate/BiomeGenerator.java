@@ -23,6 +23,8 @@ public class BiomeGenerator implements Generator {
             final int elevation = builder.getElevation();
             if (elevation >= MIN_MOUNTAIN_ELEV) {
                 biome = Biome.ALPINE;
+            } else if (elevation < 0) {
+                biome = Biome.OCEAN;
             } else {
                 biome = Biome.PLAINS;
             }

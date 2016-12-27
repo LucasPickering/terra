@@ -33,8 +33,8 @@ public class World {
     private static final int SIZE = 20;
 
     private static final Generator[] GENERATORS = new Generator[]{
-        new PeakGenerator(),
         new OceanGenerator(),
+        new PeakGenerator(),
         new BiomeGenerator()
     };
 

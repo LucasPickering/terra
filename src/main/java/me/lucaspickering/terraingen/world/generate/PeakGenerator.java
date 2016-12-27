@@ -15,7 +15,7 @@ import me.lucaspickering.terraingen.world.tile.Tile;
 public class PeakGenerator implements Generator {
 
     // Generation parameters
-    private static final InclusiveRange PEAK_COUNT_RANGE = new InclusiveRange(4, 7);
+    private static final InclusiveRange PEAK_COUNT_RANGE = new InclusiveRange(7, 10);
     private static final InclusiveRange PEAK_ELEVATION_RANGE = new InclusiveRange(45, 60);
     private static final int MIN_PEAK_SEPARATION = 2; // Min distance between two peak
 
@@ -42,14 +42,16 @@ public class PeakGenerator implements Generator {
 
         for (TilePoint peak : peaks) {
             final Tile.Builder peakBuilder = builders.get(peak);
-            final int elev = PEAK_ELEVATION_RANGE.randomIn(random);
+            final int elev = peakBuilder.getElevation();
+            final int elevModifier = PEAK_ELEVATION_RANGE.randomIn(random);
             // Pick a random elevation for the peak and assign it
-            peakBuilder.setElevation(elev);
+            peakBuilder.setElevation(elev + elevModifier);
 
             // Adjust the elevation of the adjacent tiles
             for (Tile.Builder adjBuilder : peakBuilder.getAdjacents().values()) {
-                final int adjElev = PEAK_ELEVATION_RANGE.randomIn(random) - 20;
-                adjBuilder.setElevation(adjElev);
+                final int adjElev = adjBuilder.getElevation();
+                final int adjElevModifier = PEAK_ELEVATION_RANGE.randomIn(random) - 20;
+                adjBuilder.setElevation(adjElev + adjElevModifier);
             }
         }
     }
