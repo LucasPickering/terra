@@ -1,24 +1,54 @@
 package me.lucaspickering.terraingen.world;
 
+import java.awt.Color;
+
+import me.lucaspickering.terraingen.util.Funcs;
+
 public enum Biome {
 
-    OCEAN("Ocean", 0.7f),
-    PLAINS("Plains", 0.3f),
-    MOUNTAIN("Mountain", 0.4f);
+    OCEAN("Ocean", Color.BLUE) {
+        @Override
+        public Color color(int elevation) {
+            final float[] hsv = Funcs.toHSV(baseColor());
+            // Change the value based on the elevation
+            hsv[2] = World.ELEVATION_RANGE.normalize(elevation, 0.5f, 4f);
+            return Funcs.toRGB(hsv);
+        }
+    },
+    PLAINS("Plains", Color.GREEN) {
+        @Override
+        public Color color(int elevation) {
+            final float[] hsv = Funcs.toHSV(baseColor());
+            // Change the value based on the elevation
+            hsv[2] = 1f - World.ELEVATION_RANGE.normalize(elevation);
+            return Funcs.toRGB(hsv);
+        }
+    },
+    MOUNTAIN("Mountain", Color.LIGHT_GRAY) {
+        @Override
+        public Color color(int elevation) {
+            final float[] hsv = Funcs.toHSV(baseColor());
+            // Change the value based on the elevation
+            hsv[2] = World.ELEVATION_RANGE.normalize(elevation);
+            return Funcs.toRGB(hsv);
+        }
+    };
 
     private final String displayName;
-    private final float hue;
+    private final Color baseColor;
 
-    Biome(String displayName, float hue) {
+    Biome(String displayName, Color baseColor) {
         this.displayName = displayName;
-        this.hue = hue;
+        this.baseColor = baseColor;
     }
 
     public String displayName() {
         return displayName;
     }
 
-    public float hue() {
-        return hue;
+    public Color baseColor() {
+        return baseColor;
     }
+
+    public abstract Color color(int elevation);
 }

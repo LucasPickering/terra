@@ -9,6 +9,8 @@ package me.lucaspickering.terraingen.util;
  */
 public class TilePoint {
 
+    public static final TilePoint ZERO = new TilePoint(0, 0, 0);
+
     private static final String STRING_FORMAT = "(%d, %d, %d)";
 
     private final int x, y, z;

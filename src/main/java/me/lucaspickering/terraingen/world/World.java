@@ -8,6 +8,7 @@ import java.util.Set;
 
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.render.Renderer;
+import me.lucaspickering.terraingen.util.InclusiveRange;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.generate.BiomeGenerator;
@@ -23,7 +24,11 @@ public class World {
      */
     public static final Point WORLD_CENTER = new Point(Renderer.RES_WIDTH / 2,
                                                        Renderer.RES_HEIGHT / 2);
-    public static final int MAX_ELEVATION = 100;
+
+    /**
+     * The range of valid elevations for tiles to have.
+     */
+    public static final InclusiveRange ELEVATION_RANGE = new InclusiveRange(-50, 100);
 
     // Board size
     private static final int X_SIZE = 10, Y_SIZE = 10, Z_SIZE = 10;

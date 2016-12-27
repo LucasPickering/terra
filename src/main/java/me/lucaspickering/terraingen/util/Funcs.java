@@ -25,18 +25,6 @@ public class Funcs {
             () -> new AssertionError("No random element selected despite non-empty collection"));
     }
 
-    /**
-     * Coerces {@code x} into the range {@code [min, max]}.
-     *
-     * @param min the minimum of the range (inclusive)
-     * @param x   the value to be coerced
-     * @param max the maximum of the range (inclusive)
-     * @return the coerced value
-     */
-    public static float coerce(float min, float x, float max) {
-        return Math.max(min, Math.min(x, max));
-    }
-
     public static void setGlColor(Color color) {
         GL11.glColor4f(color.getRed() / 255f,
                        color.getGreen() / 255f,
@@ -89,12 +77,11 @@ public class Funcs {
      * @param color the color in RGB form
      * @return the color as a float array of Hue-Saturation-Value (in that order)
      */
-    public static Colors.HSVColor toHSV(Color color) {
-        return new Colors.HSVColor(Color.RGBtoHSB(color.getRed(), color.getGreen(),
-                                                  color.getBlue(), null));
+    public static float[] toHSV(Color color) {
+        return Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
     }
 
-    public static Color toRGB(Colors.HSVColor hsv) {
-        return colorFromRgb(Color.HSBtoRGB(hsv.hue(), hsv.saturation(), hsv.value()));
+    public static Color toRGB(float[] hsv) {
+        return colorFromRgb(Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]));
     }
 }

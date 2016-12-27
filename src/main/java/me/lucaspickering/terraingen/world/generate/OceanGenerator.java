@@ -16,7 +16,7 @@ public class OceanGenerator implements Generator {
     @Override
     public void generate(WorldBuilder worldBuilder, Random random) {
         for (Tile.Builder builder : worldBuilder.builders().values()) {
-            if (builder.getPos().distanceTo(new TilePoint(0, 0, 0)) >= OCEAN_DISTANCE_THRESHOLD) {
+            if (builder.getPos().distanceTo(TilePoint.ZERO) >= OCEAN_DISTANCE_THRESHOLD) {
                 builder.setBiome(Biome.OCEAN);
                 builder.setElevation(-3);
             }

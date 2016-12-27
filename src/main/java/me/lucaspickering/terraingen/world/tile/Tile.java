@@ -8,11 +8,9 @@ import java.util.Objects;
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Colors;
 import me.lucaspickering.terraingen.util.Direction;
-import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
-import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.WorldHelper;
 
 public class Tile {
@@ -107,7 +105,7 @@ public class Tile {
     };
 
     private static final String INFO_STRING = "Biome: %s%nElevation: %d";
-    private static final String DEBUG_INFO_STRING = "Pos: %s%nColor: %s%n    %s";
+    private static final String DEBUG_INFO_STRING = "Pos: %s%nColor: %s";
 
     /**
      * The position of this tile within the world. Non-null.
@@ -183,10 +181,11 @@ public class Tile {
     }
 
     public final Color backgroundColor() {
-        final float hue = biome.hue();
-        final float saturation = Funcs.coerce(0f, 1f - (float) elevation / World.MAX_ELEVATION, 1f);
-        final float value = 1f;
-        return Funcs.toRGB(new Colors.HSVColor(hue, saturation, value));
+//        final float hue = biome.hue();
+//        final float saturation = Funcs.coerce(0f, 1f - (float) elevation / World.MAX_ELEVATION, 1f);
+//        final float value = 1f;
+//        return Funcs.toRGB(new Colors.HSVColor(hue, saturation, value));
+        return biome.color(elevation);
     }
 
     /**
@@ -205,8 +204,7 @@ public class Tile {
         if (TerrainGen.instance().debug()) {
             final Color bgColor = backgroundColor();
             return String.format(INFO_STRING + "%n" + DEBUG_INFO_STRING,
-                                 biome.displayName(), elevation, pos, bgColor,
-                                 Funcs.toHSV(bgColor));
+                                 biome.displayName(), elevation, pos, bgColor);
         }
         return String.format(INFO_STRING, biome, elevation);
     }
