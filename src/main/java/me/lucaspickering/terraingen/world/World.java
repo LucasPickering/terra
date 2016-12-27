@@ -25,13 +25,12 @@ public class World {
     public static final Point WORLD_CENTER = new Point(Renderer.RES_WIDTH / 2,
                                                        Renderer.RES_HEIGHT / 2);
 
-    /**
-     * The range of valid elevations for tiles to have.
-     */
-    public static final InclusiveRange ELEVATION_RANGE = new InclusiveRange(-50, 100);
+    // Every tile's elevation must be in one of these two ranges
+    public static final InclusiveRange LOWER_ELEVATION_RANGE = new InclusiveRange(-50, 0);
+    public static final InclusiveRange UPPER_ELEVATION_RANGE = new InclusiveRange(0, 100);
 
-    // Board size
-    private static final int X_SIZE = 10, Y_SIZE = 10, Z_SIZE = 10;
+    // World size
+    private static final int SIZE = 20;
 
     private static final Generator[] GENERATORS = new Generator[]{
         new PeakGenerator(),
@@ -50,9 +49,9 @@ public class World {
     private Map<TilePoint, Tile> genTiles() {
         final Set<TilePoint> points = new HashSet<>();
         // Fill out the set with a bunch of points
-        for (int x = -X_SIZE; x <= X_SIZE; x++) {
-            for (int y = -Y_SIZE; y <= Y_SIZE; y++) {
-                for (int z = -Z_SIZE; z <= Z_SIZE; z++) {
+        for (int x = -SIZE; x <= SIZE; x++) {
+            for (int y = -SIZE; y <= SIZE; y++) {
+                for (int z = -SIZE; z <= SIZE; z++) {
                     if (x + y + z == 0) {
                         points.add(new TilePoint(x, y, z));
                     }

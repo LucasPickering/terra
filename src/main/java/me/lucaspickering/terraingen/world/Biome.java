@@ -11,7 +11,7 @@ public enum Biome {
         public Color color(int elevation) {
             final float[] hsv = Funcs.toHSV(baseColor());
             // Change the value based on the elevation
-            hsv[2] = World.ELEVATION_RANGE.normalize(elevation, 0.5f, 4f);
+            hsv[2] = World.LOWER_ELEVATION_RANGE.normalize(elevation, 0.3f, 1f);
             return Funcs.toRGB(hsv);
         }
     },
@@ -20,16 +20,17 @@ public enum Biome {
         public Color color(int elevation) {
             final float[] hsv = Funcs.toHSV(baseColor());
             // Change the value based on the elevation
-            hsv[2] = 1f - World.ELEVATION_RANGE.normalize(elevation);
+            hsv[2] = World.UPPER_ELEVATION_RANGE.normalize(elevation, 0.6f, 1f);
             return Funcs.toRGB(hsv);
         }
     },
-    MOUNTAIN("Mountain", Color.LIGHT_GRAY) {
+    ALPINE("Alpine", Funcs.colorFromRgb(0x00bb00)) {
         @Override
         public Color color(int elevation) {
             final float[] hsv = Funcs.toHSV(baseColor());
-            // Change the value based on the elevation
-            hsv[2] = World.ELEVATION_RANGE.normalize(elevation);
+            // Change the saturation and value based on the elevation
+            hsv[1] = 1f - World.UPPER_ELEVATION_RANGE.normalize(elevation, 0.2f, 0.8f);
+            hsv[2] = World.UPPER_ELEVATION_RANGE.normalize(elevation, 0.2f, 0.8f);
             return Funcs.toRGB(hsv);
         }
     };

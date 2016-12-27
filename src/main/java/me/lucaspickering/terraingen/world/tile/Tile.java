@@ -86,11 +86,6 @@ public class Tile {
     public static final int HEIGHT = (int) (Math.sqrt(3) * RADIUS);
 
     /**
-     * The width of the lines drawn to outline the tile.
-     */
-    public static final float OUTLINE_WIDTH = 1.5f;
-
-    /**
      * An array of coordinates referring to each vertex of a tile, with coordinates being relative
      * to the center of the tile. The first vertex is the top-left, and they move clockwise from
      * there.
@@ -181,21 +176,10 @@ public class Tile {
     }
 
     public final Color backgroundColor() {
-//        final float hue = biome.hue();
-//        final float saturation = Funcs.coerce(0f, 1f - (float) elevation / World.MAX_ELEVATION, 1f);
-//        final float value = 1f;
-//        return Funcs.toRGB(new Colors.HSVColor(hue, saturation, value));
         return biome.color(elevation);
     }
 
-    /**
-     * Get the color of the side of the outline in the given direction. Each side of the outline can
-     * have its own color.
-     *
-     * @param dir the direction of the side to get the color for
-     * @return the color of the request side
-     */
-    public final Color outlineColor(Direction dir) {
+    public final Color outlineColor() {
         return Colors.TILE_OUTLINE;
     }
 

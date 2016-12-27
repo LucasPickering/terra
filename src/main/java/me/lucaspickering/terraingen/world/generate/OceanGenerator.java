@@ -11,7 +11,7 @@ public class OceanGenerator implements Generator {
 
     // Generation parameters
     // How far a tile has to be from the origin to be considered ocean
-    private static final int OCEAN_DISTANCE_THRESHOLD = 7;
+    private static final int OCEAN_DISTANCE_THRESHOLD = 14;
 
     @Override
     public void generate(WorldBuilder worldBuilder, Random random) {
@@ -19,7 +19,7 @@ public class OceanGenerator implements Generator {
             final int distance = builder.getPos().distanceTo(TilePoint.ZERO);
             if (distance >= OCEAN_DISTANCE_THRESHOLD) {
                 builder.setBiome(Biome.OCEAN);
-                builder.setElevation(-distance + OCEAN_DISTANCE_THRESHOLD - 1);
+                builder.setElevation((distance - OCEAN_DISTANCE_THRESHOLD + 1) * -10);
             }
         }
     }

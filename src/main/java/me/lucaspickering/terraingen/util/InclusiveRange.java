@@ -58,7 +58,9 @@ public class InclusiveRange {
 
     /**
      * Normalizes the given value within this range to the specified range {@code [newMin, newMax]}.
-     * If the given value isn't already in this range, it will be coerced, then mapped.
+     * If the given value isn't already in this range, it will be coerced, then mapped. If the
+     * given max is less than the given min, the value will be mapped to {@code [newMax, newMin]}
+     * but be inverted.
      *
      * @param x the value to normalize
      * @return {@code x} mapped to the range {@code [0, 1]}
@@ -66,8 +68,21 @@ public class InclusiveRange {
     public float normalize(int x, float newMin, float newMax) {
         x = coerce(x); // Coerce x first
 
+        // If max < min, flip those values, but we'll need to invert the mapped value later
+        final boolean invert = newMax < newMin;
+        if (invert) {
+            final float temp = newMin;
+            newMin = newMax;
+            newMax = temp;
+        }
+
         // Then map to [0, 1]
-        final float halfMapped = (float) (x - min) / (max - min);
+        float halfMapped = (float) (x - min) / (max - min);
+
+        // Invert if needed
+        if (invert) {
+            halfMapped = 1f - halfMapped;
+        }
 
         // Now map to [newMin, newMax]
         return halfMapped * (newMax - newMin) + newMin;

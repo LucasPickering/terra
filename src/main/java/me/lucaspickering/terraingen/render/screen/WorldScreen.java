@@ -14,6 +14,7 @@ import me.lucaspickering.terraingen.render.screen.gui.TextDisplay;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
+import me.lucaspickering.terraingen.util.InclusiveRange;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.World;
@@ -22,7 +23,14 @@ import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class WorldScreen extends MainScreen {
 
+    // Location of the tile info box relative to the cursor
     private static final Point TILE_INFO_POS = new Point(20, -10);
+
+    // The range of elevation differences that the outline width varies across
+    private static final InclusiveRange ELEV_DIFF_RANGE = new InclusiveRange(0, 20);
+    private static final float DEFAULT_OUTLINE_WIDTH = 1.5f;
+    private static final float MIN_OUTLINE_WIDTH = 1f;
+    private static final float MAX_OUTLINE_WIDTH = 4f;
 
     private final World world;
     private final TextDisplay mouseOverTileInfo;
@@ -83,14 +91,27 @@ public class WorldScreen extends MainScreen {
         GL11.glDisable(GL11.GL_BLEND);
 
         // Draw the outline by drawing each side as an individual line.
-        GL11.glLineWidth(Tile.OUTLINE_WIDTH);
         for (int i = 0; i < Tile.NUM_SIDES; i++) {
             // Get the two vertices that the line will be between
             final Point vertex1 = Tile.VERTICES[i];
             final Point vertex2 = Tile.VERTICES[(i + 1) % Tile.NUM_SIDES];
             final Direction dir = Direction.values()[i];
 
-            Funcs.setGlColor(tile.outlineColor(dir));
+            // The line width is based on the elevation between this tile and the adjacent one
+            final float lineWidth;
+            final Tile adjTile = tile.adjacents().get(dir); // Get the adjacent tile
+            if (adjTile != null) {
+                // If it exists, calculate line width
+                final int elevDiff = Math.abs(tile.elevation() - adjTile.elevation());
+                lineWidth = ELEV_DIFF_RANGE.normalize(elevDiff,
+                                                      MIN_OUTLINE_WIDTH, MAX_OUTLINE_WIDTH);
+            } else {
+                // If there is no adjacent tile in this direction, use the default line width
+                lineWidth = DEFAULT_OUTLINE_WIDTH;
+            }
+            GL11.glLineWidth(lineWidth);
+
+            Funcs.setGlColor(tile.outlineColor());
             GL11.glBegin(GL11.GL_LINES);
             GL11.glVertex2i(vertex1.x(), vertex1.y());
             GL11.glVertex2i(vertex2.x(), vertex2.y());
