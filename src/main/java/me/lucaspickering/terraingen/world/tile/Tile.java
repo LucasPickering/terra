@@ -64,6 +64,11 @@ public class Tile {
         public Tile build() {
             return new Tile(pos, biome, elevation);
         }
+
+        @Override
+        public int hashCode() {
+            return pos.hashCode(); // Hashcode is just based on position
+        }
     }
 
     public static final int NUM_SIDES = Direction.values().length;

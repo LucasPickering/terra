@@ -4,7 +4,13 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+
+import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class Funcs {
 
@@ -72,5 +78,21 @@ public class Funcs {
 
     public static Color toRGB(float hue, float saturation, float value) {
         return colorFromRgb(Color.HSBtoRGB(hue, saturation, value));
+    }
+
+    public static List<Map<TilePoint, Tile>> clusterWorld(Map<TilePoint, Tile> world,
+                                                          Predicate<Tile> predicate) {
+        // Use the predicate as the similarity function. If two tiles get the same predicate
+        // result, they have 1.0 similarity, otherwise 0.0. Two tiles need 0.5 similarity to be
+        // clustered together, to avoid edge case problems.
+        return clusterWorld(world,
+                            (t1, t2) -> predicate.test(t1) == predicate.test(t2) ? 1.0 : 0.0,
+                            0.5);
+    }
+
+    public static List<Map<TilePoint, Tile>> clusterWorld(
+        Map<TilePoint, Tile> world, BiFunction<Tile, Tile, Double> similarityFunction,
+        double similarityThreshold) {
+        return null; // TODO this algorithm
     }
 }

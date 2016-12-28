@@ -19,7 +19,7 @@ import me.lucaspickering.terraingen.util.Point;
  */
 public abstract class MainScreen implements ScreenElement {
 
-    protected final Point center = new Point(Renderer.RES_WIDTH / 2,
+    protected Point center = new Point(Renderer.RES_WIDTH / 2,
                                              Renderer.RES_HEIGHT / 2);
     private List<GuiElement> guiElements = new LinkedList<>();
     private MainScreen nextScreen = this;

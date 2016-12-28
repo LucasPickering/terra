@@ -68,11 +68,11 @@ public abstract class GuiElement implements ScreenElement {
         setPos(pos);
     }
 
-    public final Point getPos() {
+    public Point getPos() {
         return adjustedPos;
     }
 
-    public final void setPos(Point pos) {
+    public void setPos(Point pos) {
         Objects.requireNonNull(pos);
         this.pos = pos;
         updateAdjustedPos();
@@ -82,7 +82,7 @@ public abstract class GuiElement implements ScreenElement {
         return width;
     }
 
-    public final void setWidth(int width) {
+    public void setWidth(int width) {
         this.width = width;
     }
 
@@ -90,7 +90,7 @@ public abstract class GuiElement implements ScreenElement {
         return height;
     }
 
-    public final void setHeight(int height) {
+    public void setHeight(int height) {
         this.height = height;
     }
 
@@ -98,7 +98,7 @@ public abstract class GuiElement implements ScreenElement {
         return horizAlign;
     }
 
-    public final void setHorizAlign(HorizAlignment horizAlign) {
+    public void setHorizAlign(HorizAlignment horizAlign) {
         Objects.requireNonNull(horizAlign);
         this.horizAlign = horizAlign;
         updateAdjustedPos();
@@ -108,7 +108,7 @@ public abstract class GuiElement implements ScreenElement {
         return vertAlign;
     }
 
-    public final void setVertAlign(VertAlignment vertAlign) {
+    public void setVertAlign(VertAlignment vertAlign) {
         Objects.requireNonNull(vertAlign);
         this.vertAlign = vertAlign;
         updateAdjustedPos();
@@ -118,7 +118,7 @@ public abstract class GuiElement implements ScreenElement {
         return visible;
     }
 
-    public final void setVisible(boolean visible) {
+    public void setVisible(boolean visible) {
         this.visible = visible;
     }
 
@@ -126,7 +126,7 @@ public abstract class GuiElement implements ScreenElement {
         return visible && enabled;
     }
 
-    public final void setEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
