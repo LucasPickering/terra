@@ -15,6 +15,15 @@ public enum Biome {
             return Funcs.toRGB(hsv);
         }
     },
+    LAKE("Lake", Color.BLUE, false) {
+        @Override
+        public Color color(int elevation) {
+            final float[] hsv = Funcs.toHSV(baseColor());
+            // Change the value based on the elevation
+            hsv[2] = World.LOWER_ELEVATION_RANGE.normalize(elevation, 0.3f, 1f);
+            return Funcs.toRGB(hsv);
+        }
+    },
     BEACH("Beach", Color.YELLOW, true) {
         @Override
         public Color color(int elevation) {

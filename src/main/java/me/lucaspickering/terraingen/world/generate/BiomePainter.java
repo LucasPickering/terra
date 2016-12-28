@@ -6,7 +6,7 @@ import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.WorldBuilder;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
-public class BiomeGenerator implements Generator {
+public class BiomePainter implements Generator {
 
     // Generation parameters
     // Minimum elevation needed to be considered a mountain

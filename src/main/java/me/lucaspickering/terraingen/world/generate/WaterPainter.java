@@ -29,13 +29,25 @@ public class WaterPainter implements Generator {
             WorldHelper.clusterTiles(worldBuilder.getTiles(), t -> t.elevation() < 0);
 
         for (Map<TilePoint, Tile> cluster : clusters) {
+            final int size = cluster.size();
+            final Biome biome;
             // If this cluster is over the min ocean size, make everything in it an ocean
-            if (cluster.size() >= MIN_OCEAN_SIZE) {
-                for (Tile tile : cluster.values()) {
-                    tile.setBiome(Biome.OCEAN);
+            if (size >= MIN_OCEAN_SIZE) {
+                biome = Biome.OCEAN;
+            } else {
+                final float rand = random.nextFloat();
+                final float chance = (float) size / MIN_OCEAN_SIZE;
+                if (rand < chance) {
+                    biome = Biome.LAKE;
+                } else {
+                    biome = null;
                 }
             }
-            // TODO lakes
+
+            // If we need to chance the biome, set it for each tile in the cluster
+            if (biome != null) {
+                cluster.values().forEach(tile -> tile.setBiome(biome));
+            }
         }
     }
 }
