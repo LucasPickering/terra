@@ -86,7 +86,7 @@ public class WorldHelper {
 
         final Map<Direction, TilePoint> result = new EnumMap<>(Direction.class);
         for (Direction dir : Direction.values()) {
-            final TilePoint point = origin.plus(dir.delta()); // Get the shifted point
+            final TilePoint point = dir.shift(origin); // Get the shifted point
 
             // If the shifted point is in the world, add it to the map
             if (world.contains(point)) {

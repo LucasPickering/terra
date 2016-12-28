@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.InclusiveRange;
 import me.lucaspickering.terraingen.util.TilePoint;
@@ -18,6 +19,7 @@ public class PeakGenerator implements Generator {
     private static final InclusiveRange PEAK_COUNT_RANGE = new InclusiveRange(7, 10);
     private static final InclusiveRange PEAK_ELEVATION_RANGE = new InclusiveRange(45, 60);
     private static final int MIN_PEAK_SEPARATION = 2; // Min distance between two peak
+    private static final int SMOOTHING_SLOP = 4; // Variation in each direction for smoothing elev
 
     @Override
     public void generate(WorldBuilder worldBuilder, Random random) {
@@ -42,16 +44,24 @@ public class PeakGenerator implements Generator {
 
         for (TilePoint peak : peaks) {
             final Tile.Builder peakBuilder = builders.get(peak);
-            final int elev = peakBuilder.getElevation();
-            final int elevModifier = PEAK_ELEVATION_RANGE.randomIn(random);
+            final int peakElev = peakBuilder.getElevation() + PEAK_ELEVATION_RANGE.randomIn(random);
             // Pick a random elevation for the peak and assign it
-            peakBuilder.setElevation(elev + elevModifier);
+            peakBuilder.setElevation(peakElev);
 
             // Adjust the elevation of the adjacent tiles
-            for (Tile.Builder adjBuilder : peakBuilder.getAdjacents().values()) {
-                final int adjElev = adjBuilder.getElevation();
-                final int adjElevModifier = PEAK_ELEVATION_RANGE.randomIn(random) - 20;
-                adjBuilder.setElevation(adjElev + adjElevModifier);
+            for (Map.Entry<Direction, Tile.Builder> entry : peakBuilder.getAdjacents().entrySet()) {
+                final Direction dir = entry.getKey();
+                final Tile.Builder adjBuilder = entry.getValue();
+
+                // The tile on the opposite side of adjBuilder from the peak
+                final Tile.Builder oppBuilder = builders.get(dir.shift(adjBuilder.getPos()));
+                final int oppElev = oppBuilder != null ? oppBuilder.getElevation() : 0;
+
+                // Average peakElev and oppElev, then apply a small random slop
+                // Random number in range [-slop, slop]
+                final int slop = random.nextInt(SMOOTHING_SLOP * 2 + 1) - SMOOTHING_SLOP;
+                final int adjElev = (peakElev + oppElev) / 2 + slop;
+                adjBuilder.setElevation(adjElev);
             }
         }
     }

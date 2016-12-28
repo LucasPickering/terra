@@ -15,6 +15,12 @@ public enum Biome {
             return Funcs.toRGB(hsv);
         }
     },
+    BEACH("Beach", Color.YELLOW, true) {
+        @Override
+        public Color color(int elevation) {
+            return baseColor();
+        }
+    },
     PLAINS("Plains", Color.GREEN) {
         @Override
         public Color color(int elevation) {

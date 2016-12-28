@@ -14,4 +14,8 @@ public enum Direction {
     public TilePoint delta() {
         return delta;
     }
+
+    public TilePoint shift(TilePoint point) {
+        return point.plus(delta);
+    }
 }
