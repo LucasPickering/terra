@@ -1,14 +1,13 @@
 package me.lucaspickering.terraingen.world.generate;
 
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.WorldBuilder;
+import me.lucaspickering.terraingen.world.WorldHelper;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -25,35 +24,18 @@ public class WaterPainter implements Generator {
 
     @Override
     public void generate(WorldBuilder worldBuilder, Random random) {
-        // First isolate all tiles with negative elevations
-        Set<Tile> candidates = worldBuilder.getTiles().values().stream()
-            .filter(b -> b.elevation() < 0) // Filter down to only negative tiles
-            .collect(Collectors.toSet()); // Collect to a list
+        // Get clusters of tiles that have negative elevation
+        final List<Map<TilePoint, Tile>> clusters =
+            WorldHelper.clusterTiles(worldBuilder.getTiles(), t -> t.elevation() < 0);
 
-        // All the tiles that have been put in a cluster
-        List<Set<Tile>> clusters = new LinkedList<>();
-
-        Set<Tile> currentCluster = null;
-        while (!candidates.isEmpty()) {
-            // Start a new cluster
-            if (currentCluster == null) {
-                currentCluster = new HashSet<>();
-            }
-
-            // Done with this cluster, add it to the list then get ready for a new one
-            if (true) {
-                clusters.add(currentCluster);
-                currentCluster = null;
-            }
-        }
-
-        for (Set<Tile> cluster : clusters) {
+        for (Map<TilePoint, Tile> cluster : clusters) {
             // If this cluster is over the min ocean size, make everything in it an ocean
             if (cluster.size() >= MIN_OCEAN_SIZE) {
-                for (Tile tile : cluster) {
+                for (Tile tile : cluster.values()) {
                     tile.setBiome(Biome.OCEAN);
                 }
             }
+            // TODO lakes
         }
     }
 }

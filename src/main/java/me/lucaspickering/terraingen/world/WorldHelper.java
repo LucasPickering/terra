@@ -1,10 +1,16 @@
 package me.lucaspickering.terraingen.world;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Point;
@@ -19,7 +25,8 @@ public class WorldHelper {
      * @param tile the position of the tile as a {@link TilePoint}
      * @return the position of that tile's center on the screen
      */
-    public static Point tileToPixel(TilePoint tile) {
+    @NotNull
+    public static Point tileToPixel(@NotNull TilePoint tile) {
         final float x = Tile.WIDTH * tile.x() * 0.75f;
         final float y = -Tile.HEIGHT * (tile.x() / 2.0f + tile.y());
         return World.WORLD_CENTER.plus((int) x, (int) y);
@@ -34,7 +41,8 @@ public class WorldHelper {
      * @param pos any point on the screen
      * @return the position of the tile that encloses the given point
      */
-    public static TilePoint pixelToTile(Point pos) {
+    @NotNull
+    public static TilePoint pixelToTile(@NotNull Point pos) {
         // Shift the point so that the origin is the middle of the screen
         final Point shifted = pos.minus(World.WORLD_CENTER);
 
@@ -77,8 +85,9 @@ public class WorldHelper {
      * @return tiles adjacent to {@code origin}, in a direction:point map
      * @throws IllegalArgumentException if {@code origin} is not in {@code world}
      */
-    public static Map<Direction, TilePoint> getAdjacentTiles(Set<TilePoint> world,
-                                                             TilePoint origin) {
+    @NotNull
+    public static Map<Direction, TilePoint> getAdjacentTiles(@NotNull Set<TilePoint> world,
+                                                             @NotNull TilePoint origin) {
         Objects.requireNonNull(origin);
         if (!world.contains(origin)) {
             throw new IllegalArgumentException("Origin is not in the world");
@@ -111,8 +120,9 @@ public class WorldHelper {
      * @throws IllegalArgumentException if {@code origin} is not in {@code world} or {@code range <
      *                                  0}
      */
-    public static Set<TilePoint> getTilesInRange(Set<TilePoint> world, TilePoint origin,
-                                                 int range) {
+    @NotNull
+    public static Set<TilePoint> getTilesInRange(@NotNull Set<TilePoint> world,
+                                                 @NotNull TilePoint origin, int range) {
         Objects.requireNonNull(origin);
         if (!world.contains(origin)) {
             throw new IllegalArgumentException("Origin is not in the world");
@@ -140,5 +150,54 @@ public class WorldHelper {
         }
 
         return result;
+    }
+
+    /**
+     * Clusters the given tiles into one or more clusters. Each tile in each cluster:
+     * <ul>
+     * <li>is adjacent to at least one other tile in the cluster</li>
+     * <li>satisfies the given predicate function</li>
+     * </ul>
+     *
+     * @param tiles     the tiles to cluster
+     * @param predicate the function used to determine if each tile should be clustered or not
+     * @return the clusters
+     */
+    @NotNull
+    public static List<Map<TilePoint, Tile>> clusterTiles(@NotNull Map<TilePoint, Tile> tiles,
+                                                          @NotNull Predicate<Tile> predicate) {
+        // If both tiles pass the predicate, they are similar. The similarity threshold is 0.5 to
+        // avoid edge case problems.
+        return clusterTiles(tiles,
+                            (t1, t2) -> predicate.test(t1) && predicate.test(t2) ? 1.0 : 0.0,
+                            0.5);
+    }
+
+    /**
+     * Clusters the given tiles into one or more clusters. Each tile in each cluster is:
+     * <ul>
+     * <li>adjacent to at least one other tile in the cluster</li>
+     * <li>similar to at least one tile adjacent to it</li>
+     * </ul>
+     *
+     * Each cluster will be one contiguous set of tiles.
+     *
+     * Two tiles are considered "similar" iff the similarity score between them, as determined by
+     * the given similarity function, is GREATER THAN OR EQUAL TO the given similarity threshold.
+     *
+     * @param tiles               the tiles to cluster
+     * @param similarityFunction  the function used to determine how similar two tiles are, should
+     *                            be commutative
+     * @param similarityThreshold the minimum similarity score two tiles need in order to be
+     *                            considered similar to each other
+     * @return the clusters
+     */
+    @NotNull
+    public static List<Map<TilePoint, Tile>> clusterTiles(
+        @NotNull Map<TilePoint, Tile> tiles,
+        @NotNull BiFunction<Tile, Tile, Double> similarityFunction,
+        double similarityThreshold) {
+        // TODO algorithm
+        return new LinkedList<>();
     }
 }
