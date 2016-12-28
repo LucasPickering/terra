@@ -16,6 +16,7 @@ import me.lucaspickering.terraingen.world.generate.BiomePainter;
 import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.generate.OceanGenerator;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
+import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class World {
@@ -36,9 +37,10 @@ public class World {
     private static final Generator[] GENERATORS = new Generator[]{
         new OceanGenerator(),
         new PeakGenerator(),
+        new WaterPainter(),
         new BiomePainter(),
         new BeachGenerator()
-        };
+    };
 
     private final Random random;
     private final Map<TilePoint, Tile> tiles;

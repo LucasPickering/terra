@@ -23,8 +23,6 @@ public class BiomePainter implements Generator {
             final int elevation = tile.elevation();
             if (elevation >= MIN_MOUNTAIN_ELEV) {
                 biome = Biome.ALPINE;
-            } else if (elevation < 0) {
-                biome = Biome.OCEAN;
             } else {
                 biome = Biome.PLAINS;
             }

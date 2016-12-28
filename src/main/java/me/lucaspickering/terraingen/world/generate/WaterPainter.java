@@ -26,7 +26,7 @@ public class WaterPainter implements Generator {
     public void generate(WorldBuilder worldBuilder, Random random) {
         // Get clusters of tiles that have negative elevation
         final List<Map<TilePoint, Tile>> clusters =
-            WorldHelper.clusterTiles(worldBuilder.getTiles(), t -> t.elevation() < 0);
+            WorldHelper.clusterTiles(worldBuilder.getTiles(), t -> t.elevation() < 0).first();
 
         for (Map<TilePoint, Tile> cluster : clusters) {
             final int size = cluster.size();

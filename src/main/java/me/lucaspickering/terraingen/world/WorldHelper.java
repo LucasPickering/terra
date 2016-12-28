@@ -3,6 +3,7 @@ package me.lucaspickering.terraingen.world;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import me.lucaspickering.terraingen.util.Direction;
+import me.lucaspickering.terraingen.util.Funcs;
+import me.lucaspickering.terraingen.util.Pair;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.Tile;
@@ -128,7 +131,7 @@ public class WorldHelper {
             throw new IllegalArgumentException("Origin is not in the world");
         }
         if (range < 0) {
-            throw new IllegalArgumentException(String.format("Range must be positive, was [%d]",
+            throw new IllegalArgumentException(String.format("Range must be isPositive, was [%d]",
                                                              range));
         }
 
@@ -139,8 +142,7 @@ public class WorldHelper {
         Set<TilePoint> lastAdjacents = new HashSet<>(result);
         for (int i = 1; i <= range; i++) {
             // Start with tiles directly adjacent to this one
-            final Set<TilePoint> adjacents =
-                new HashSet<>(getAdjacentTiles(world, origin).values());
+            final Set<TilePoint> adjacents = new HashSet<>(getAdjacentTiles(world, origin).values());
             for (TilePoint adjacent : lastAdjacents) {
                 adjacents.addAll(getAdjacentTiles(world, adjacent).values());
             }
@@ -153,24 +155,79 @@ public class WorldHelper {
     }
 
     /**
-     * Clusters the given tiles into one or more clusters. Each tile in each cluster:
-     * <ul>
-     * <li>is adjacent to at least one other tile in the cluster</li>
-     * <li>satisfies the given predicate function</li>
-     * </ul>
+     * Clusters the given tiles into two sets of clusters. Each tile in each cluster is adjacent
+     * to at least one other tile in the cluster, so that each cluster is one contiguous set of
+     * tiles.
+     *
+     * The returned pair of clusters contains both the isPositive and negative clusters. For the
+     * isPositive clusters, each tile in each cluster <i>satisfies</i> the predicate. For the
+     * negative clusters, each tile in each cluster <i>does not satisy</i> the predicate.
+     *
+     * Each tile in the given map will be in EXACTLY ONE of the returned clusters.
      *
      * @param tiles     the tiles to cluster
      * @param predicate the function used to determine if each tile should be clustered or not
-     * @return the clusters
+     * @return the isPositive and negative clusters, in a pair (with isPositive first)
      */
     @NotNull
-    public static List<Map<TilePoint, Tile>> clusterTiles(@NotNull Map<TilePoint, Tile> tiles,
-                                                          @NotNull Predicate<Tile> predicate) {
-        // If both tiles pass the predicate, they are similar. The similarity threshold is 0.5 to
-        // avoid edge case problems.
-        return clusterTiles(tiles,
-                            (t1, t2) -> predicate.test(t1) && predicate.test(t2) ? 1.0 : 0.0,
-                            0.5);
+    public static Pair<List<Map<TilePoint, Tile>>, List<Map<TilePoint, Tile>>> clusterTiles(
+        @NotNull Map<TilePoint, Tile> tiles, @NotNull Predicate<Tile> predicate) {
+        // First divided each tile into its own cluster, then iterate over all those clusters and
+        // begin joining clusters that have the same state (postive or negative) and have
+        // adjacent tiles.
+
+        final Map<TilePoint, Tile> unclusteredTiles = new HashMap<>(tiles); // Copy the input map
+        // Clusters of tiles that satisfy the predicate
+        final List<Map<TilePoint, Tile>> posClusters = new LinkedList<>();
+        // Clusters of tiles that DON'T satisfy the predicate
+        final List<Map<TilePoint, Tile>> negClusters = new LinkedList<>();
+
+        // Each iteration of this loop creates a new cluster
+        while (!unclusteredTiles.isEmpty()) {
+            // Grab a tile to work with
+            final Tile firstTile = Funcs.firstFromCollection(unclusteredTiles.values());
+            final boolean positive = predicate.test(firstTile); // Get its state (pos/neg)
+
+            // Start building a cluster around this tile
+            final Map<TilePoint, Tile> cluster = new HashMap<>();
+            // Keep track of the tiles whose adjacent tiles haven't been checked yet
+            final Map<TilePoint, Tile> uncheckedTiles = new HashMap<>();
+
+            // Add the first tile to the cluster, and remove it from unclusteredTiles
+            cluster.put(firstTile.pos(), firstTile);
+            uncheckedTiles.put(firstTile.pos(), firstTile);
+            unclusteredTiles.remove(firstTile.pos());
+
+
+            // If there is still at least one tile whose adjacents haven't been checked yet...
+            while (!uncheckedTiles.isEmpty()) {
+                // Grab one of those unchecked tiles
+                final Tile tile = Funcs.firstFromCollection(uncheckedTiles.values());
+
+                // For each tile adjacent to that one...
+                for (final Tile adjTile : tile.adjacents().values()) {
+                    // If this adjacent tile has the same pos/neg state, and it's not already in
+                    // the cluster...
+                    if (predicate.test(adjTile) == positive
+                        && !cluster.containsKey(adjTile.pos())) {
+                        // Add the first tile to the cluster, and remove it from unclusteredTiles
+                        cluster.put(adjTile.pos(), adjTile);
+                        uncheckedTiles.put(adjTile.pos(), adjTile);
+                        unclusteredTiles.remove(adjTile.pos(), adjTile);
+                    }
+                }
+
+                uncheckedTiles.remove(tile.pos()); // We've now checked this tile
+            }
+
+            if (positive) {
+                posClusters.add(cluster);
+            } else {
+                negClusters.add(cluster);
+            }
+        }
+
+        return new Pair<>(posClusters, negClusters);
     }
 
     /**
@@ -197,7 +254,6 @@ public class WorldHelper {
         @NotNull Map<TilePoint, Tile> tiles,
         @NotNull BiFunction<Tile, Tile, Double> similarityFunction,
         double similarityThreshold) {
-        // TODO algorithm
-        return new LinkedList<>();
+        throw new UnsupportedOperationException(); // TODO implement if necessary
     }
 }

@@ -11,6 +11,25 @@ import java.util.Random;
 public class Funcs {
 
     /**
+     * Returns the first element in a {@link Collection}. Technically collections don't have
+     * ordering so this is effectively the same as {@link #randomFromCollection}, but a little
+     * bit faster.
+     *
+     * @param coll the collection to be chosen from (non-null, non-empty)
+     * @param <T>  the type of the element in the collection
+     * @return the first element in the collection, as determined by its iterator
+     */
+    @NotNull
+    public static <T> T firstFromCollection(@NotNull Collection<T> coll) {
+        Objects.requireNonNull(coll);
+
+        // Exception will be thrown if the collection is empty
+        return coll.stream()
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Collection cannot be empty"));
+    }
+
+    /**
      * Randomly selects one element from the given non-empty collection. Each element has an equal
      * chance of being chosen.
      *
@@ -22,13 +41,13 @@ public class Funcs {
     @NotNull
     public static <T> T randomFromCollection(@NotNull Random random, @NotNull Collection<T> coll) {
         Objects.requireNonNull(coll);
-        if (coll.isEmpty()) {
-            throw new IllegalArgumentException("Collection cannot be empty");
-        }
 
-        // Select a random element from the collection. The error should never be thrown.
-        return coll.stream().skip(random.nextInt(coll.size())).findFirst().orElseThrow(
-            () -> new AssertionError("No random element selected despite non-empty collection"));
+        // Select a random element from the collection
+        // Exception will be thrown if the collection is empty
+        return coll.stream()
+            .skip(random.nextInt(coll.size()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Collection cannot be empty"));
     }
 
     public static void setGlColor(Color color) {

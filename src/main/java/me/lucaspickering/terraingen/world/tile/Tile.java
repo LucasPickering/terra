@@ -181,7 +181,9 @@ public class Tile {
         }
 
         final Tile tile = (Tile) o;
-        return Objects.equals(pos, tile.pos);
+        return Objects.equals(pos, tile.pos)
+               && Objects.equals(biome, tile.biome)
+               && Objects.equals(elevation, tile.elevation);
     }
 
     @Override
