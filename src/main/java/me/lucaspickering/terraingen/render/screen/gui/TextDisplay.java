@@ -21,13 +21,17 @@ public class TextDisplay extends GuiElement {
     private String text;
     private Color textColor = Color.WHITE;
 
+    public TextDisplay() {
+        this("", Point.ZERO);
+    }
+
     public TextDisplay(String text, Point pos) {
         super(pos);
         setText(text);
     }
 
     public TextDisplay(String text, Point pos, HorizAlignment horizAlign, VertAlignment vertAlign) {
-        super(pos, horizAlign, vertAlign);
+        super(pos, 0, 0, horizAlign, vertAlign);
         setText(text);
     }
 

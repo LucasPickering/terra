@@ -8,6 +8,7 @@ import java.util.Map;
 
 import me.lucaspickering.terraingen.render.ColorTexture;
 import me.lucaspickering.terraingen.render.HorizAlignment;
+import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.render.VertAlignment;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.screen.gui.TextDisplay;
@@ -24,7 +25,8 @@ import me.lucaspickering.terraingen.world.tile.Tile;
 public class WorldScreen extends MainScreen {
 
     // Location of the tile info box relative to the cursor
-    private static final Point TILE_INFO_POS = new Point(20, -10);
+    private static final int TILE_INFO_OFFSET_X = 20;
+    private static final int TILE_INFO_OFFSET_Y = -10;
 
     // The range of elevation differences that the outline width varies across
     private static final InclusiveRange ELEV_DIFF_RANGE = new InclusiveRange(0, 20);
@@ -37,9 +39,7 @@ public class WorldScreen extends MainScreen {
 
     public WorldScreen(World world) {
         this.world = world;
-        addGuiElement(mouseOverTileInfo = new TextDisplay("", Point.ZERO,
-                                                          HorizAlignment.LEFT,
-                                                          VertAlignment.BOTTOM));
+        addGuiElement(mouseOverTileInfo = new TextDisplay());
         mouseOverTileInfo.setVisible(false);
     }
 
@@ -56,9 +56,29 @@ public class WorldScreen extends MainScreen {
         // after all the tiles are drawn, otherwise it would be underneath some of them.
         final Tile mouseOverTile = tileMap.get(mouseOverPos);
         if (mouseOverTile != null) {
-            mouseOverTileInfo.setText(mouseOverTile.info());
-            mouseOverTileInfo.setPos(mousePos.plus(TILE_INFO_POS));
             mouseOverTileInfo.setVisible(true);
+            mouseOverTileInfo.setText(mouseOverTile.info());
+
+            int x = TILE_INFO_OFFSET_X;
+            int y = TILE_INFO_OFFSET_Y;
+            HorizAlignment horizAlign = HorizAlignment.LEFT;
+            VertAlignment vertAlign = VertAlignment.BOTTOM;
+
+            // If the box extends outside the screen on the right, move it left of the cursor
+            if (mousePos.x() + x + mouseOverTileInfo.getWidth() > Renderer.RES_WIDTH) {
+                x *= -1;
+                horizAlign = HorizAlignment.RIGHT;
+            }
+
+            // If it extends off the top of the screen, move it below the cursor
+            if (mousePos.y() + y - mouseOverTileInfo.getHeight() < 0) {
+                y *= -1;
+                vertAlign = VertAlignment.TOP;
+            }
+
+            mouseOverTileInfo.setPos(mousePos.plus(x, y));
+            mouseOverTileInfo.setHorizAlign(horizAlign);
+            mouseOverTileInfo.setVertAlign(vertAlign);
         }
 
         super.draw(mousePos); // Draw GUI elements

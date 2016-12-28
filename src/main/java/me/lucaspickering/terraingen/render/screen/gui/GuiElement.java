@@ -9,7 +9,9 @@ import me.lucaspickering.terraingen.util.Point;
 
 public abstract class GuiElement implements ScreenElement {
 
+    // This is only retained so adjustedPos can be updated after changing alignments
     private Point pos;
+    private Point adjustedPos; // The position after being adjusted for alignments
     private int width;
     private int height;
     private HorizAlignment horizAlign;
@@ -41,23 +43,6 @@ public abstract class GuiElement implements ScreenElement {
     }
 
     /**
-     * Constructs a new {@code GuiElement} with the given coordinates and alignments.
-     *
-     * @param pos        the position of the element
-     * @param horizAlign the horizontal alignment of the element (non-null)
-     * @param vertAlign  the vertical alignment of the element (non-null)
-     * @throws NullPointerException if {@code horizAlign == null} or {@code vertAlign == null}
-     */
-    protected GuiElement(Point pos, HorizAlignment horizAlign, VertAlignment vertAlign) {
-        Objects.requireNonNull(horizAlign);
-        Objects.requireNonNull(vertAlign);
-
-        this.horizAlign = horizAlign;
-        this.vertAlign = vertAlign;
-        setPos(pos);
-    }
-
-    /**
      * Constructs a new {@code GuiElement} with the given coordinates, size, and alignments.
      *
      * @param pos        the position of the element
@@ -84,20 +69,13 @@ public abstract class GuiElement implements ScreenElement {
     }
 
     public final Point getPos() {
-        return pos;
+        return adjustedPos;
     }
 
     public final void setPos(Point pos) {
         Objects.requireNonNull(pos);
-        this.pos = pos.adjustForAlignment(horizAlign, vertAlign, width, height);
-    }
-
-    public final int getX() {
-        return pos.x();
-    }
-
-    public final int getY() {
-        return pos.y();
+        this.pos = pos;
+        updateAdjustedPos();
     }
 
     public final int getWidth() {
@@ -114,6 +92,26 @@ public abstract class GuiElement implements ScreenElement {
 
     public final void setHeight(int height) {
         this.height = height;
+    }
+
+    public final HorizAlignment getHorizAlign() {
+        return horizAlign;
+    }
+
+    public final void setHorizAlign(HorizAlignment horizAlign) {
+        Objects.requireNonNull(horizAlign);
+        this.horizAlign = horizAlign;
+        updateAdjustedPos();
+    }
+
+    public final VertAlignment getVertAlign() {
+        return vertAlign;
+    }
+
+    public final void setVertAlign(VertAlignment vertAlign) {
+        Objects.requireNonNull(vertAlign);
+        this.vertAlign = vertAlign;
+        updateAdjustedPos();
     }
 
     public final boolean isVisible() {
@@ -136,5 +134,9 @@ public abstract class GuiElement implements ScreenElement {
     public boolean contains(Point p) {
         return pos.x() <= p.x() && p.x() <= pos.x() + width
                && pos.y() <= p.y() && p.y() <= pos.y() + height;
+    }
+
+    private void updateAdjustedPos() {
+        adjustedPos = pos.adjustForAlignment(horizAlign, vertAlign, width, height);
     }
 }

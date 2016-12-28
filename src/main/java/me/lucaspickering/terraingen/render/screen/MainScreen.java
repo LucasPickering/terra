@@ -37,7 +37,8 @@ public abstract class MainScreen implements ScreenElement {
 
     private void drawElement(Point mousePos, GuiElement element) {
         GL11.glPushMatrix();
-        GL11.glTranslatef(element.getX(), element.getY(), 0f);
+        final Point pos = element.getPos();
+        GL11.glTranslatef(pos.x(), pos.y(), 0f);
         element.draw(mousePos);
         GL11.glPopMatrix();
     }
