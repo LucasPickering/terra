@@ -14,13 +14,13 @@ public class BiomeGenerator implements Generator {
 
     @Override
     public void generate(WorldBuilder worldBuilder, Random random) {
-        for (Tile.Builder builder : worldBuilder.builders().values()) {
+        for (Tile tile : worldBuilder.getTiles().values()) {
             // If the biome has already been assigned, skip this tile
-            if (builder.getBiome() != null) {
+            if (tile.biome() != null) {
                 continue;
             }
             final Biome biome;
-            final int elevation = builder.getElevation();
+            final int elevation = tile.elevation();
             if (elevation >= MIN_MOUNTAIN_ELEV) {
                 biome = Biome.ALPINE;
             } else if (elevation < 0) {
@@ -28,7 +28,7 @@ public class BiomeGenerator implements Generator {
             } else {
                 biome = Biome.PLAINS;
             }
-            builder.setBiome(biome);
+            tile.setBiome(biome);
         }
     }
 }

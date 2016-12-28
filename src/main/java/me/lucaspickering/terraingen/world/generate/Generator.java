@@ -9,7 +9,7 @@ import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
  * Represents one stage in the world generation process. A {@link Generator} is given a
- * {@link Map} of {@link TilePoint}s to {@link Tile.Builder}s, representing a partially-generated
+ * {@link Map} of {@link TilePoint}s to {@link Tile}s, representing a partially-generated
  * world. It modifies the tiles in that map, and returns the same map with all the same objects.
  */
 @FunctionalInterface

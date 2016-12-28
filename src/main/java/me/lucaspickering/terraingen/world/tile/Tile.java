@@ -15,62 +15,6 @@ import me.lucaspickering.terraingen.world.WorldHelper;
 
 public class Tile {
 
-    public static final class Builder {
-
-        private final TilePoint pos;
-        private Map<Direction, Tile.Builder> adjacents;
-        private Biome biome;
-        private int elevation;
-
-        /**
-         * Every tile has to have a position, so make it required by the constructor.
-         *
-         * @param pos the position of this tile
-         */
-        public Builder(TilePoint pos) {
-            this.pos = pos;
-        }
-
-        public TilePoint getPos() {
-            return pos;
-        }
-
-        public Biome getBiome() {
-            return biome;
-        }
-
-        public Builder setBiome(Biome biome) {
-            this.biome = biome;
-            return this;
-        }
-
-        public int getElevation() {
-            return elevation;
-        }
-
-        public Builder setElevation(int elevation) {
-            this.elevation = elevation;
-            return this;
-        }
-
-        public final Map<Direction, Tile.Builder> getAdjacents() {
-            return adjacents;
-        }
-
-        public final void setAdjacents(Map<Direction, Tile.Builder> adjacents) {
-            this.adjacents = Collections.unmodifiableMap(adjacents);
-        }
-
-        public Tile build() {
-            return new Tile(pos, biome, elevation);
-        }
-
-        @Override
-        public int hashCode() {
-            return pos.hashCode(); // Hashcode is just based on position
-        }
-    }
-
     public static final int NUM_SIDES = Direction.values().length;
 
     // UI constants
@@ -114,8 +58,8 @@ public class Tile {
     private Map<Direction, Tile> adjacents;
 
     // Terrain features
-    private final Biome biome;
-    private final int elevation;
+    private Biome biome;
+    private int elevation;
 
     /**
      * The position of the top-left corner of the texture of this tile on the screen.
@@ -123,14 +67,18 @@ public class Tile {
     private final Point center;
     private final Point topLeft;
 
-    private Tile(TilePoint pos, Biome biome, int elevation) {
+    public Tile(TilePoint pos) {
         Objects.requireNonNull(pos);
-        Objects.requireNonNull(biome);
         this.pos = pos;
-        this.biome = biome;
-        this.elevation = elevation;
         this.center = WorldHelper.tileToPixel(pos);
         this.topLeft = center.minus(WIDTH / 2, HEIGHT / 2);
+    }
+
+    protected Tile(TilePoint pos, Biome biome, int elevation) {
+        this(pos);
+        Objects.requireNonNull(biome);
+        this.biome = biome;
+        this.elevation = elevation;
     }
 
     public final TilePoint pos() {
@@ -160,7 +108,7 @@ public class Tile {
      * @throws NullPointerException  if {@code adjacents == null}
      * @throws IllegalStateException if this tile's adjacent tiles has already been set
      */
-    public final void setAdjacents(Map<Direction, Tile> adjacents) {
+    public void setAdjacents(Map<Direction, Tile> adjacents) {
         if (this.adjacents != null) {
             throw new IllegalStateException("Map of adjacent tiles has already been initialized");
         }
@@ -168,8 +116,33 @@ public class Tile {
         this.adjacents = Collections.unmodifiableMap(adjacents);
     }
 
+    /**
+     * Is the given tile adjacent to this tile? Two tiles are adjacent if the distance between them
+     * is exactly 1.
+     *
+     * @param tile the other tile (non-null)
+     * @return true if this tile and the other are adjacent, false otherwise
+     * @throws NullPointerException if {@code tile == null}
+     */
+    public final boolean isAdjacentTo(Tile tile) {
+        Objects.requireNonNull(tile);
+        return pos.distanceTo(tile.pos()) == 1;
+    }
+
+    public final Biome biome() {
+        return biome;
+    }
+
+    public void setBiome(Biome biome) {
+        this.biome = biome;
+    }
+
     public final int elevation() {
         return elevation;
+    }
+
+    public void setElevation(int elevation) {
+        this.elevation = elevation;
     }
 
     public final Point center() {
@@ -196,19 +169,6 @@ public class Tile {
                                  biome.displayName(), elevation, pos, bgColor);
         }
         return String.format(INFO_STRING, biome, elevation);
-    }
-
-    /**
-     * Is the given tile adjacent to this tile? Two tiles are adjacent if the distance between them
-     * is exactly 1.
-     *
-     * @param tile the other tile (non-null)
-     * @return true if this tile and the other are adjacent, false otherwise
-     * @throws NullPointerException if {@code tile == null}
-     */
-    public boolean isAdjacentTo(Tile tile) {
-        Objects.requireNonNull(tile);
-        return pos.distanceTo(tile.pos()) == 1;
     }
 
     @Override

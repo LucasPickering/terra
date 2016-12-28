@@ -14,10 +14,10 @@ public class OceanGenerator implements Generator {
 
     @Override
     public void generate(WorldBuilder worldBuilder, Random random) {
-        for (Tile.Builder builder : worldBuilder.builders().values()) {
-            final int distance = builder.getPos().distanceTo(TilePoint.ZERO);
+        for (Tile tile : worldBuilder.getTiles().values()) {
+            final int distance = tile.pos().distanceTo(TilePoint.ZERO);
             if (distance >= OCEAN_DISTANCE_THRESHOLD) {
-                builder.setElevation((distance - OCEAN_DISTANCE_THRESHOLD + 1) * -10);
+                tile.setElevation((distance - OCEAN_DISTANCE_THRESHOLD + 1) * -10);
             }
         }
     }
