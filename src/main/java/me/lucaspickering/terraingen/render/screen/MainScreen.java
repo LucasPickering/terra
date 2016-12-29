@@ -6,6 +6,8 @@ import org.lwjgl.opengl.GL11;
 import java.util.LinkedList;
 import java.util.List;
 
+import me.lucaspickering.terraingen.TerrainGen;
+import me.lucaspickering.terraingen.render.Font;
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
@@ -32,8 +34,14 @@ public abstract class MainScreen implements ScreenElement {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         guiElements.stream().filter(GuiElement::isVisible).forEach(element -> drawElement(mousePos,
                                                                                           element));
+        // If debug mode is enabled, draw the FPS in the corner
+        final TerrainGen terrainGen = TerrainGen.instance();
+        if (terrainGen.debug()) {
+            renderer().drawString(Font.DEBUG, "FPS: " + terrainGen.getFps(), 10, 10);
+        }
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
+
     }
 
     private void drawElement(Point mousePos, GuiElement element) {
@@ -62,7 +70,8 @@ public abstract class MainScreen implements ScreenElement {
 
     @Override
     public boolean contains(Point p) {
-        return true;
+        return 0 <= p.x() && p.x() <= Renderer.RES_WIDTH
+               && 0 <= p.y() && p.y() <= Renderer.RES_HEIGHT;
     }
 
 

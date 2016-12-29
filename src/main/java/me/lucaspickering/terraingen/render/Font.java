@@ -7,6 +7,7 @@ import me.lucaspickering.terraingen.util.Constants;
 
 public enum Font {
 
+    DEBUG(Constants.FONT_BOMBARDIER, 30f),
     TILE(Constants.FONT_BOMBARDIER, 60f),
     UI(Constants.FONT_BOMBARDIER, 100f),
     LARGE(Constants.FONT_BOMBARDIER, 150f),

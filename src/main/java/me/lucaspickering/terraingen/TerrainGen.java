@@ -46,6 +46,9 @@ public class TerrainGen {
     private int windowWidth;
     private int windowHeight;
     private Point mousePos = Point.ZERO;
+    private double lastFpsUpdate; // Time of the last FPS update, in seconds
+    private int framesSinceCheck; // Number of frames since the last FPS update
+    private int fps; // Current framerate
 
     private World world;
 
@@ -164,7 +167,7 @@ public class TerrainGen {
                               (vidmode.height() - windowHeight) / 2); // Center the window
 
         GLFW.glfwMakeContextCurrent(window);
-        GLFW.glfwSwapInterval(1); // Enable v-sync
+//        GLFW.glfwSwapInterval(1); // Enable v-sync
         GLFW.glfwShowWindow(window); // Make the window visible
         GL.createCapabilities(); // LWJGL needs this
         GL11.glClearColor(Colors.CLEAR.getRed() / 255f, Colors.CLEAR.getGreen() / 255f,
@@ -181,6 +184,7 @@ public class TerrainGen {
         renderer = new Renderer();
         world = new World(); // Generate the world
         currentScreen = new WorldScreen(world); // Initialize the current screen
+        lastFpsUpdate = GLFW.glfwGetTime(); // Set this for FPS calculation
     }
 
     private void gameLoop() {
@@ -197,6 +201,7 @@ public class TerrainGen {
             if (currentScreen == null) {
                 exitGame();
             }
+            updateFPS(); // Update the FPS counter
         }
     }
 
@@ -217,6 +222,24 @@ public class TerrainGen {
         GLFW.glfwSetErrorCallback(null).free(); // Need to wipe this out
     }
 
+    /**
+     * Exits the game gracefully.
+     */
+    private void exitGame() {
+        GLFW.glfwSetWindowShouldClose(window, true);
+    }
+
+    private void updateFPS() {
+        // If it's been more than a second since the last loop...
+        if (GLFW.glfwGetTime() - lastFpsUpdate >= 1.0) {
+            // Recalculate fps
+            fps = framesSinceCheck;
+            framesSinceCheck = 0;
+            lastFpsUpdate++;
+        }
+        framesSinceCheck++;
+    }
+
     public boolean debug() {
         return debug;
     }
@@ -229,11 +252,8 @@ public class TerrainGen {
         return renderer;
     }
 
-    /**
-     * Exits the game gracefully.
-     */
-    private void exitGame() {
-        GLFW.glfwSetWindowShouldClose(window, true);
+    public int getFps() {
+        return fps;
     }
 
     public static URL getResource(String path, String fileName) {

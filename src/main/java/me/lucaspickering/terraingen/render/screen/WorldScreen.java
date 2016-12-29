@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import me.lucaspickering.terraingen.render.ColorTexture;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
@@ -28,8 +29,8 @@ public class WorldScreen extends MainScreen {
     // The range of elevation differences that the outline width varies across
     private static final InclusiveRange ELEV_DIFF_RANGE = new InclusiveRange(0, 20);
     private static final float DEFAULT_OUTLINE_WIDTH = 1.5f;
-    private static final float MIN_OUTLINE_WIDTH = 1f;
-    private static final float MAX_OUTLINE_WIDTH = 4f;
+    private static final float MIN_OUTLINE_WIDTH = 0.1f;
+    private static final float MAX_OUTLINE_WIDTH = 1f;
 
     private final World world;
     private final MouseTextBox mouseOverTileInfo;
@@ -49,17 +50,21 @@ public class WorldScreen extends MainScreen {
     @Override
     public void draw(Point mousePos) {
         // If the mouse is being dragged, shift the world center based on it
-        Point worldCenter = world.getWorldCenter();
         if (lastMouseDragPos != null) {
             // Shift the world
             final Point diff = mousePos.minus(lastMouseDragPos);
-            worldCenter = worldCenter.plus(diff);
-            world.setWorldCenter(worldCenter);
+            world.setWorldCenter(world.getWorldCenter().plus(diff));
             lastMouseDragPos = mousePos; // Update the mouse pos
         }
+        final Point worldCenter = world.getWorldCenter();
 
         final Map<TilePoint, Tile> tileMap = world.getTiles();
-        final Collection<Tile> tiles = tileMap.values();
+
+        // Get all the tiles that are on-screen (those are the ones that will be drawn)
+        // TODO add some slop so that partially-contained tiles get in here
+        final Collection<Tile> onScreenTiles = tileMap.values().stream()
+            .filter(tile -> contains(worldCenter.plus(tile.center())))
+            .collect(Collectors.toList());
 
         // Draw each tile. For each one, check if it is the
         final Point shiftedMousePos = mousePos.minus(worldCenter);
@@ -69,12 +74,12 @@ public class WorldScreen extends MainScreen {
         {
             GL11.glTranslatef(worldCenter.x(), worldCenter.y(), 0f);
             // Draw the tiles themselves
-            tiles.forEach(this::drawTile);
+            onScreenTiles.forEach(this::drawTile);
 
             // Draw the overlays
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glEnable(GL11.GL_TEXTURE_2D);
-            tiles.forEach(tile -> drawTileOverlays(tile, tile.pos().equals(mouseOverPos)));
+            onScreenTiles.forEach(tile -> drawTileOverlays(tile, tile.pos().equals(mouseOverPos)));
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glTranslatef(-worldCenter.x(), -worldCenter.y(), 0f);
@@ -99,9 +104,16 @@ public class WorldScreen extends MainScreen {
      */
     private void drawTile(Tile tile) {
         // Translate to the top-left corner of the tile
+        // Draw the background
+        // Draw the outline
+        // Translate back
         GL11.glTranslatef(tile.topLeft().x(), tile.topLeft().y(), 0f);
+        drawTileBackground(tile);
+//        drawTileOutline(tile); // It looks neater without outlines
+        GL11.glTranslatef(-tile.topLeft().x(), -tile.topLeft().y(), 0f);
+    }
 
-        // Start drawing textures
+    private void drawTileBackground(Tile tile) {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
@@ -112,8 +124,9 @@ public class WorldScreen extends MainScreen {
         // Stop drawing textures
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
+    }
 
-        // Draw the outline by drawing each side as an individual line.
+    private void drawTileOutline(Tile tile) {
         for (int i = 0; i < Tile.NUM_SIDES; i++) {
             // Get the two vertices that the line will be between
             final Point vertex1 = Tile.VERTICES[i];
@@ -140,9 +153,6 @@ public class WorldScreen extends MainScreen {
             GL11.glVertex2i(vertex2.x(), vertex2.y());
             GL11.glEnd();
         }
-
-        // Translate back
-        GL11.glTranslatef(-tile.topLeft().x(), -tile.topLeft().y(), 0f);
     }
 
     /**
