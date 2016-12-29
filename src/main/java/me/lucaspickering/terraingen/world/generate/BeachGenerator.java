@@ -20,8 +20,7 @@ public class BeachGenerator implements Generator {
             // tiles, and if there is an ocean tile adjacent, make this a beach.
             if ((biome == null || biome.isLand()) && tile.elevation() <= MAX_BEACH_ELEV) {
                 for (Tile adj : tile.adjacents().values()) {
-                    if (adj.biome() == Biome.OCEAN) {
-                        // Possibly set elevation here to 0?
+                    if (adj.biome() == Biome.OCEAN || adj.biome() == Biome.COAST) {
                         tile.setBiome(Biome.BEACH);
                         break; // Done with this tile
                     }

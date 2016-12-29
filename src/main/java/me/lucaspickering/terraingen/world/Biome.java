@@ -6,62 +6,29 @@ import me.lucaspickering.terraingen.util.Funcs;
 
 public enum Biome {
 
-    OCEAN("Ocean", Color.BLUE, false) {
-        @Override
-        public Color color(int elevation) {
-            final float[] hsv = Funcs.toHSV(baseColor());
-            // Change the value based on the elevation
-            hsv[2] = World.LOWER_ELEVATION_RANGE.normalize(elevation, 0.3f, 1f);
-            return Funcs.toRGB(hsv);
-        }
-    },
-    LAKE("Lake", Color.BLUE, false) {
-        @Override
-        public Color color(int elevation) {
-            final float[] hsv = Funcs.toHSV(baseColor());
-            // Change the value based on the elevation
-            hsv[2] = World.LOWER_ELEVATION_RANGE.normalize(elevation, 0.3f, 1f);
-            return Funcs.toRGB(hsv);
-        }
-    },
-    BEACH("Beach", Color.YELLOW, true) {
-        @Override
-        public Color color(int elevation) {
-            return baseColor();
-        }
-    },
-    PLAINS("Plains", Color.GREEN) {
-        @Override
-        public Color color(int elevation) {
-            final float[] hsv = Funcs.toHSV(baseColor());
-            // Change the value based on the elevation
-            hsv[2] = World.UPPER_ELEVATION_RANGE.normalize(elevation, 0.6f, 1f);
-            return Funcs.toRGB(hsv);
-        }
-    },
-    ALPINE("Alpine", Funcs.colorFromRgb(0x00bb00)) {
-        @Override
-        public Color color(int elevation) {
-            final float[] hsv = Funcs.toHSV(baseColor());
-            // Change the saturation and value based on the elevation
-            hsv[1] = 1f - World.UPPER_ELEVATION_RANGE.normalize(elevation, 0.2f, 0.8f);
-            hsv[2] = World.UPPER_ELEVATION_RANGE.normalize(elevation, 0.2f, 0.8f);
-            return Funcs.toRGB(hsv);
-        }
-    };
+    OCEAN("Ocean", 0x1653b7, false, 0.3f, 1f),
+    COAST("Coast", 0x1887b2, false, 0.3f, 1f),
+    LAKE("Lake", 0x09729b, false, 0.3f, 1f),
+    BEACH("Beach", 0xe2c909, true, 0.7f, 1f),
+    PLAINS("Plains", 0xb9f442, true, 0.5f, 0.9f),
+    FOREST("Forest", 0x249b09, true, 0.4f, 0.8f),
+    MOUNTAIN("Mountain", 0xbbbbbb, true, 0f, 0.8f);
 
     private final String displayName;
     private final Color baseColor;
     private final boolean isLand;
+    private final float minValue, maxValue; // Min and max value for the color of this biome
 
-    Biome(String displayName, Color baseColor) {
-        this(displayName, baseColor, true);
+    Biome(String displayName, int baseColor, boolean isLand, float minValue, float maxValue) {
+        this(displayName, Funcs.colorFromRgb(baseColor), isLand, minValue, maxValue);
     }
 
-    Biome(String displayName, Color baseColor, boolean isLand) {
+    Biome(String displayName, Color baseColor, boolean isLand, float minValue, float maxValue) {
         this.displayName = displayName;
         this.baseColor = baseColor;
         this.isLand = isLand;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
     }
 
     public String displayName() {
@@ -76,5 +43,11 @@ public enum Biome {
         return isLand;
     }
 
-    public abstract Color color(int elevation);
+    public Color color(int elevation) {
+        final float[] hsv = Funcs.toHSV(baseColor());
+        // Change the value based on the elevation
+        hsv[2] = World.ELEVATION_RANGE.normalize(elevation, minValue, maxValue);
+        hsv[2] = Funcs.coerce(0f, hsv[2], 1f); // Max sure it's [0, 1]
+        return Funcs.toRGB(hsv);
+    }
 }

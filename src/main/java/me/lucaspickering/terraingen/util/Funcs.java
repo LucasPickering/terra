@@ -50,6 +50,36 @@ public class Funcs {
             .orElseThrow(() -> new IllegalArgumentException("Collection cannot be empty"));
     }
 
+    /**
+     * Coerces the given value into the range {@code [min, max]}.
+     *
+     * @param min the minimum of the range
+     * @param x   the value to be coerced
+     * @param max the maximum of the range
+     * @return the coerced value
+     */
+    public static float coerce(float min, float x, float max) {
+        if (x < min) {
+            return min;
+        }
+        if (x > max) {
+            return max;
+        }
+        return x;
+    }
+
+    /**
+     * Applies a random amount of slop to the given value.
+     *
+     * @param random  the {@link Random} to use
+     * @param x       the value to be randomized
+     * @param maxSlop the maximum amount of slop to apply
+     * @return a random, uniformly distributed value in the range {@code [x - maxSlop, x + maxSlop]}
+     */
+    public static int randomSlop(Random random, int x, int maxSlop) {
+        return x + random.nextInt(maxSlop * 2 + 1) - maxSlop;
+    }
+
     public static void setGlColor(Color color) {
         GL11.glColor4f(color.getRed() / 255f,
                        color.getGreen() / 255f,

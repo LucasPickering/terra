@@ -14,22 +14,21 @@ import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
 import me.lucaspickering.terraingen.world.generate.BiomePainter;
 import me.lucaspickering.terraingen.world.generate.Generator;
-import me.lucaspickering.terraingen.world.generate.OceanGenerator;
+import me.lucaspickering.terraingen.world.generate.OceanFloorGenerator;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class World {
 
-    // Every tile's elevation must be in one of these two ranges
-    public static final InclusiveRange LOWER_ELEVATION_RANGE = new InclusiveRange(-50, 0);
-    public static final InclusiveRange UPPER_ELEVATION_RANGE = new InclusiveRange(0, 100);
+    // Every tile's elevation must be in this range
+    public static final InclusiveRange ELEVATION_RANGE = new InclusiveRange(-50, 75);
 
     // World size
     private static final int SIZE = 20;
 
     private static final Generator[] GENERATORS = new Generator[]{
-        new OceanGenerator(),
+        new OceanFloorGenerator(),
         new PeakGenerator(),
         new WaterPainter(),
         new BiomePainter(),

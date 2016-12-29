@@ -10,7 +10,7 @@ public class BiomePainter implements Generator {
 
     // Generation parameters
     // Minimum elevation needed to be considered a mountain
-    private static final int MIN_MOUNTAIN_ELEV = 20;
+    private static final int MIN_MOUNTAIN_ELEV = 40;
 
     @Override
     public void generate(WorldBuilder worldBuilder, Random random) {
@@ -22,9 +22,9 @@ public class BiomePainter implements Generator {
             final Biome biome;
             final int elevation = tile.elevation();
             if (elevation >= MIN_MOUNTAIN_ELEV) {
-                biome = Biome.ALPINE;
+                biome = Biome.MOUNTAIN;
             } else {
-                biome = Biome.PLAINS;
+                biome = Biome.FOREST;
             }
             tile.setBiome(biome);
         }

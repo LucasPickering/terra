@@ -58,9 +58,8 @@ public class PeakGenerator implements Generator {
                 final int oppElev = oppTile != null ? oppTile.elevation() : 0;
 
                 // Average peakElev and oppElev, then apply a small random slop
-                // Random number in range [-slop, slop]
-                final int slop = random.nextInt(SMOOTHING_SLOP * 2 + 1) - SMOOTHING_SLOP;
-                final int adjElev = (peakElev + oppElev) / 2 + slop;
+                final int adjElev = Funcs.randomSlop(random, (peakElev + oppElev) / 2,
+                                                     SMOOTHING_SLOP);
                 adjTile.setElevation(adjElev);
             }
         }
