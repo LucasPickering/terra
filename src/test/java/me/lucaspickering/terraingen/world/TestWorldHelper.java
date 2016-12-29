@@ -24,37 +24,37 @@ public class TestWorldHelper {
         Point expected;
 
         // Simple case
-        expected = World.WORLD_CENTER;
+        expected = Point.ZERO;
         assertEquals(expected, WorldHelper.tileToPixel(origin));
 
         // Unfortunately I can't think an alternative to hardcoding these numbers without
         // basically copying the code we're testing
-        expected = new Point(2031, 760);
+        expected = new Point(111, -320);
         assertEquals(expected, WorldHelper.tileToPixel(tile1));
 
-        expected = new Point(2253, 1272);
+        expected = new Point(333, 192);
         assertEquals(expected, WorldHelper.tileToPixel(tile2));
     }
 
     @Test
     public void testPixelToTile() throws Exception {
-        final Point origin = World.WORLD_CENTER;
+        final Point origin = Point.ZERO;
 
         // Just barely in the origin tile
-        final Point p1 = World.WORLD_CENTER.plus(0, -Tile.HEIGHT / 2 + 1);
+        final Point p1 = new Point(0, -Tile.HEIGHT / 2 + 1);
         // On the edge - counts as origin
-        final Point p2 = World.WORLD_CENTER.plus(0, -Tile.HEIGHT / 2);
+        final Point p2 = new Point(0, -Tile.HEIGHT / 2);
         // Just barely outside the origin tile
-        final Point p3 = World.WORLD_CENTER.plus(0, -Tile.HEIGHT / 2 - 1);
+        final Point p3 = new Point(0, -Tile.HEIGHT / 2 - 1);
 
-        final Point p4 = World.WORLD_CENTER.plus(-80, -70); // On the fringes of the tile
+        final Point p4 = new Point(-80, -70); // On the fringes of the tile
 
         // Just left of left corner of origin tile
-        final Point p5 = World.WORLD_CENTER.plus(-Tile.WIDTH / 2 - 1, 0);
+        final Point p5 = new Point(-Tile.WIDTH / 2 - 1, 0);
         // Right onleft corner of origin tile
-        final Point p6 = World.WORLD_CENTER.plus(-Tile.WIDTH / 2, 0);
+        final Point p6 = new Point(-Tile.WIDTH / 2, 0);
         // Just right of left corner of origin tile
-        final Point p7 = World.WORLD_CENTER.plus(-Tile.WIDTH / 2 + 1, 0);
+        final Point p7 = new Point(-Tile.WIDTH / 2 + 1, 0);
 
         TilePoint expected;
 

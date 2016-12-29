@@ -32,27 +32,24 @@ public class WorldHelper {
     public static Point tileToPixel(@NotNull TilePoint tile) {
         final float x = Tile.WIDTH * tile.x() * 0.75f;
         final float y = -Tile.HEIGHT * (tile.x() / 2.0f + tile.y());
-        return World.WORLD_CENTER.plus((int) x, (int) y);
+        return new Point((int) x, (int) y);
     }
 
     /**
      * Converts a {@link Point} on the screen to a {@link TilePoint} in the world. The returned
      * point is the location of the tile that contains the given screen point. It doesn't
      * necessarily exist in the world; it is just the position of a theoretical tile that could
-     * exist there.
+     * exist there. The given point needs to be shifted based on the world center before calling
+     * this function.
      *
      * @param pos any point on the screen
      * @return the position of the tile that encloses the given point
      */
     @NotNull
     public static TilePoint pixelToTile(@NotNull Point pos) {
-        // Shift the point so that the origin is the middle of the screen
-        final Point shifted = pos.minus(World.WORLD_CENTER);
-
         // Convert it to a fractional tile point
-        final float fracX = shifted.x() * 2f / 3f / Tile.RADIUS;
-        final float fracY = -(shifted.x() + (float) Math.sqrt(3) * shifted.y())
-                            / (Tile.RADIUS * 3f);
+        final float fracX = pos.x() * 2f / 3f / Tile.RADIUS;
+        final float fracY = -(pos.x() + (float) Math.sqrt(3) * pos.y()) / (Tile.RADIUS * 3f);
         final float fracZ = -fracX - fracY; // We'll need this later
 
         // Convert the fraction tile coordinates to regular coordinates
@@ -142,7 +139,9 @@ public class WorldHelper {
         Set<TilePoint> lastAdjacents = new HashSet<>(result);
         for (int i = 1; i <= range; i++) {
             // Start with tiles directly adjacent to this one
-            final Set<TilePoint> adjacents = new HashSet<>(getAdjacentTiles(world, origin).values());
+            final Set<TilePoint>
+                adjacents =
+                new HashSet<>(getAdjacentTiles(world, origin).values());
             for (TilePoint adjacent : lastAdjacents) {
                 adjacents.addAll(getAdjacentTiles(world, adjacent).values());
             }
@@ -197,7 +196,6 @@ public class WorldHelper {
             cluster.put(firstTile.pos(), firstTile);
             uncheckedTiles.put(firstTile.pos(), firstTile);
             unclusteredTiles.remove(firstTile.pos());
-
 
             // If there is still at least one tile whose adjacents haven't been checked yet...
             while (!uncheckedTiles.isEmpty()) {

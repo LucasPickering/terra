@@ -11,6 +11,7 @@ import me.lucaspickering.terraingen.render.HorizAlignment;
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.render.VertAlignment;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
+import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.screen.gui.TextDisplay;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Direction;
@@ -28,6 +29,9 @@ public class WorldScreen extends MainScreen {
     private static final int TILE_INFO_OFFSET_X = 20;
     private static final int TILE_INFO_OFFSET_Y = -10;
 
+    // Maximum time a click can be held down to be considered a click and not a drag
+    private static final int MAX_CLICK_TIME = 250;
+
     // The range of elevation differences that the outline width varies across
     private static final InclusiveRange ELEV_DIFF_RANGE = new InclusiveRange(0, 20);
     private static final float DEFAULT_OUTLINE_WIDTH = 1.5f;
@@ -37,6 +41,12 @@ public class WorldScreen extends MainScreen {
     private final World world;
     private final TextDisplay mouseOverTileInfo;
 
+    // The last position of the mouse while dragging. Null if not dragging.
+    private Point lastMouseDragPos;
+
+    // The time at which the user pressed the mouse button down
+    private long mouseDownTime;
+
     public WorldScreen(World world) {
         this.world = world;
         addGuiElement(mouseOverTileInfo = new TextDisplay());
@@ -45,12 +55,25 @@ public class WorldScreen extends MainScreen {
 
     @Override
     public void draw(Point mousePos) {
+        // If the mouse is being dragged, shift the world center based on it
+        Point worldCenter = world.getWorldCenter();
+        if (lastMouseDragPos != null) {
+            // Shift the world
+            final Point diff = mousePos.minus(lastMouseDragPos);
+            worldCenter = worldCenter.plus(diff);
+            world.setWorldCenter(worldCenter);
+            lastMouseDragPos = mousePos; // Update the mouse pos
+        }
+
         final Map<TilePoint, Tile> tileMap = world.getTiles();
         final Collection<Tile> tiles = tileMap.values();
 
         // Draw each tile. For each one, check if it is the
-        final TilePoint mouseOverPos = WorldHelper.pixelToTile(mousePos);
+        final Point shiftedMousePos = mousePos.minus(worldCenter);
+        final TilePoint mouseOverPos = WorldHelper.pixelToTile(shiftedMousePos);
+        GL11.glTranslatef(worldCenter.x(), worldCenter.y(), 0f);
         tiles.forEach(tile -> drawTile(tile, tile.pos().equals(mouseOverPos)));
+        GL11.glTranslatef(-worldCenter.x(), -worldCenter.y(), 0f);
 
         // Update mouseOverTileInfo for the tile that the mouse is over. This HAS to be done
         // after all the tiles are drawn, otherwise it would be underneath some of them.
@@ -170,12 +193,30 @@ public class WorldScreen extends MainScreen {
 
     @Override
     public void onKey(KeyEvent event) {
-        switch (event.key) {
-            case GLFW.GLFW_KEY_SPACE:
-                // todo pause generation here
-                break;
-            case GLFW.GLFW_KEY_ESCAPE:
-                setNextScreen(null); // Close the game
+        if (event.action == GLFW.GLFW_RELEASE) {
+            switch (event.key) {
+                case GLFW.GLFW_KEY_SPACE:
+                    // todo pause generation here
+                    break;
+                case GLFW.GLFW_KEY_ESCAPE:
+                    setNextScreen(null); // Close the game
+            }
+        }
+    }
+
+    @Override
+    public void onClick(MouseButtonEvent event) {
+        if (event.button == GLFW.GLFW_MOUSE_BUTTON_1) {
+            if (event.action == GLFW.GLFW_PRESS) {
+                lastMouseDragPos = event.mousePos;
+                mouseDownTime = System.currentTimeMillis();
+            } else if (event.action == GLFW.GLFW_RELEASE) {
+                // If the elapsed time between mouse down and up is below a threshold, call it a click
+                if (System.currentTimeMillis() - mouseDownTime <= MAX_CLICK_TIME) {
+                    super.onClick(event);
+                }
+                lastMouseDragPos = null; // Wipe this out
+            }
         }
     }
 }

@@ -21,12 +21,6 @@ import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class World {
 
-    /**
-     * The on-screen location of the center of the world
-     */
-    public static final Point WORLD_CENTER = new Point(Renderer.RES_WIDTH / 2,
-                                                       Renderer.RES_HEIGHT / 2);
-
     // Every tile's elevation must be in one of these two ranges
     public static final InclusiveRange LOWER_ELEVATION_RANGE = new InclusiveRange(-50, 0);
     public static final InclusiveRange UPPER_ELEVATION_RANGE = new InclusiveRange(0, 100);
@@ -45,9 +39,13 @@ public class World {
     private final Random random;
     private final Map<TilePoint, Tile> tiles;
 
+    // The pixel location of the center of the world
+    private Point worldCenter;
+
     public World() {
         random = TerrainGen.instance().random();
         tiles = genTiles();
+        worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
     }
 
     private Map<TilePoint, Tile> genTiles() {
@@ -79,5 +77,13 @@ public class World {
      */
     public Map<TilePoint, Tile> getTiles() {
         return tiles;
+    }
+
+    public Point getWorldCenter() {
+        return worldCenter;
+    }
+
+    public void setWorldCenter(Point worldCenter) {
+        this.worldCenter = worldCenter;
     }
 }

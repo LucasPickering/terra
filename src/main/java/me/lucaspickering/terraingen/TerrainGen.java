@@ -93,16 +93,15 @@ public class TerrainGen {
         keyHandler = new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
-                if (action == GLFW.GLFW_RELEASE) {
-                    currentScreen.onKey(new KeyEvent(window, key, scancode, mods));
-                }
+                currentScreen.onKey(new KeyEvent(window, key, scancode, action, mods));
             }
         };
         mouseButtonHandler = new GLFWMouseButtonCallback() {
             @Override
             public void invoke(long window, int button, int action, int mods) {
-                if (action == GLFW.GLFW_RELEASE && currentScreen.contains(mousePos)) {
-                    currentScreen.onClick(new MouseButtonEvent(window, button, mods, mousePos));
+                if (currentScreen.contains(mousePos)) {
+                    currentScreen.onClick(new MouseButtonEvent(window, button, action, mods,
+                                                               mousePos));
                 }
             }
         };

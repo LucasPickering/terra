@@ -1,5 +1,6 @@
 package me.lucaspickering.terraingen.render.screen;
 
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import java.util.LinkedList;
@@ -85,9 +86,11 @@ public abstract class MainScreen implements ScreenElement {
      */
     public void onClick(MouseButtonEvent event) {
         // Call onElementClicked for all GUI elements that contain the cursor
-        guiElements.stream()
-            .filter(element -> element.isEnabled() && element.contains(event.mousePos))
-            .forEach(element -> onElementClicked(event, element));
+        if (event.button == GLFW.GLFW_MOUSE_BUTTON_1 && event.action == GLFW.GLFW_RELEASE) {
+            guiElements.stream()
+                .filter(element -> element.isEnabled() && element.contains(event.mousePos))
+                .forEach(element -> onElementClicked(event, element));
+        }
     }
 
     /**

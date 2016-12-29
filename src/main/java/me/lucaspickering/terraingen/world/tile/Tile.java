@@ -62,7 +62,10 @@ public class Tile {
     private int elevation;
 
     /**
-     * The position of the top-left corner of the texture of this tile on the screen.
+     * Pixel position of the center of the texture of this tile, relative to the origin tile.
+     * This needs to be shifted by the world center
+     * ({@link me.lucaspickering.terraingen.world.World#getWorldCenter}) before being drawn on
+     * screen.
      */
     private final Point center;
     private final Point topLeft;
