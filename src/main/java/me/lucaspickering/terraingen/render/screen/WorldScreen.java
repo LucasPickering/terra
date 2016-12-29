@@ -7,12 +7,9 @@ import java.util.Collection;
 import java.util.Map;
 
 import me.lucaspickering.terraingen.render.ColorTexture;
-import me.lucaspickering.terraingen.render.HorizAlignment;
-import me.lucaspickering.terraingen.render.Renderer;
-import me.lucaspickering.terraingen.render.VertAlignment;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
-import me.lucaspickering.terraingen.render.screen.gui.TextDisplay;
+import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
@@ -25,10 +22,6 @@ import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class WorldScreen extends MainScreen {
 
-    // Location of the tile info box relative to the cursor
-    private static final int TILE_INFO_OFFSET_X = 20;
-    private static final int TILE_INFO_OFFSET_Y = -10;
-
     // Maximum time a click can be held down to be considered a click and not a drag
     private static final int MAX_CLICK_TIME = 250;
 
@@ -39,7 +32,7 @@ public class WorldScreen extends MainScreen {
     private static final float MAX_OUTLINE_WIDTH = 4f;
 
     private final World world;
-    private final TextDisplay mouseOverTileInfo;
+    private final MouseTextBox mouseOverTileInfo;
 
     // The last position of the mouse while dragging. Null if not dragging.
     private Point lastMouseDragPos;
@@ -49,7 +42,7 @@ public class WorldScreen extends MainScreen {
 
     public WorldScreen(World world) {
         this.world = world;
-        addGuiElement(mouseOverTileInfo = new TextDisplay());
+        addGuiElement(mouseOverTileInfo = new MouseTextBox());
         mouseOverTileInfo.setVisible(false);
     }
 
@@ -81,27 +74,6 @@ public class WorldScreen extends MainScreen {
         if (mouseOverTile != null) {
             mouseOverTileInfo.setVisible(true);
             mouseOverTileInfo.setText(mouseOverTile.info());
-
-            int x = TILE_INFO_OFFSET_X;
-            int y = TILE_INFO_OFFSET_Y;
-            HorizAlignment horizAlign = HorizAlignment.LEFT;
-            VertAlignment vertAlign = VertAlignment.BOTTOM;
-
-            // If the box extends outside the screen on the right, move it left of the cursor
-            if (mousePos.x() + x + mouseOverTileInfo.getWidth() > Renderer.RES_WIDTH) {
-                x *= -1;
-                horizAlign = HorizAlignment.RIGHT;
-            }
-
-            // If it extends off the top of the screen, move it below the cursor
-            if (mousePos.y() + y - mouseOverTileInfo.getHeight() < 0) {
-                y *= -1;
-                vertAlign = VertAlignment.TOP;
-            }
-
-            mouseOverTileInfo.setPos(mousePos.plus(x, y));
-            mouseOverTileInfo.setHorizAlign(horizAlign);
-            mouseOverTileInfo.setVertAlign(vertAlign);
         }
 
         super.draw(mousePos); // Draw GUI elements

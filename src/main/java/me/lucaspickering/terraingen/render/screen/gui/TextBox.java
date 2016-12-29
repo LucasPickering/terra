@@ -12,7 +12,7 @@ import me.lucaspickering.terraingen.util.Colors;
 import me.lucaspickering.terraingen.util.Pair;
 import me.lucaspickering.terraingen.util.Point;
 
-public class TextDisplay extends GuiElement {
+public class TextBox extends GuiElement {
 
     private static final int BORDER_PADDING_X = 8;
     private static final int BORDER_PADDING_Y = 1;
@@ -21,16 +21,16 @@ public class TextDisplay extends GuiElement {
     private String text;
     private Color textColor = Color.WHITE;
 
-    public TextDisplay() {
+    public TextBox() {
         this("", Point.ZERO);
     }
 
-    public TextDisplay(String text, Point pos) {
+    public TextBox(String text, Point pos) {
         super(pos);
         setText(text);
     }
 
-    public TextDisplay(String text, Point pos, HorizAlignment horizAlign, VertAlignment vertAlign) {
+    public TextBox(String text, Point pos, HorizAlignment horizAlign, VertAlignment vertAlign) {
         super(pos, 0, 0, horizAlign, vertAlign);
         setText(text);
     }
