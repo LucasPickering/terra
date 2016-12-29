@@ -24,6 +24,7 @@ public class WorldBuilder {
             .map(p -> new Pair<>(p, new Tile(p))) // Create a tile for each point
             .collect(Pair.mapCollector()); // Collect the stream into a map
 
+        // Add adjacents for each tile
         for (Map.Entry<TilePoint, Tile> entry : tiles.entrySet()) {
             final TilePoint point = entry.getKey();
             final Tile tile = entry.getValue();

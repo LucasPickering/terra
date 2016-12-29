@@ -31,13 +31,14 @@ public class WaterPainter implements Generator {
         for (Map<TilePoint, Tile> cluster : clusters) {
             final int size = cluster.size();
             final Biome biome;
-            // If this cluster is over the min ocean size, make everything in it an ocean
+            // If this cluster is over the min ocean size...
             if (size >= MIN_OCEAN_SIZE) {
+                // Make everything in it an ocean
                 biome = Biome.OCEAN;
             } else {
-                final float rand = random.nextFloat();
+                // Otherwise, give it a chance to become a lake, proportional to its size
                 final float chance = (float) size / MIN_OCEAN_SIZE;
-                if (rand < chance) {
+                if (random.nextFloat() < chance) {
                     biome = Biome.LAKE;
                 } else {
                     biome = null;
