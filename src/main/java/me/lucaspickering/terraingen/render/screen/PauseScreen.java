@@ -11,7 +11,7 @@ import me.lucaspickering.terraingen.render.screen.gui.GuiElement;
 import me.lucaspickering.terraingen.util.Colors;
 import me.lucaspickering.terraingen.util.Point;
 
-public class PauseScreen extends MainScreen {
+public class PauseScreen extends Screen {
 
     private final WorldScreen worldScreen;
     private final Button backToWorldButton;
@@ -26,9 +26,13 @@ public class PauseScreen extends MainScreen {
      */
     public PauseScreen(WorldScreen worldScreen) {
         this.worldScreen = worldScreen;
+
+        // Initialize everything
         backToWorldButton = new Button("Resume", new Point(center.x(), center.y() - 200));
         optionsButton = new Button("Options", new Point(center.x(), center.y()));
         desktopButton = new Button("Exit to Desktop", new Point(center.x(), center.y() + 200));
+
+        // Add all the elements
         addGuiElement(backToWorldButton);
         addGuiElement(optionsButton);
         addGuiElement(desktopButton);
@@ -50,7 +54,6 @@ public class PauseScreen extends MainScreen {
         if (event.action == GLFW.GLFW_RELEASE) {
             switch (event.key) {
                 case GLFW.GLFW_KEY_ESCAPE:
-                    // Go back to the world
                     returnToWorld();
                     break;
             }
@@ -64,13 +67,11 @@ public class PauseScreen extends MainScreen {
         } else if (element == optionsButton) {
             // TODO options menu
         } else if (element == desktopButton) {
-            setNextScreen(null); // Close the program
+            exit(); // Close the program
         }
     }
 
     private void returnToWorld() {
-        // We need to set both of these so the world doesn't immediately re-open the pause menu
-        worldScreen.setNextScreen(worldScreen);
-        setNextScreen(worldScreen);
+        setNextScreen(worldScreen); // Go back to the world
     }
 }

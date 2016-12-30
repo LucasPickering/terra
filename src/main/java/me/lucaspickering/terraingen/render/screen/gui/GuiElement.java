@@ -72,62 +72,69 @@ public abstract class GuiElement implements ScreenElement {
         return adjustedPos;
     }
 
-    public void setPos(Point pos) {
+    public GuiElement setPos(Point pos) {
         Objects.requireNonNull(pos);
         this.pos = pos;
         updateAdjustedPos();
+        return this;
     }
 
     public final int getWidth() {
         return width;
     }
 
-    public void setWidth(int width) {
+    public GuiElement setWidth(int width) {
         this.width = width;
+        return this;
     }
 
     public final int getHeight() {
         return height;
     }
 
-    public void setHeight(int height) {
+    public GuiElement setHeight(int height) {
         this.height = height;
+        return this;
     }
 
     public final HorizAlignment getHorizAlign() {
         return horizAlign;
     }
 
-    public void setHorizAlign(HorizAlignment horizAlign) {
+    public GuiElement setHorizAlign(HorizAlignment horizAlign) {
         Objects.requireNonNull(horizAlign);
         this.horizAlign = horizAlign;
         updateAdjustedPos();
+        return this;
     }
 
     public final VertAlignment getVertAlign() {
         return vertAlign;
     }
 
-    public void setVertAlign(VertAlignment vertAlign) {
+    public GuiElement setVertAlign(VertAlignment vertAlign) {
         Objects.requireNonNull(vertAlign);
         this.vertAlign = vertAlign;
         updateAdjustedPos();
+        return this;
     }
 
     public final boolean isVisible() {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
+    public GuiElement setVisible(boolean visible) {
         this.visible = visible;
+        return this;
     }
 
     public final boolean isEnabled() {
         return visible && enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public GuiElement setEnabled(boolean enabled) {
         this.enabled = enabled;
+        return this;
     }
 
     @Override

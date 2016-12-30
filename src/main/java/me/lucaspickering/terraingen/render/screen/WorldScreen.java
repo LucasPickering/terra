@@ -18,7 +18,7 @@ import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.WorldHelper;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
-public class WorldScreen extends MainScreen {
+public class WorldScreen extends Screen {
 
     // Maximum time a click can be held down to be considered a click and not a drag
     private static final int MAX_CLICK_TIME = 250;
@@ -36,8 +36,9 @@ public class WorldScreen extends MainScreen {
 
     public WorldScreen(World world) {
         this.world = world;
-        addGuiElement(mouseOverTileInfo = new MouseTextBox());
-        mouseOverTileInfo.setVisible(false);
+        mouseOverTileInfo = new MouseTextBox();
+        mouseOverTileInfo.setVisible(false); // Hide this for now
+        addGuiElement(mouseOverTileInfo);
     }
 
     @Override
@@ -84,8 +85,8 @@ public class WorldScreen extends MainScreen {
         // after all the tiles are drawn, otherwise it would be underneath some of them.
         final Tile mouseOverTile = tileMap.get(mouseOverPos);
         if (mouseOverTile != null) {
-            mouseOverTileInfo.setVisible(true);
-            mouseOverTileInfo.setText(mouseOverTile.info());
+            // Set the text and show the element
+            mouseOverTileInfo.setText(mouseOverTile.info()).setVisible(true);
         }
 
         super.draw(mousePos); // Draw GUI elements

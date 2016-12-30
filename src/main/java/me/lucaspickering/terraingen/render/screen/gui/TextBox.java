@@ -39,12 +39,13 @@ public class TextBox extends GuiElement {
         return text;
     }
 
-    public void setText(String text) {
+    public TextBox setText(String text) {
         Objects.requireNonNull(text);
         this.text = text;
         final Pair<Integer, Integer> stringSize = renderer().getStringSize(text, FONT);
         setWidth(stringSize.first() + BORDER_PADDING_X * 2);
         setHeight(stringSize.second() + BORDER_PADDING_Y * 2);
+        return this;
     }
 
     @Override

@@ -1,10 +1,12 @@
 package me.lucaspickering.terraingen.render.screen;
 
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.render.Font;
@@ -15,33 +17,36 @@ import me.lucaspickering.terraingen.render.screen.gui.GuiElement;
 import me.lucaspickering.terraingen.util.Point;
 
 /**
- * A {@code MainScreen} is a type of {@link ScreenElement} that is meant to be a top-level element.
- * A {@code MainScreen} has no parent {@link ScreenElement} and there can only ever be one active
- * {@code MainScreen} at a time. Examples of a {@code MainScreen} include the main menu screen and
+ * A {@code Screen} is a type of {@link ScreenElement} that is meant to be a top-level element.
+ * A {@code Screen} has no parent {@link ScreenElement} and there can only ever be one active
+ * {@code Screen} at a time. Examples of a {@code Screen} include the main menu screen and
  * the in-game screen.
  */
-public abstract class MainScreen implements ScreenElement {
+public abstract class Screen implements ScreenElement {
 
     protected final Point center = new Point(Renderer.RES_WIDTH / 2,
                                              Renderer.RES_HEIGHT / 2);
     private List<GuiElement> guiElements = new LinkedList<>();
-    private MainScreen nextScreen = this;
+    private Screen nextScreen;
+    private boolean shouldExit; // Set to true to close the game
 
     @Override
     public void draw(Point mousePos) {
         // Draw all visible GUI elements
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        guiElements.stream().filter(GuiElement::isVisible).forEach(element -> drawElement(mousePos,
-                                                                                          element));
+        guiElements.stream()
+            .filter(GuiElement::isVisible) // Only draw elements that are visible
+            .forEach(element -> drawElement(mousePos, element)); // Draw each element
+
         // If debug mode is enabled, draw the FPS in the corner
         final TerrainGen terrainGen = TerrainGen.instance();
         if (terrainGen.debug()) {
             renderer().drawString(Font.DEBUG, "FPS: " + terrainGen.getFps(), 10, 10);
         }
+
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
-
     }
 
     private void drawElement(Point mousePos, GuiElement element) {
@@ -52,20 +57,48 @@ public abstract class MainScreen implements ScreenElement {
         GL11.glPopMatrix();
     }
 
-    protected final void setNextScreen(MainScreen nextScreen) {
+    /**
+     * Called each frame by the main game loop, after {@link #draw}. To keep this screen as the
+     * current screen, return {@code null}. To change to another screen, return that screen.
+     *
+     * @return the screen to change to, or {@code null} to keep this screen
+     */
+    public final Screen getNextScreen() {
+        return nextScreen;
+    }
+
+    /**
+     * Resets the next screen back to null. Should be called on the old screen after changing
+     * screens, if you intend to use that same object again.
+     */
+    public final void resetNextScreen() {
+        nextScreen = null; // Reset it to null
+    }
+
+    /**
+     * Sets the next screen, which will be swapped to.
+     *
+     * @param nextScreen the next screen to display
+     */
+    protected final void setNextScreen(@NotNull Screen nextScreen) {
+        Objects.requireNonNull(nextScreen);
         this.nextScreen = nextScreen;
     }
 
     /**
-     * Called each frame by the main game loop, after {@link #draw}. To keep this screen as the
-     * current screen, return {@code null}. To change to another screen, return that screen. To keep
-     * this screen, return {@code this}. To exit the game, return {@code null}
+     * Should the game exit?
      *
-     * @return the screen to change to, {@code this} to keep this screen, or {@code null} to exit
-     * the game
+     * @return {@code true} if the game should exit, {@code false} otherwise
      */
-    public final MainScreen nextScreen() {
-        return nextScreen;
+    public final boolean shouldExit() {
+        return shouldExit;
+    }
+
+    /**
+     * Closes the game.
+     */
+    protected final void exit() {
+        shouldExit = true;
     }
 
     @Override

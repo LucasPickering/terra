@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
-import me.lucaspickering.terraingen.render.screen.MainScreen;
+import me.lucaspickering.terraingen.render.screen.Screen;
 import me.lucaspickering.terraingen.render.screen.WorldScreen;
 import me.lucaspickering.terraingen.util.Colors;
 import me.lucaspickering.terraingen.util.Point;
@@ -42,7 +42,7 @@ public class TerrainGen {
 
     private long window;
     private Renderer renderer;
-    private MainScreen currentScreen;
+    private Screen currentScreen;
     private int windowWidth;
     private int windowHeight;
     private Point mousePos = Point.ZERO;
@@ -194,13 +194,18 @@ public class TerrainGen {
             currentScreen.draw(mousePos);
             GLFW.glfwSwapBuffers(window); // Swap the color buffers
 
-            // Change to the next screen (usually nextScreen() returns the same screen)
-            currentScreen = currentScreen.nextScreen();
+            // If the current screen says to change to another screen, do that
+            final Screen nextScreen = currentScreen.getNextScreen();
+            if (nextScreen != null) {
+                currentScreen.resetNextScreen(); // We're changing screens so reset this
+                currentScreen = nextScreen; // Go to the next screen
+            }
 
-            // If the current screen is null, exit the game
-            if (currentScreen == null) {
+            // If the current screen says the game should exit, then exit
+            if (currentScreen.shouldExit()) {
                 exitGame();
             }
+
             updateFPS(); // Update the FPS counter
         }
     }

@@ -19,5 +19,5 @@ public class Colors {
     public static final Color BUTTON_NORMAL = Color.BLACK;
     public static final Color BUTTON_HIGHLIGHT = Color.RED;
     public static final Color BUTTON_TEXT_NORMAL = Color.WHITE;
-    public static final Color BUTTON_TEXT_HIGHLIGHT = Color.BLUE;
+    public static final Color BUTTON_TEXT_HIGHLIGHT = Color.LIGHT_GRAY;
 }
