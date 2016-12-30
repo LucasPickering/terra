@@ -72,7 +72,9 @@ public class WorldScreen extends MainScreen {
 
         // Draw each tile
         {
+            GL11.glPushMatrix();
             GL11.glTranslatef(worldCenter.x(), worldCenter.y(), 0f);
+
             // Draw the tiles themselves
             onScreenTiles.forEach(this::drawTile);
 
@@ -82,7 +84,8 @@ public class WorldScreen extends MainScreen {
             onScreenTiles.forEach(tile -> drawTileOverlays(tile, tile.pos().equals(mouseOverPos)));
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             GL11.glDisable(GL11.GL_BLEND);
-            GL11.glTranslatef(-worldCenter.x(), -worldCenter.y(), 0f);
+
+            GL11.glPopMatrix();
         }
 
         // Update mouseOverTileInfo for the tile that the mouse is over. This HAS to be done
@@ -100,17 +103,15 @@ public class WorldScreen extends MainScreen {
     /**
      * Draws the given tile.
      *
-     * @param tile      the tile to draw
+     * @param tile the tile to draw
      */
     private void drawTile(Tile tile) {
-        // Translate to the top-left corner of the tile
-        // Draw the background
-        // Draw the outline
-        // Translate back
+        // Shift to the tile and draw the background
+        GL11.glPushMatrix();
         GL11.glTranslatef(tile.topLeft().x(), tile.topLeft().y(), 0f);
         drawTileBackground(tile);
 //        drawTileOutline(tile); // It looks neater without outlines
-        GL11.glTranslatef(-tile.topLeft().x(), -tile.topLeft().y(), 0f);
+        GL11.glPopMatrix();
     }
 
     private void drawTileBackground(Tile tile) {

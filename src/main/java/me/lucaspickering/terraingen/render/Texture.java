@@ -24,8 +24,7 @@ public class Texture {
      * @param color  the color of the texture
      */
     public void draw(int x, int y, int width, int height, Color color) {
-        // Set the color (aren't bitshifts cool?)
-        Funcs.setGlColor(color);
+        Funcs.setGlColor(color); // Set the color
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID); // Bind the texture
 
         // Draw a rectangle
