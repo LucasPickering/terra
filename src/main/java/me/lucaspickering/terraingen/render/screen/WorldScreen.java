@@ -43,6 +43,11 @@ public class WorldScreen extends Screen {
 
     @Override
     public void draw(Point mousePos) {
+        // Mouse pos is null when being rendered in the background
+        if (mousePos == null) {
+            lastMouseDragPos = null; // No longer dragging
+        }
+
         // If the mouse is being dragged, shift the world getCenter based on it
         if (lastMouseDragPos != null) {
             // Shift the world
@@ -59,9 +64,14 @@ public class WorldScreen extends Screen {
             .filter(this::containsTile)
             .collect(Collectors.toList());
 
-        // Draw each tile. For each one, check if it is the
-        final Point shiftedMousePos = mousePos.minus(worldCenter);
-        final TilePoint mouseOverPos = WorldHelper.pixelToTile(shiftedMousePos);
+        // If there is a mouse position, check which tile it's over
+        final TilePoint mouseOverPos;
+        if (mousePos != null) {
+            final Point shiftedMousePos = mousePos.minus(worldCenter);
+            mouseOverPos = WorldHelper.pixelToTile(shiftedMousePos);
+        } else {
+            mouseOverPos = null;
+        }
 
         // Draw each tile
         {

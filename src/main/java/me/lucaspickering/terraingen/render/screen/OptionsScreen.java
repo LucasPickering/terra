@@ -38,7 +38,7 @@ public class OptionsScreen extends Screen {
 
     @Override
     public void draw(Point mousePos) {
-        worldScreen.draw(Point.ZERO);
+        worldScreen.draw(null);
 
         GL11.glEnable(GL11.GL_BLEND);
         renderer().drawRect(0, 0, Renderer.RES_WIDTH, Renderer.RES_HEIGHT, Colors.MENU_SHADER);
