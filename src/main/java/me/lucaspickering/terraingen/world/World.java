@@ -14,6 +14,7 @@ import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
 import me.lucaspickering.terraingen.world.generate.BiomePainter;
 import me.lucaspickering.terraingen.world.generate.Generator;
+import me.lucaspickering.terraingen.world.generate.LandRougher;
 import me.lucaspickering.terraingen.world.generate.OceanFloorGenerator;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
@@ -29,9 +30,10 @@ public class World {
 
     private static final Generator[] GENERATORS = new Generator[]{
         new OceanFloorGenerator(),
+        new BiomePainter(),
+        new LandRougher(),
         new PeakGenerator(),
         new WaterPainter(),
-        new BiomePainter(),
         new BeachGenerator()
     };
 

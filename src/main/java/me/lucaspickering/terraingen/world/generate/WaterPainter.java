@@ -20,7 +20,7 @@ public class WaterPainter implements Generator {
 
     // Generation parameters
     // Minimum size of a cluster to be considered an ocean
-    private static final int MIN_OCEAN_SIZE = 10;
+    private static final int MIN_OCEAN_SIZE = 20;
     private static final int MIN_COAST_DEPTH = -10; // Everything in an ocean >= this is coast
 
     @Override
@@ -41,7 +41,8 @@ public class WaterPainter implements Generator {
                 }
             } else {
                 // Otherwise, give it a chance to become a lake, proportional to its size
-                final float chance = (float) size / MIN_OCEAN_SIZE;
+                // 1 tile has 0 chance, 2 tiles have 1/x chance, 3 tiles have 2/x chance, etc.
+                final float chance = (float) (size - 1) / (MIN_OCEAN_SIZE - 2);
                 if (random.nextFloat() < chance) {
                     // If we chose to make it a lake, change all the tiles to lake
                     cluster.values().forEach(tile -> tile.setBiome(Biome.LAKE));

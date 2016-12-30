@@ -6,6 +6,10 @@ import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.WorldBuilder;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
+/**
+ * Turns all land tiles that border ocean/coast and that are below some elevation threshold into
+ * beach.
+ */
 public class BeachGenerator implements Generator {
 
     // Generation parameters

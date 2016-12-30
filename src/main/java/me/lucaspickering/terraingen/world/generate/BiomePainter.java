@@ -6,11 +6,10 @@ import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.WorldBuilder;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
+/**
+ * Paints biomes onto each continent.
+ */
 public class BiomePainter implements Generator {
-
-    // Generation parameters
-    // Minimum elevation needed to be considered a mountain
-    private static final int MIN_MOUNTAIN_ELEV = 40;
 
     @Override
     public void generate(WorldBuilder worldBuilder, Random random) {
@@ -19,13 +18,7 @@ public class BiomePainter implements Generator {
             if (tile.biome() != null) {
                 continue;
             }
-            final Biome biome;
-            final int elevation = tile.elevation();
-            if (elevation >= MIN_MOUNTAIN_ELEV) {
-                biome = Biome.MOUNTAIN;
-            } else {
-                biome = Biome.FOREST;
-            }
+            final Biome biome = Biome.PLAINS;
             tile.setBiome(biome);
         }
     }
