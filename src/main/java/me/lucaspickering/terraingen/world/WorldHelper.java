@@ -26,7 +26,7 @@ public class WorldHelper {
      * Converts a {@link TilePoint} in the world to a {@link Point} on the screen.
      *
      * @param tile the position of the tile as a {@link TilePoint}
-     * @return the position of that tile's center on the screen
+     * @return the position of that tile's getCenter on the screen
      */
     @NotNull
     public static Point tileToPixel(@NotNull TilePoint tile) {
@@ -39,7 +39,7 @@ public class WorldHelper {
      * Converts a {@link Point} on the screen to a {@link TilePoint} in the world. The returned
      * point is the location of the tile that contains the given screen point. It doesn't
      * necessarily exist in the world; it is just the position of a theoretical tile that could
-     * exist there. The given point needs to be shifted based on the world center before calling
+     * exist there. The given point needs to be shifted based on the world getCenter before calling
      * this function.
      *
      * @param pos any point on the screen
@@ -81,7 +81,7 @@ public class WorldHelper {
      * Gets the set of all tiles adjacent to the given tile that exist in the world.
      *
      * @param world  the set of tiles in the world
-     * @param origin the center of the search
+     * @param origin the getCenter of the search
      * @return tiles adjacent to {@code origin}, in a direction:point map
      * @throws IllegalArgumentException if {@code origin} is not in {@code world}
      */

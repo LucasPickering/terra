@@ -6,10 +6,13 @@ import me.lucaspickering.terraingen.util.Funcs;
 
 public enum Biome {
 
+    // You can adjust how much the value of the tile color changes in relation to the elevation.
+    // For more value change, use a larger range. You can have the range extend outside [0, 1],
+    // and it will be coerced if necessary.
     OCEAN("Ocean", 0x1653b7, false, 0.3f, 1f),
     COAST("Coast", 0x1887b2, false, 0.3f, 1f),
     LAKE("Lake", 0x09729b, false, 0.3f, 1f),
-    BEACH("Beach", 0xe2c909, true, 0.7f, 1f),
+    BEACH("Beach", 0xe2c909, true, -1.25f, 3.75f),
     PLAINS("Plains", 0xb9f442, true, 0.5f, 0.9f),
     FOREST("Forest", 0x249b09, true, 0.4f, 0.8f),
     MOUNTAIN("Mountain", 0xbbbbbb, true, 0f, 0.8f);

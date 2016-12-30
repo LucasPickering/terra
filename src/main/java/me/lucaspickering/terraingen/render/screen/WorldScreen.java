@@ -3,7 +3,7 @@ package me.lucaspickering.terraingen.render.screen;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -11,7 +11,6 @@ import me.lucaspickering.terraingen.render.ColorTexture;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
-import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.InclusiveRange;
@@ -49,7 +48,7 @@ public class WorldScreen extends MainScreen {
 
     @Override
     public void draw(Point mousePos) {
-        // If the mouse is being dragged, shift the world center based on it
+        // If the mouse is being dragged, shift the world getCenter based on it
         if (lastMouseDragPos != null) {
             // Shift the world
             final Point diff = mousePos.minus(lastMouseDragPos);
@@ -61,9 +60,8 @@ public class WorldScreen extends MainScreen {
         final Map<TilePoint, Tile> tileMap = world.getTiles();
 
         // Get all the tiles that are on-screen (those are the ones that will be drawn)
-        // TODO add some slop so that partially-contained tiles get in here
-        final Collection<Tile> onScreenTiles = tileMap.values().stream()
-            .filter(tile -> contains(worldCenter.plus(tile.center())))
+        final List<Tile> onScreenTiles = tileMap.values().stream()
+            .filter(this::containsTile)
             .collect(Collectors.toList());
 
         // Draw each tile. For each one, check if it is the
@@ -100,6 +98,15 @@ public class WorldScreen extends MainScreen {
         mouseOverTileInfo.setVisible(false); // Hide the tile info, to be updated on the next frame
     }
 
+    private boolean containsTile(Tile tile) {
+        // If any of the 4 corners of the tile are on-screen, the tile is on-screen
+        final Point worldCenter = world.getWorldCenter();
+        return contains(worldCenter.plus(tile.getTopLeft()))
+               || contains(worldCenter.plus(tile.getTopRight()))
+               || contains(worldCenter.plus(tile.getBottomRight()))
+               || contains(worldCenter.plus(tile.getBottomLeft()));
+    }
+
     /**
      * Draws the given tile.
      *
@@ -108,23 +115,20 @@ public class WorldScreen extends MainScreen {
     private void drawTile(Tile tile) {
         // Shift to the tile and draw the background
         GL11.glPushMatrix();
-        GL11.glTranslatef(tile.topLeft().x(), tile.topLeft().y(), 0f);
+        GL11.glTranslatef(tile.getCenter().x(), tile.getCenter().y(), 0f);
         drawTileBackground(tile);
-//        drawTileOutline(tile); // It looks neater without outlines
+        // Could draw tile outlines here
         GL11.glPopMatrix();
     }
 
     private void drawTileBackground(Tile tile) {
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-
-        // Draw the tile background
-        renderer().drawTexture(Constants.TILE_BG_NAME, 0, 0, Tile.WIDTH, Tile.HEIGHT,
-                               tile.backgroundColor());
-
-        // Stop drawing textures
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_BLEND);
+        // Set the color then draw a hexagon
+        Funcs.setGlColor(tile.backgroundColor());
+        GL11.glBegin(GL11.GL_POLYGON);
+        for (Point vertex : Tile.VERTICES) {
+            GL11.glVertex2i(vertex.x(), vertex.y());
+        }
+        GL11.glEnd();
     }
 
     private void drawTileOutline(Tile tile) {
@@ -164,15 +168,15 @@ public class WorldScreen extends MainScreen {
      */
     private void drawTileOverlays(Tile tile, boolean mouseOver) {
         // Translate to this tile
-        GL11.glTranslatef(tile.topLeft().x(), tile.topLeft().y(), 0f);
+        GL11.glPushMatrix();
+        GL11.glTranslatef(tile.getTopLeft().x(), tile.getTopLeft().y(), 0f);
 
         // If the mouse is over this tile, draw the mouse-over overlay
         if (mouseOver) {
             ColorTexture.mouseOver.draw(0, 0, Tile.WIDTH, Tile.HEIGHT);
         }
 
-        // Translate back
-        GL11.glTranslatef(-tile.topLeft().x(), -tile.topLeft().y(), 0f);
+        GL11.glPopMatrix();
     }
 
     @Override

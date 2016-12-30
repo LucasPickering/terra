@@ -12,7 +12,7 @@ public class Colors {
     public static final Color TILE_OUTLINE = Funcs.colorFromRgb(0x606060);
 
     // Tile overlay colors
-    public static final Color MOUSE_OVER = Funcs.colorFromArgb(0x60999999);
+    public static final Color MOUSE_OVER = Funcs.colorFromArgb(0x90aaaaaa);
     public static final Color TILE_INFO_BG = Funcs.colorFromArgb(0xee444444);
 
     // Button colors

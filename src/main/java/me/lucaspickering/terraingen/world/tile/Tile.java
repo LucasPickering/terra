@@ -19,8 +19,8 @@ public class Tile {
 
     // UI constants
     /**
-     * The distance between the center point of the hexagon and each vertex. Also the length of one
-     * side of the tile.
+     * The distance between the getCenter point of the hexagon and each vertex. Also the length of
+     * one side of the tile.
      */
     public static final int RADIUS = 74;
 
@@ -40,12 +40,12 @@ public class Tile {
      * there.
      */
     public static final Point[] VERTICES = new Point[]{
-        new Point(WIDTH / 4, 0),
-        new Point(WIDTH * 3 / 4, 0),
-        new Point(WIDTH, HEIGHT / 2),
-        new Point(WIDTH * 3 / 4, HEIGHT),
-        new Point(WIDTH / 4, HEIGHT),
-        new Point(0, HEIGHT / 2)
+        new Point(-WIDTH / 4, -HEIGHT / 2),
+        new Point(WIDTH / 4, -HEIGHT / 2),
+        new Point(RADIUS, 0),
+        new Point(WIDTH / 4, HEIGHT / 2),
+        new Point(-WIDTH / 4, HEIGHT / 2),
+        new Point(-RADIUS, 0)
     };
 
     private static final String INFO_STRING = "Biome: %s%nElevation: %d";
@@ -62,19 +62,25 @@ public class Tile {
     private int elevation;
 
     /**
-     * Pixel position of the center of the texture of this tile, relative to the origin tile.
-     * This needs to be shifted by the world center
+     * Pixel position of the getCenter of the texture of this tile, relative to the origin tile.
+     * This needs to be shifted by the world getCenter
      * ({@link me.lucaspickering.terraingen.world.World#getWorldCenter}) before being drawn on
      * screen.
      */
     private final Point center;
     private final Point topLeft;
+    private final Point topRight;
+    private final Point bottomRight;
+    private final Point bottomLeft;
 
     public Tile(TilePoint pos) {
         Objects.requireNonNull(pos);
         this.pos = pos;
         this.center = WorldHelper.tileToPixel(pos);
-        this.topLeft = center.minus(WIDTH / 2, HEIGHT / 2);
+        topLeft = center.plus(-WIDTH / 2, -HEIGHT / 2);
+        topRight = center.plus(WIDTH / 2, -HEIGHT / 2);
+        bottomRight = center.plus(WIDTH / 2, HEIGHT / 2);
+        bottomLeft = center.plus(-WIDTH / 2, HEIGHT / 2);
     }
 
     protected Tile(TilePoint pos, Biome biome, int elevation) {
@@ -148,12 +154,24 @@ public class Tile {
         this.elevation = elevation;
     }
 
-    public final Point center() {
+    public final Point getCenter() {
         return center;
     }
 
-    public final Point topLeft() {
+    public final Point getTopLeft() {
         return topLeft;
+    }
+
+    public Point getTopRight() {
+        return topRight;
+    }
+
+    public Point getBottomRight() {
+        return bottomRight;
+    }
+
+    public Point getBottomLeft() {
+        return bottomLeft;
     }
 
     public final Color backgroundColor() {

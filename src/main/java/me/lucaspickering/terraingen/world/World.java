@@ -38,7 +38,7 @@ public class World {
     private final Random random;
     private final Map<TilePoint, Tile> tiles;
 
-    // The pixel location of the center of the world
+    // The pixel location of the getCenter of the world
     private Point worldCenter;
 
     public World() {
