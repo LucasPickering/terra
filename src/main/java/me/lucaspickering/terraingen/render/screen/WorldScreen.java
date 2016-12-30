@@ -164,11 +164,8 @@ public class WorldScreen extends MainScreen {
     public void onKey(KeyEvent event) {
         if (event.action == GLFW.GLFW_RELEASE) {
             switch (event.key) {
-                case GLFW.GLFW_KEY_SPACE:
-                    // todo pause generation here
-                    break;
                 case GLFW.GLFW_KEY_ESCAPE:
-                    setNextScreen(null); // Close the game
+                    setNextScreen(new PauseScreen(this)); // Open the pause menu
             }
         }
     }

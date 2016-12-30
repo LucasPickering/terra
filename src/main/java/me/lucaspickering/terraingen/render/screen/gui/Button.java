@@ -15,8 +15,7 @@ public class Button extends GuiElement {
     private String text;
 
     public Button(String text, Point pos) {
-        super(pos, WIDTH, HEIGHT);
-        this.text = text;
+        this(text, pos, HorizAlignment.CENTER, VertAlignment.CENTER);
     }
 
     public Button(String text, Point pos, HorizAlignment horizAlign, VertAlignment vertAlign) {

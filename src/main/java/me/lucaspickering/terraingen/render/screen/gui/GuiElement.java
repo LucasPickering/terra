@@ -132,8 +132,8 @@ public abstract class GuiElement implements ScreenElement {
 
     @Override
     public boolean contains(Point p) {
-        return pos.x() <= p.x() && p.x() <= pos.x() + width
-               && pos.y() <= p.y() && p.y() <= pos.y() + height;
+        return adjustedPos.x() <= p.x() && p.x() <= adjustedPos.x() + width
+               && adjustedPos.y() <= p.y() && p.y() <= adjustedPos.y() + height;
     }
 
     private void updateAdjustedPos() {
