@@ -3,7 +3,6 @@ package me.lucaspickering.terraingen.world;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -169,17 +168,15 @@ public class WorldHelper {
      * @return the isPositive and negative clusters, in a pair (with isPositive first)
      */
     @NotNull
-    public static Pair<List<Map<TilePoint, Tile>>, List<Map<TilePoint, Tile>>> clusterTiles(
-        @NotNull Map<TilePoint, Tile> tiles, @NotNull Predicate<Tile> predicate) {
+    public static Pair<List<Tiles>, List<Tiles>> clusterTiles(@NotNull Tiles tiles,
+                                                              @NotNull Predicate<Tile> predicate) {
         // First divided each tile into its own cluster, then iterate over all those clusters and
         // begin joining clusters that have the same state (postive or negative) and have
         // adjacent tiles.
 
-        final Map<TilePoint, Tile> unclusteredTiles = new HashMap<>(tiles); // Copy the input map
-        // Clusters of tiles that satisfy the predicate
-        final List<Map<TilePoint, Tile>> posClusters = new LinkedList<>();
-        // Clusters of tiles that DON'T satisfy the predicate
-        final List<Map<TilePoint, Tile>> negClusters = new LinkedList<>();
+        final Tiles unclusteredTiles = new Tiles(tiles); // Copy the input structure
+        final List<Tiles> posClusters = new LinkedList<>(); // These satisfy the predicate
+        final List<Tiles> negClusters = new LinkedList<>(); // These DON'T satisfy the predicate
 
         // Each iteration of this loop creates a new cluster
         while (!unclusteredTiles.isEmpty()) {
@@ -188,9 +185,9 @@ public class WorldHelper {
             final boolean positive = predicate.test(firstTile); // Get its state (pos/neg)
 
             // Start building a cluster around this tile
-            final Map<TilePoint, Tile> cluster = new HashMap<>();
+            final Tiles cluster = new Tiles();
             // Keep track of the tiles whose adjacent tiles haven't been checked yet
-            final Map<TilePoint, Tile> uncheckedTiles = new HashMap<>();
+            final Tiles uncheckedTiles = new Tiles();
 
             // Add the first tile to the cluster, and remove it from unclusteredTiles
             cluster.put(firstTile.pos(), firstTile);
@@ -241,17 +238,16 @@ public class WorldHelper {
      * the given similarity function, is GREATER THAN OR EQUAL TO the given similarity threshold.
      *
      * @param tiles               the tiles to cluster
-     * @param similarityFunction  the function used to determine how similar two tiles are, should
-     *                            be commutative
+     * @param similarityFunc      the function used to determine how similar two tiles are (should
+     *                            be commutative)
      * @param similarityThreshold the minimum similarity score two tiles need in order to be
      *                            considered similar to each other
      * @return the clusters
      */
     @NotNull
-    public static List<Map<TilePoint, Tile>> clusterTiles(
-        @NotNull Map<TilePoint, Tile> tiles,
-        @NotNull BiFunction<Tile, Tile, Double> similarityFunction,
-        double similarityThreshold) {
+    public static List<Tiles> clusterTiles(@NotNull Tiles tiles,
+                                           @NotNull BiFunction<Tile, Tile, Double> similarityFunc,
+                                           double similarityThreshold) {
         throw new UnsupportedOperationException(); // TODO implement if necessary
     }
 }

@@ -1,10 +1,9 @@
 package me.lucaspickering.terraingen.world.generate;
 
-import java.util.Map;
 import java.util.Random;
 
-import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
+import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -18,7 +17,7 @@ public class BeachGenerator implements Generator {
     private static final int MAX_BEACH_ELEV = 5;
 
     @Override
-    public void generate(Map<TilePoint, Tile> tiles, Random random) {
+    public void generate(Tiles tiles, Random random) {
         for (Tile tile : tiles.values()) {
             final Biome biome = tile.biome();
             // No biome set, or already land, and within our elevation bound. Check the adjacent

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Random;
 
 import me.lucaspickering.terraingen.util.TilePoint;
+import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -20,6 +21,6 @@ public interface Generator {
      * @param tiles  the tiles to modify
      * @param random the source of random for generation
      */
-    void generate(Map<TilePoint, Tile> tiles, Random random);
+    void generate(Tiles tiles, Random random);
 
 }

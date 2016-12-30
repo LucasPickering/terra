@@ -4,7 +4,6 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import me.lucaspickering.terraingen.render.ColorTexture;
@@ -14,6 +13,7 @@ import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
+import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.WorldHelper;
 import me.lucaspickering.terraingen.world.tile.Tile;
@@ -57,10 +57,10 @@ public class WorldScreen extends Screen {
         }
         final Point worldCenter = world.getWorldCenter();
 
-        final Map<TilePoint, Tile> tileMap = world.getTiles();
+        final Tiles tiles = world.getTiles();
 
         // Get all the tiles that are on-screen (those are the ones that will be drawn)
-        final List<Tile> onScreenTiles = tileMap.values().stream()
+        final List<Tile> onScreenTiles = tiles.values().stream()
             .filter(this::containsTile)
             .collect(Collectors.toList());
 
@@ -93,7 +93,7 @@ public class WorldScreen extends Screen {
 
         // Update mouseOverTileInfo for the tile that the mouse is over. This HAS to be done
         // after all the tiles are drawn, otherwise it would be underneath some of them.
-        final Tile mouseOverTile = tileMap.get(mouseOverPos);
+        final Tile mouseOverTile = tiles.get(mouseOverPos);
         if (mouseOverTile != null) {
             // Set the text and show the element
             mouseOverTileInfo.setText(mouseOverTile.info()).setVisible(true);

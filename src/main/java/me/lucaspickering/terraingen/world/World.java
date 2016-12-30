@@ -1,9 +1,7 @@
 package me.lucaspickering.terraingen.world;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -11,7 +9,6 @@ import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.InclusiveRange;
-import me.lucaspickering.terraingen.util.Pair;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
@@ -21,7 +18,6 @@ import me.lucaspickering.terraingen.world.generate.LandRougher;
 import me.lucaspickering.terraingen.world.generate.OceanFloorGenerator;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
-import me.lucaspickering.terraingen.world.tile.ImmutableTile;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class World {
@@ -42,7 +38,7 @@ public class World {
     };
 
     private final Random random;
-    private final Map<TilePoint, Tile> tiles;
+    private final Tiles tiles;
 
     // The pixel location of the getCenter of the world
     private Point worldCenter;
@@ -53,8 +49,8 @@ public class World {
         worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
     }
 
-    private Map<TilePoint, Tile> genTiles() {
-        final Map<TilePoint, Tile> tiles = new HashMap<>();
+    private Tiles genTiles() {
+        final Tiles tiles = new Tiles();
         // Fill out the set with a bunch of points
         for (int x = -SIZE; x <= SIZE; x++) {
             for (int y = -SIZE; y <= SIZE; y++) {
@@ -86,29 +82,19 @@ public class World {
             tile.setAdjacents(adjacents);
         }
 
-        // Apply each generator in sequence
+        // Apply each generator in sequence (this is the heavy lifting)
         Arrays.stream(GENERATORS).forEach(gen -> gen.generate(tiles, random));
 
-        // Build the world into a map of point:tile and return it
-        return buildTiles(tiles);
-    }
-
-    private Map<TilePoint, Tile> buildTiles(Map<TilePoint, Tile> tiles) {
-        // Turn the map of point:Tile into a map of point:ImmutableTile
-        final Map<TilePoint, ? extends Tile> world = tiles.entrySet().stream()
-            .map(e -> new Pair<>(e.getKey(), new ImmutableTile(e.getValue()))) // Build each tile
-            .collect(Pair.mapCollector()); // Collect into a map
-
-        // Return an unmodifiable map backed by the map we just made
-        return Collections.unmodifiableMap(world);
+        return tiles.immutableCopy(); // Return an immutable copy of what we just made
     }
 
     /**
-     * Gets the world's copy of tiles. This is NOT a copy, so DO NOT MODIFY IT.
+     * Gets the world's tiles. No copy is made, but the returned object is immutable. Its
+     * internal objects (tiles, etc.) may be mutable though, so do not change them!
      *
-     * @return the world's copy of tiles
+     * @return the world's tiles
      */
-    public Map<TilePoint, Tile> getTiles() {
+    public Tiles getTiles() {
         return tiles;
     }
 
