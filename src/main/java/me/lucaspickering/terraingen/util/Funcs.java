@@ -69,6 +69,23 @@ public class Funcs {
     }
 
     /**
+     * Maps the given value from one given range to the other given range. For example, 5 mapped
+     * from [0, 10] to [20, 40] is 30.
+     *
+     * @param fromMin the minimum of the range being mapped from
+     * @param fromMax the maximum of the range being mapped from
+     * @param toMin   the minimum of the range being mapped to
+     * @param toMax   the maximum of the range being mapped to
+     * @param x       the value being mapped
+     * @return the mapped value
+     */
+    public static float mapToRange(float fromMin, float fromMax,
+                                   float toMin, float toMax, float x) {
+        float halfMapped = (x - fromMin) / (fromMax - fromMin); // Map to [0, 1]
+        return halfMapped * (toMax - toMin) + toMin; // Now map to [toMin, toMax]
+    }
+
+    /**
      * Applies a random amount of slop to the given value.
      *
      * @param random  the {@link Random} to use

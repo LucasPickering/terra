@@ -9,29 +9,47 @@ public enum Biome {
     // You can adjust how much the value of the tile color changes in relation to the elevation.
     // For more value change, use a larger range. You can have the range extend outside [0, 1],
     // and it will be coerced if necessary.
-    OCEAN("Ocean", 0x1653b7, false, 0.3f, 1f),
-    COAST("Coast", 0x1887b2, false, 0.3f, 1f),
-    LAKE("Lake", 0x09729b, false, 0.3f, 1f),
-    BEACH("Beach", 0xe2c909, true, -1.25f, 3.75f),
-    PLAINS("Plains", 0xb9f442, true, 0.5f, 0.9f),
-    FOREST("Forest", 0x249b09, true, 0.4f, 0.8f),
-    MOUNTAIN("Mountain", 0xbbbbbb, true, 0f, 0.8f);
+    OCEAN("Ocean", 0x1653b7, false, new Mapping(-50, -10, 0.3f, 1f)),
+    COAST("Coast", 0x1887b2, false, new Mapping(-20, 0, 0.5f, 1f)),
+    LAKE("Lake", 0x09729b, false, new Mapping(-10, 0, 0.5f, 1f)),
+    BEACH("Beach", 0xe2c909, true, new Mapping(0, 5, 0.75f, 0.95f)),
+    PLAINS("Plains", 0xb9f442, true, new Mapping(0, 40, 0.5f, 1f)),
+    FOREST("Forest", 0x249b09, true, new Mapping(0, 40, 0.3f, 0.8f)),
+    MOUNTAIN("Mountain", 0xbbbbbb, true, new Mapping(40, 75, 0.3f, 0.6f));
+
+    private static class Mapping {
+
+        private final float fromMin;
+        private final float fromMax;
+        private final float toMin;
+        private final float toMax;
+
+        private Mapping(float fromMin, float fromMax, float toMin, float toMax) {
+            this.fromMin = fromMin;
+            this.fromMax = fromMax;
+            this.toMin = toMin;
+            this.toMax = toMax;
+        }
+
+        private float map(float x) {
+            return Funcs.mapToRange(fromMin, fromMax, toMin, toMax, x);
+        }
+    }
 
     private final String displayName;
     private final Color baseColor;
     private final boolean isLand;
-    private final float minValue, maxValue; // Min and max value for the color of this biome
+    private final Mapping colorValueMapping; // Mapping for calculating value of tile color
 
-    Biome(String displayName, int baseColor, boolean isLand, float minValue, float maxValue) {
-        this(displayName, Funcs.colorFromRgb(baseColor), isLand, minValue, maxValue);
+    Biome(String displayName, int baseColor, boolean isLand, Mapping colorValueMapping) {
+        this(displayName, Funcs.colorFromRgb(baseColor), isLand, colorValueMapping);
     }
 
-    Biome(String displayName, Color baseColor, boolean isLand, float minValue, float maxValue) {
+    Biome(String displayName, Color baseColor, boolean isLand, Mapping colorValueMapping) {
         this.displayName = displayName;
         this.baseColor = baseColor;
         this.isLand = isLand;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
+        this.colorValueMapping = colorValueMapping;
     }
 
     public String displayName() {
@@ -49,8 +67,8 @@ public enum Biome {
     public Color color(int elevation) {
         final float[] hsv = Funcs.toHSV(baseColor());
         // Change the value based on the elevation
-        hsv[2] = World.ELEVATION_RANGE.normalize(elevation, minValue, maxValue);
-        hsv[2] = Funcs.coerce(0f, hsv[2], 1f); // Max sure it's [0, 1]
+        final float value = colorValueMapping.map(elevation);
+        hsv[2] = Funcs.coerce(0f, value, 1f); // Coerce value to [0, 1]
         return Funcs.toRGB(hsv);
     }
 }

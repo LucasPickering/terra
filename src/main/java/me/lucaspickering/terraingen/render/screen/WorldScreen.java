@@ -11,9 +11,7 @@ import me.lucaspickering.terraingen.render.ColorTexture;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
-import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.terraingen.util.InclusiveRange;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.World;
@@ -25,11 +23,7 @@ public class WorldScreen extends MainScreen {
     // Maximum time a click can be held down to be considered a click and not a drag
     private static final int MAX_CLICK_TIME = 250;
 
-    // The range of elevation differences that the outline width varies across
-    private static final InclusiveRange ELEV_DIFF_RANGE = new InclusiveRange(0, 20);
-    private static final float DEFAULT_OUTLINE_WIDTH = 1.5f;
-    private static final float MIN_OUTLINE_WIDTH = 0.1f;
-    private static final float MAX_OUTLINE_WIDTH = 1f;
+    private static final float OUTLINE_WIDTH = 1.5f;
 
     private final World world;
     private final MouseTextBox mouseOverTileInfo;
@@ -136,22 +130,9 @@ public class WorldScreen extends MainScreen {
             // Get the two vertices that the line will be between
             final Point vertex1 = Tile.VERTICES[i];
             final Point vertex2 = Tile.VERTICES[(i + 1) % Tile.NUM_SIDES];
-            final Direction dir = Direction.values()[i];
 
             // The line width is based on the elevation between this tile and the adjacent one
-            final float lineWidth;
-            final Tile adjTile = tile.adjacents().get(dir); // Get the adjacent tile
-            if (adjTile != null) {
-                // If it exists, calculate line width
-                final int elevDiff = Math.abs(tile.elevation() - adjTile.elevation());
-                lineWidth = ELEV_DIFF_RANGE.normalize(elevDiff,
-                                                      MIN_OUTLINE_WIDTH, MAX_OUTLINE_WIDTH);
-            } else {
-                // If there is no adjacent tile in this direction, use the default line width
-                lineWidth = DEFAULT_OUTLINE_WIDTH;
-            }
-            GL11.glLineWidth(lineWidth);
-
+            GL11.glLineWidth(OUTLINE_WIDTH);
             Funcs.setGlColor(tile.outlineColor());
             GL11.glBegin(GL11.GL_LINES);
             GL11.glVertex2i(vertex1.x(), vertex1.y());

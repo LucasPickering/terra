@@ -18,7 +18,7 @@ public class BiomePainter implements Generator {
             if (tile.biome() != null) {
                 continue;
             }
-            final Biome biome = Biome.PLAINS;
+            final Biome biome = Biome.FOREST;
             tile.setBiome(biome);
         }
     }

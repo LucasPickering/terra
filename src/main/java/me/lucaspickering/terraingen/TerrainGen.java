@@ -167,7 +167,7 @@ public class TerrainGen {
                               (vidmode.height() - windowHeight) / 2); // Center the window
 
         GLFW.glfwMakeContextCurrent(window);
-//        GLFW.glfwSwapInterval(1); // Enable v-sync
+        GLFW.glfwSwapInterval(1); // Enable v-sync
         GLFW.glfwShowWindow(window); // Make the window visible
         GL.createCapabilities(); // LWJGL needs this
         GL11.glClearColor(Colors.CLEAR.getRed() / 255f, Colors.CLEAR.getGreen() / 255f,
