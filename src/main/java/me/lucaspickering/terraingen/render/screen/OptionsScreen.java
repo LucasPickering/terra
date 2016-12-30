@@ -11,31 +11,29 @@ import me.lucaspickering.terraingen.render.screen.gui.GuiElement;
 import me.lucaspickering.terraingen.util.Colors;
 import me.lucaspickering.terraingen.util.Point;
 
-public class PauseScreen extends Screen {
+public class OptionsScreen extends Screen {
 
     private final WorldScreen worldScreen;
-    private final Button backToWorldButton;
-    private final Button optionsButton;
-    private final Button desktopButton;
+    private final Screen prevScreen;
+    private final Button backButton;
 
     /**
-     * Constructs a new {@code PauseScreen}. The given screen is the {@link WorldScreen} that will
-     * be returned to when the game is resumed.
+     * Constructs a new {@code PauseScreen}. The given {@link WorldScreen} is rendered in the
+     * background of this menu. The given {@link Screen} is the screen that will be returned to
+     * when this one is closed.
      *
-     * @param worldScreen the screen to eventually return to
+     * @param worldScreen the world to render in the background
+     * @param prevScreen  the screen to eventually return to
      */
-    public PauseScreen(WorldScreen worldScreen) {
+    public OptionsScreen(WorldScreen worldScreen, Screen prevScreen) {
         this.worldScreen = worldScreen;
+        this.prevScreen = prevScreen;
 
         // Initialize everything
-        backToWorldButton = new Button("Resume", new Point(center.x(), center.y() - 200));
-        optionsButton = new Button("Options", new Point(center.x(), center.y()));
-        desktopButton = new Button("Exit to Desktop", new Point(center.x(), center.y() + 200));
+        backButton = new Button("Back", new Point(center.x(), center.y()));
 
         // Add all the elements
-        addGuiElement(backToWorldButton);
-        addGuiElement(optionsButton);
-        addGuiElement(desktopButton);
+        addGuiElement(backButton);
     }
 
     @Override
@@ -54,7 +52,7 @@ public class PauseScreen extends Screen {
         if (event.action == GLFW.GLFW_RELEASE) {
             switch (event.key) {
                 case GLFW.GLFW_KEY_ESCAPE:
-                    returnToWorld();
+                    returnToPrev();
                     break;
             }
         }
@@ -62,16 +60,12 @@ public class PauseScreen extends Screen {
 
     @Override
     public void onElementClicked(MouseButtonEvent event, GuiElement element) {
-        if (element == backToWorldButton) {
-            returnToWorld();
-        } else if (element == optionsButton) {
-            setNextScreen(new OptionsScreen(worldScreen, this));
-        } else if (element == desktopButton) {
-            exit(); // Close the program
+        if (element == backButton) {
+            returnToPrev();
         }
     }
 
-    private void returnToWorld() {
-        setNextScreen(worldScreen); // Go back to the world
+    private void returnToPrev() {
+        setNextScreen(prevScreen); // Go back to the world
     }
 }
