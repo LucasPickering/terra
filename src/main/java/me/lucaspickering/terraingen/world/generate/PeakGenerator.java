@@ -10,7 +10,6 @@ import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.InclusiveRange;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
-import me.lucaspickering.terraingen.world.WorldBuilder;
 import me.lucaspickering.terraingen.world.WorldHelper;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -27,9 +26,7 @@ public class PeakGenerator implements Generator {
     private static final int MIN_MOUNTAIN_ELEV = 40; // Everything taller than this is mountain
 
     @Override
-    public void generate(WorldBuilder worldBuilder, Random random) {
-        final Map<TilePoint, Tile> tiles = worldBuilder.getTiles();
-
+    public void generate(Map<TilePoint, Tile> tiles, Random random) {
         // Copy the key set because we're going to be modifying it
         final Set<TilePoint> potentialPeaks = new HashSet<>(tiles.keySet());
         final Set<TilePoint> peaks = new HashSet<>();

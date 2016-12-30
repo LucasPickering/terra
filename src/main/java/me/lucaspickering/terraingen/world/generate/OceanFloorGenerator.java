@@ -1,9 +1,9 @@
 package me.lucaspickering.terraingen.world.generate;
 
+import java.util.Map;
 import java.util.Random;
 
 import me.lucaspickering.terraingen.util.TilePoint;
-import me.lucaspickering.terraingen.world.WorldBuilder;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -21,8 +21,8 @@ public class OceanFloorGenerator implements Generator {
     private static final int FLOOR_DEPTH = -50;
 
     @Override
-    public void generate(WorldBuilder worldBuilder, Random random) {
-        for (Tile tile : worldBuilder.getTiles().values()) {
+    public void generate(Map<TilePoint, Tile> tiles, Random random) {
+        for (Tile tile : tiles.values()) {
             final int distance = tile.pos().distanceTo(TilePoint.ZERO);
             final int elev;
             if (distance >= FLOOR_DISTANCE_THRESHOLD) {

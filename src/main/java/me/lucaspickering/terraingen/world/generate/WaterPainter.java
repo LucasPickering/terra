@@ -6,7 +6,6 @@ import java.util.Random;
 
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
-import me.lucaspickering.terraingen.world.WorldBuilder;
 import me.lucaspickering.terraingen.world.WorldHelper;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -24,10 +23,10 @@ public class WaterPainter implements Generator {
     private static final int MIN_COAST_DEPTH = -10; // Everything in an ocean >= this is coast
 
     @Override
-    public void generate(WorldBuilder worldBuilder, Random random) {
+    public void generate(Map<TilePoint, Tile> tiles, Random random) {
         // Get clusters of tiles that have negative elevation
         final List<Map<TilePoint, Tile>> clusters =
-            WorldHelper.clusterTiles(worldBuilder.getTiles(), t -> t.elevation() < 0).first();
+            WorldHelper.clusterTiles(tiles, t -> t.elevation() < 0).first();
 
         for (Map<TilePoint, Tile> cluster : clusters) {
             final int size = cluster.size();

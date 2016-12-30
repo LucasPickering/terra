@@ -1,14 +1,17 @@
 package me.lucaspickering.terraingen.world;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.render.Renderer;
+import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.InclusiveRange;
+import me.lucaspickering.terraingen.util.Pair;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
@@ -18,6 +21,7 @@ import me.lucaspickering.terraingen.world.generate.LandRougher;
 import me.lucaspickering.terraingen.world.generate.OceanFloorGenerator;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
+import me.lucaspickering.terraingen.world.tile.ImmutableTile;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class World {
@@ -50,25 +54,53 @@ public class World {
     }
 
     private Map<TilePoint, Tile> genTiles() {
-        final Set<TilePoint> points = new HashSet<>();
+        final Map<TilePoint, Tile> tiles = new HashMap<>();
         // Fill out the set with a bunch of points
         for (int x = -SIZE; x <= SIZE; x++) {
             for (int y = -SIZE; y <= SIZE; y++) {
                 for (int z = -SIZE; z <= SIZE; z++) {
                     if (x + y + z == 0) {
-                        points.add(new TilePoint(x, y, z));
+                        final TilePoint point = new TilePoint(x, y, z);
+                        tiles.put(point, new Tile(point));
                     }
                 }
             }
         }
 
-        final WorldBuilder worldBuilder = new WorldBuilder(points);
+        // Add adjacents for each tile
+        for (Map.Entry<TilePoint, Tile> entry : tiles.entrySet()) {
+            final TilePoint point = entry.getKey();
+            final Tile tile = entry.getValue();
+
+            // Get all tiles adjacent to this one
+            final Map<Direction, Tile> adjacents = new EnumMap<>(Direction.class);
+            for (Map.Entry<Direction, TilePoint> adjEntry :
+                WorldHelper.getAdjacentTiles(tiles.keySet(), point).entrySet()) {
+
+                final Direction dir = adjEntry.getKey();
+                final TilePoint adjPoint = adjEntry.getValue();
+
+                // Add the corresponding tile to the map of adjacent tiles
+                adjacents.put(dir, tiles.get(adjPoint));
+            }
+            tile.setAdjacents(adjacents);
+        }
 
         // Apply each generator in sequence
-        Arrays.stream(GENERATORS).forEach(gen -> gen.generate(worldBuilder, random));
+        Arrays.stream(GENERATORS).forEach(gen -> gen.generate(tiles, random));
 
         // Build the world into a map of point:tile and return it
-        return worldBuilder.build();
+        return buildTiles(tiles);
+    }
+
+    private Map<TilePoint, Tile> buildTiles(Map<TilePoint, Tile> tiles) {
+        // Turn the map of point:Tile into a map of point:ImmutableTile
+        final Map<TilePoint, ? extends Tile> world = tiles.entrySet().stream()
+            .map(e -> new Pair<>(e.getKey(), new ImmutableTile(e.getValue()))) // Build each tile
+            .collect(Pair.mapCollector()); // Collect into a map
+
+        // Return an unmodifiable map backed by the map we just made
+        return Collections.unmodifiableMap(world);
     }
 
     /**
