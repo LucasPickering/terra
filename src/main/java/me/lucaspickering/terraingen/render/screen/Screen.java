@@ -24,6 +24,8 @@ import me.lucaspickering.terraingen.util.Point;
  */
 public abstract class Screen implements ScreenElement {
 
+    private static final String DEBUG_FORMAT = "FPS: %d";
+
     protected final Point center = new Point(Renderer.RES_WIDTH / 2,
                                              Renderer.RES_HEIGHT / 2);
     private List<GuiElement> guiElements = new LinkedList<>();
@@ -39,10 +41,9 @@ public abstract class Screen implements ScreenElement {
             .filter(GuiElement::isVisible) // Only draw elements that are visible
             .forEach(element -> drawElement(mousePos, element)); // Draw each element
 
-        // If debug mode is enabled, draw the FPS in the corner
-        final TerrainGen terrainGen = TerrainGen.instance();
-        if (terrainGen.debug()) {
-            renderer().drawString(Font.DEBUG, "FPS: " + terrainGen.getFps(), 10, 10);
+        // If debug mode is enabled, draw debug info
+        if (TerrainGen.instance().debug()) {
+            drawDebugInfo();
         }
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -55,6 +56,12 @@ public abstract class Screen implements ScreenElement {
         GL11.glTranslatef(pos.x(), pos.y(), 0f);
         element.draw(mousePos);
         GL11.glPopMatrix();
+    }
+
+    private void drawDebugInfo() {
+        final TerrainGen terrainGen = TerrainGen.instance();
+        final String debugString = String.format(DEBUG_FORMAT, terrainGen.getFps());
+        renderer().drawString(Font.DEBUG, debugString, 10, 10); // Draw FPS
     }
 
     /**

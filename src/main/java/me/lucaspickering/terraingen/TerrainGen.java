@@ -29,9 +29,9 @@ public class TerrainGen {
 
     private static final TerrainGen TERRAIN_GEN = new TerrainGen();
 
-    // True if we are in debug mode (set by a VM argument)
     private final Logger logger;
-    private final boolean debug;
+    private final boolean debug; // True if we are in debug mode (set by a VM argument)
+    private final long seed;
     private final Random random;
 
     // These event handlers are initialized at the bottom
@@ -75,19 +75,20 @@ public class TerrainGen {
 
         // Set random instance
         final String seedString = System.getProperty("seed");
-        long seed;
         // If a seed was provided, use that, otherwise generate our own seed
         if (seedString != null) {
-            // Try to parse the seed as a Long, and if that fails, just hash it
+            long seed;
+            // Try to parse the seed as a Long, and if that fails, just hash the string
             try {
                 seed = Long.parseLong(seedString);
             } catch (NumberFormatException e) {
                 seed = seedString.hashCode();
             }
+            this.seed = seed;
         } else {
             // Generate a seed and record it, so that it can be logged
             // Maybe we could just use system time here? This seems more xD random though
-            seed = new Random().nextLong();
+            this.seed = new Random().nextLong();
         }
         random = new Random(seed);
         logger.log(Level.CONFIG, "Random seed: " + seed);
@@ -247,6 +248,10 @@ public class TerrainGen {
 
     public boolean debug() {
         return debug;
+    }
+
+    public long getSeed() {
+        return seed;
     }
 
     public Random random() {
