@@ -5,7 +5,6 @@ import java.util.Random;
 
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
-import me.lucaspickering.terraingen.world.WorldHelper;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
