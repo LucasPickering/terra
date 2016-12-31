@@ -19,7 +19,7 @@ public class Tile {
 
     // UI constants
     /**
-     * The distance between the getCenter point of the hexagon and each vertex. Also the length of
+     * The distance between the center point of the hexagon and each vertex. Also the length of
      * one side of the tile.
      */
     public static final int RADIUS = 74;
@@ -62,8 +62,8 @@ public class Tile {
     private int elevation;
 
     /**
-     * Pixel position of the getCenter of the texture of this tile, relative to the origin tile.
-     * This needs to be shifted by the world getCenter
+     * Pixel position of the center of the texture of this tile, relative to the origin tile.
+     * This needs to be shifted by the world center
      * ({@link me.lucaspickering.terraingen.world.World#getWorldCenter}) before being drawn on
      * screen.
      */

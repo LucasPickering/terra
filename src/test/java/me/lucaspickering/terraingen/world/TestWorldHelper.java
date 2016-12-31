@@ -96,15 +96,15 @@ public class TestWorldHelper {
         Map<Direction, TilePoint> result;
 
         // Center tile has 6 adjacents
-        result = WorldHelper.getAdjacentTiles(tiles, new TilePoint(0, 0, 0));
+        result = tiles.getAdjacentTiles(new TilePoint(0, 0, 0));
         assertEquals("Should have 6 adjacent tiles", 6, result.size());
 
         // Another one with 6 adjacents
-        result = WorldHelper.getAdjacentTiles(tiles, new TilePoint(0, 1, -1));
+        result = tiles.getAdjacentTiles(new TilePoint(0, 1, -1));
         assertEquals("Should have 6 adjacent tiles", 6, result.size());
 
         // One on the edge with only 3 adjacents
-        result = WorldHelper.getAdjacentTiles(tiles, new TilePoint(2, 0, -2));
+        result = tiles.getAdjacentTiles(new TilePoint(2, 0, -2));
         assertEquals("Should have 3 adjacent tiles", 3, result.size());
     }
 
@@ -127,15 +127,15 @@ public class TestWorldHelper {
         Set<TilePoint> result;
 
         // Range of 0 returns just the 1 tile
-        result = WorldHelper.getTilesInRange(tiles, origin, 0);
+        result = tiles.getTilesInRange(origin, 0);
         assertEquals("Should return just 1 tile", 1, result.size());
 
         // Range of 1 returns the origin and 6 adjacents
-        result = WorldHelper.getTilesInRange(tiles, origin, 1);
+        result = tiles.getTilesInRange(origin, 1);
         assertEquals("Should return 7 tiles", 7, result.size());
 
         // Range of 2 returns every tile in the world
-        result = WorldHelper.getTilesInRange(tiles, origin, 2);
+        result = tiles.getTilesInRange(origin, 2);
         assertEquals("Should return the entire world", tiles.size(), result.size());
     }
 }

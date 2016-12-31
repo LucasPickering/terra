@@ -43,7 +43,7 @@ public class World {
     private final Random random;
     private final Tiles tiles;
 
-    // The pixel location of the getCenter of the world
+    // The pixel location of the center of the world
     private Point worldCenter;
 
     public World() {
@@ -73,7 +73,7 @@ public class World {
             // Get all tiles adjacent to this one
             final Map<Direction, Tile> adjacents = new EnumMap<>(Direction.class);
             for (Map.Entry<Direction, TilePoint> adjEntry :
-                WorldHelper.getAdjacentTiles(tiles, tile.pos()).entrySet()) {
+                tiles.getAdjacentTiles(tile.pos()).entrySet()) {
 
                 final Direction dir = adjEntry.getKey();
                 final TilePoint adjPoint = adjEntry.getValue();

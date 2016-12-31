@@ -48,7 +48,7 @@ public class WorldScreen extends Screen {
             lastMouseDragPos = null; // No longer dragging
         }
 
-        // If the mouse is being dragged, shift the world getCenter based on it
+        // If the mouse is being dragged, shift the world center based on it
         if (lastMouseDragPos != null) {
             // Shift the world
             final Point diff = mousePos.minus(lastMouseDragPos);

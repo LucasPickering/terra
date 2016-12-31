@@ -25,7 +25,7 @@ public class PeakGenerator implements Generator {
     @Override
     public void generate(Tiles tiles, Random random) {
         final int peaksToGen = PEAK_COUNT_RANGE.randomIn(random);
-        final Tiles peaks = WorldHelper.selectTiles(tiles, random, peaksToGen, MIN_PEAK_SEPARATION);
+        final Tiles peaks = tiles.selectTiles(random, peaksToGen, MIN_PEAK_SEPARATION);
 
         for (Tile peak : peaks) {
             final int peakElev = peak.elevation() + PEAK_ELEVATION_RANGE.randomIn(random);

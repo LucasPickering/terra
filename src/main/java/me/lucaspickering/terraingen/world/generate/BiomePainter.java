@@ -49,7 +49,7 @@ public class BiomePainter implements Generator {
         final int numSeeds = tiles.size() / AVERAGE_BLOTCH_SIZE;
 
         // Step 2
-        final Tiles seeds = WorldHelper.selectTiles(tiles, random, numSeeds, MIN_SEED_SPACING);
+        final Tiles seeds = tiles.selectTiles(random, numSeeds, MIN_SEED_SPACING);
 
         // Step 3 (this one is a bit longer)
         final Tiles unselectedTiles = new Tiles(tiles); // We need a copy so we can modify it
@@ -69,17 +69,17 @@ public class BiomePainter implements Generator {
         // Step 3 (the hard part)
         // While there are tiles left to assign...
         while (!unselectedTiles.isEmpty()) {
-            final TilePoint point = Funcs.randomFromCollection(random, incompleteBlotches);
-            final Tiles blotch = blotches.get(point);
+            // Pick a seed that still has openings to work from
+            final TilePoint seed = Funcs.randomFromCollection(random, incompleteBlotches);
+            final Tiles blotch = blotches.get(seed); // The blotch grown from that seed
 
             // All tiles that are adjacent to any tile in this blotch
-            // Lots of room for speed improvement here
             final Tiles adjTiles = collectAdjacents(blotch);
             adjTiles.retainAll(unselectedTiles); // Remove tiles that are already in a blotch
 
             if (adjTiles.isEmpty()) {
                 // We've run out of ways to expand this blotch, so consider it complete
-                incompleteBlotches.remove(point);
+                incompleteBlotches.remove(seed);
                 continue;
             }
 
