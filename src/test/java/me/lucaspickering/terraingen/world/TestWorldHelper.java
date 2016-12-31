@@ -87,7 +87,7 @@ public class TestWorldHelper {
             for (int y = -radius; y <= radius; y++) {
                 for (int z = -radius; z <= radius; z++) {
                     if (x + y + z == 0) {
-                        tiles.putTile(new Tile(new TilePoint(x, y, z)));
+                        tiles.add(new Tile(new TilePoint(x, y, z)));
                     }
                 }
             }
@@ -117,7 +117,7 @@ public class TestWorldHelper {
             for (int y = -radius; y <= radius; y++) {
                 for (int z = -radius; z <= radius; z++) {
                     if (x + y + z == 0) {
-                        tiles.putTile(new Tile(new TilePoint(x, y, z)));
+                        tiles.add(new Tile(new TilePoint(x, y, z)));
                     }
                 }
             }

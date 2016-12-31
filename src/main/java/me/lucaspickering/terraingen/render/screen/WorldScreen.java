@@ -60,7 +60,7 @@ public class WorldScreen extends Screen {
         final Tiles tiles = world.getTiles();
 
         // Get all the tiles that are on-screen (those are the ones that will be drawn)
-        final List<Tile> onScreenTiles = tiles.values().stream()
+        final List<Tile> onScreenTiles = tiles.stream()
             .filter(this::containsTile)
             .collect(Collectors.toList());
 
@@ -93,7 +93,7 @@ public class WorldScreen extends Screen {
 
         // Update mouseOverTileInfo for the tile that the mouse is over. This HAS to be done
         // after all the tiles are drawn, otherwise it would be underneath some of them.
-        final Tile mouseOverTile = tiles.get(mouseOverPos);
+        final Tile mouseOverTile = tiles.getByPoint(mouseOverPos);
         if (mouseOverTile != null) {
             // Set the text and show the element
             mouseOverTileInfo.setText(mouseOverTile.info()).setVisible(true);

@@ -21,7 +21,7 @@ public class OceanFloorGenerator implements Generator {
 
     @Override
     public void generate(Tiles tiles, Random random) {
-        for (Tile tile : tiles.values()) {
+        for (Tile tile : tiles) {
             final int distance = tile.pos().distanceTo(TilePoint.ZERO);
             final int elev;
             if (distance >= FLOOR_DISTANCE_THRESHOLD) {

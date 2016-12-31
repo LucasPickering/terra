@@ -56,27 +56,24 @@ public class World {
             for (int y = -SIZE; y <= SIZE; y++) {
                 for (int z = -SIZE; z <= SIZE; z++) {
                     if (x + y + z == 0) {
-                        tiles.putTile(new Tile(new TilePoint(x, y, z)));
+                        tiles.add(new Tile(new TilePoint(x, y, z)));
                     }
                 }
             }
         }
 
         // Add adjacents for each tile
-        for (Map.Entry<TilePoint, Tile> entry : tiles.entrySet()) {
-            final TilePoint point = entry.getKey();
-            final Tile tile = entry.getValue();
-
+        for (Tile tile : tiles) {
             // Get all tiles adjacent to this one
             final Map<Direction, Tile> adjacents = new EnumMap<>(Direction.class);
             for (Map.Entry<Direction, TilePoint> adjEntry :
-                WorldHelper.getAdjacentTiles(tiles, point).entrySet()) {
+                WorldHelper.getAdjacentTiles(tiles, tile.pos()).entrySet()) {
 
                 final Direction dir = adjEntry.getKey();
                 final TilePoint adjPoint = adjEntry.getValue();
 
                 // Add the corresponding tile to the map of adjacent tiles
-                adjacents.put(dir, tiles.get(adjPoint));
+                adjacents.put(dir, tiles.getByPoint(adjPoint));
             }
             tile.setAdjacents(adjacents);
         }

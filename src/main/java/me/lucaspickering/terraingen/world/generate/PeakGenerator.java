@@ -27,7 +27,7 @@ public class PeakGenerator implements Generator {
         final int peaksToGen = PEAK_COUNT_RANGE.randomIn(random);
         final Tiles peaks = WorldHelper.selectTiles(tiles, random, peaksToGen, MIN_PEAK_SEPARATION);
 
-        for (Tile peak : peaks.values()) {
+        for (Tile peak : peaks) {
             final int peakElev = peak.elevation() + PEAK_ELEVATION_RANGE.randomIn(random);
             // Pick a random elevation for the peak and assign it
             setElev(peak, peakElev);
@@ -38,7 +38,7 @@ public class PeakGenerator implements Generator {
                 final Tile adjTile = entry.getValue();
 
                 // The tile on the opposite side of adjTile from the peak
-                final Tile oppTile = tiles.get(dir.shift(adjTile.pos()));
+                final Tile oppTile = tiles.getByPoint(dir.shift(adjTile.pos()));
                 final int oppElev = oppTile != null ? oppTile.elevation() : 0;
 
                 // Average peakElev and oppElev, then apply a small random slop

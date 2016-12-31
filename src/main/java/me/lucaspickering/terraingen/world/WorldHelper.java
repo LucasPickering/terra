@@ -89,7 +89,7 @@ public class WorldHelper {
     public static Map<Direction, TilePoint> getAdjacentTiles(@NotNull Tiles tiles,
                                                              @NotNull TilePoint origin) {
         Objects.requireNonNull(origin);
-        if (!tiles.containsKey(origin)) {
+        if (!tiles.containsPoint(origin)) {
             throw new IllegalArgumentException("Origin is not in the world");
         }
 
@@ -98,7 +98,7 @@ public class WorldHelper {
             final TilePoint point = dir.shift(origin); // Get the shifted point
 
             // If the shifted point is in the world, add it to the map
-            if (tiles.containsKey(point)) {
+            if (tiles.containsPoint(point)) {
                 result.put(dir, point);
             }
         }
@@ -124,7 +124,7 @@ public class WorldHelper {
     public static Set<TilePoint> getTilesInRange(@NotNull Tiles tiles,
                                                  @NotNull TilePoint origin, int range) {
         Objects.requireNonNull(origin);
-        if (!tiles.containsKey(origin)) {
+        if (!tiles.containsPoint(origin)) {
             throw new IllegalArgumentException("Origin is not in the world");
         }
         if (range < 0) {
@@ -178,8 +178,8 @@ public class WorldHelper {
         // While we haven't hit our target number and there are tiles left to pick...
         while (result.size() < numToPick && !candidates.isEmpty()) {
             // Pick a random peak from the set of potential peaks
-            final Tile tile = Funcs.randomFromCollection(random, candidates.values());
-            result.putTile(tile); // Add it to the collection
+            final Tile tile = Funcs.randomFromCollection(random, candidates);
+            result.add(tile); // Add it to the collection
 
             // If we need spacing, remove nearby tiles
             if (minSpacing > 0) {
@@ -223,7 +223,7 @@ public class WorldHelper {
         // Each iteration of this loop creates a new cluster
         while (!unclusteredTiles.isEmpty()) {
             // Grab a tile to work with
-            final Tile firstTile = Funcs.firstFromCollection(unclusteredTiles.values());
+            final Tile firstTile = Funcs.firstFromCollection(unclusteredTiles);
             final boolean positive = predicate.test(firstTile); // Get its state (pos/neg)
 
             // Start building a cluster around this tile
@@ -232,29 +232,29 @@ public class WorldHelper {
             final Tiles uncheckedTiles = new Tiles();
 
             // Add the first tile to the cluster, and remove it from unclusteredTiles
-            cluster.putTile(firstTile);
-            uncheckedTiles.putTile(firstTile);
-            unclusteredTiles.remove(firstTile.pos());
+            cluster.add(firstTile);
+            uncheckedTiles.add(firstTile);
+            unclusteredTiles.remove(firstTile);
 
             // If there is still at least one tile whose adjacents haven't been checked yet...
             while (!uncheckedTiles.isEmpty()) {
                 // Grab one of those unchecked tiles
-                final Tile tile = Funcs.firstFromCollection(uncheckedTiles.values());
+                final Tile tile = Funcs.firstFromCollection(uncheckedTiles);
 
                 // For each tile adjacent to that one...
                 for (final Tile adjTile : tile.adjacents().values()) {
                     // If this adjacent tile has the same pos/neg state, and it's not already in
                     // the cluster...
                     if (predicate.test(adjTile) == positive
-                        && !cluster.containsKey(adjTile.pos())) {
+                        && !cluster.contains(adjTile)) {
                         // Add the first tile to the cluster, and remove it from unclusteredTiles
-                        cluster.putTile(adjTile);
-                        uncheckedTiles.putTile(adjTile);
-                        unclusteredTiles.remove(adjTile.pos(), adjTile);
+                        cluster.add(adjTile);
+                        uncheckedTiles.add(adjTile);
+                        unclusteredTiles.remove(adjTile);
                     }
                 }
 
-                uncheckedTiles.remove(tile.pos()); // We've now checked this tile
+                uncheckedTiles.remove(tile); // We've now checked this tile
             }
 
             if (positive) {

@@ -1,19 +1,18 @@
 package me.lucaspickering.terraingen.world;
 
-import org.intellij.lang.annotations.Flow;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
+import java.util.AbstractSet;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.ImmutableTile;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
-public class Tiles implements Map<TilePoint, Tile> {
+public class Tiles extends AbstractSet<Tile> {
 
     // Internal map
     private final Map<TilePoint, Tile> map;
@@ -57,6 +56,10 @@ public class Tiles implements Map<TilePoint, Tile> {
         return new Tiles(Collections.unmodifiableMap(tiles));
     }
 
+    public Tile getByPoint(TilePoint point) {
+        return map.get(point);
+    }
+
     @Override
     public int size() {
         return map.size();
@@ -68,67 +71,41 @@ public class Tiles implements Map<TilePoint, Tile> {
     }
 
     @Override
-    public boolean containsKey(Object key) {
-        return map.containsKey(key);
+    public boolean contains(Object o) {
+        // Cast o to a tile and check if its position is in the map
+        return o instanceof Tile && map.containsKey(((Tile) o).pos());
+    }
+
+    public boolean containsPoint(TilePoint point) {
+        return map.containsKey(point);
+    }
+
+    @NotNull
+    @Override
+    public Iterator<Tile> iterator() {
+        return map.values().iterator();
     }
 
     @Override
-    public boolean containsValue(Object value) {
-        return map.containsValue(value);
+    public boolean add(Tile tile) {
+        return map.put(tile.pos(), tile) != null;
     }
 
     @Override
-    public Tile get(Object key) {
-        return map.get(key);
+    public boolean remove(Object o) {
+        if (o instanceof Tile) {
+            final Tile tile = (Tile) o;
+            return map.remove(tile.pos()) != null;
+        }
+        return false;
     }
 
-    @Override
-    public Tile put(@Flow(target = "this.keys", targetIsContainer = true) TilePoint key,
-                    @Flow(target = "this.values", targetIsContainer = true) Tile value) {
-        return map.put(key, value);
-    }
-
-    /**
-     * Puts the given tile in this map. The tile's position ({@link Tile#pos()} is used as the
-     * key, and the tile itself is the value.
-     *
-     * @param tile the tile to add to the map
-     * @return the evicted value (or {@code null} if nothing was evicted)
-     */
-    public Tile putTile(Tile tile) {
-        return put(tile.pos(), tile);
-    }
-
-    @Override
-    public Tile remove(Object key) {
-        return map.remove(key);
-    }
-
-    @Override
-    public void putAll(Map<? extends TilePoint, ? extends Tile> m) {
-        map.putAll(m);
+    public boolean removePoint(TilePoint point) {
+        return map.remove(point) != null;
     }
 
     @Override
     public void clear() {
         map.clear();
-    }
-
-    @NotNull
-    @Override
-    public Set<TilePoint> keySet() {
-        return map.keySet();
-    }
-
-    @NotNull
-    @Override
-    public Collection<Tile> values() {
-        return map.values();
-    }
-
-    @NotNull
-    @Override
-    public Set<Entry<TilePoint, Tile>> entrySet() {
-        return map.entrySet();
     }
 }

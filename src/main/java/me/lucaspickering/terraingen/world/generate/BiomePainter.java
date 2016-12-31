@@ -2,6 +2,7 @@ package me.lucaspickering.terraingen.world.generate;
 
 import java.util.Random;
 
+import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.WorldHelper;
@@ -33,10 +34,17 @@ public class BiomePainter implements Generator {
         // Each blotch will be grown from its seed to be about average size.
         // By the end of this step, every tile will have been assigned.
 
-        final int seedCount = tiles.size() / AVERAGE_BLOTCH_SIZE;
-        final Tiles seeds = WorldHelper.selectTiles(tiles, random, seedCount, MIN_SEED_SPACING);
+        final int numSeeds = tiles.size() / AVERAGE_BLOTCH_SIZE;
+        final Tiles seeds = WorldHelper.selectTiles(tiles, random, numSeeds, MIN_SEED_SPACING);
 
-        for (Tile tile : tiles.values()) {
+        for (Tile seed : seeds) {
+            seed.setBiome(Funcs.randomFromCollection(random, Biome.REGULAR_LAND_BIOMES));
+        }
+
+        for (Tile tile : tiles) {
+            if (tile.biome() != null) {
+                continue;
+            }
             final Biome biome = Biome.FOREST;
             tile.setBiome(biome);
         }

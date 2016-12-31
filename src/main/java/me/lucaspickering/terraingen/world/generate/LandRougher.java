@@ -16,7 +16,7 @@ public class LandRougher implements Generator {
 
     @Override
     public void generate(Tiles tiles, Random random) {
-        for (Tile tile : tiles.values()) {
+        for (Tile tile : tiles) {
             // If the tile is land, adjust its elevation a bit
             final int elev = Funcs.randomSlop(random, tile.elevation(), SLOP) + WEIGHT;
             tile.setElevation(elev);

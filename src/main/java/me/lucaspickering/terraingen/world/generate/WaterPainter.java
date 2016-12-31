@@ -1,10 +1,8 @@
 package me.lucaspickering.terraingen.world.generate;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
-import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.WorldHelper;
@@ -29,13 +27,13 @@ public class WaterPainter implements Generator {
         final List<Tiles> clusters =
             WorldHelper.clusterTiles(tiles, t -> t.elevation() < 0).first();
 
-        for (Map<TilePoint, Tile> cluster : clusters) {
+        for (Tiles cluster : clusters) {
             final int size = cluster.size();
 
             // If this cluster is over the min ocean size...
             if (size >= MIN_OCEAN_SIZE) {
                 // Make everything in it an coast/ocean
-                for (Tile tile : cluster.values()) {
+                for (Tile tile : cluster) {
                     // If this tile is shallow, make it coast, otherwise make it ocean
                     tile.setBiome(tile.elevation() >= MIN_COAST_DEPTH ? Biome.COAST : Biome.OCEAN);
                 }
@@ -45,7 +43,7 @@ public class WaterPainter implements Generator {
                 final float chance = (float) (size - 1) / (MIN_OCEAN_SIZE - 2);
                 if (random.nextFloat() < chance) {
                     // If we chose to make it a lake, change all the tiles to lake
-                    cluster.values().forEach(tile -> tile.setBiome(Biome.LAKE));
+                    cluster.forEach(tile -> tile.setBiome(Biome.LAKE));
                 }
             }
         }
