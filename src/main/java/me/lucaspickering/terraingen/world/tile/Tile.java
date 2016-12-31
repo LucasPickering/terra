@@ -58,7 +58,7 @@ public class Tile {
     private Map<Direction, Tile> adjacents;
 
     // Terrain features
-    private Biome biome;
+    private Biome biome = Biome.NONE;
     private int elevation;
 
     /**
@@ -143,6 +143,7 @@ public class Tile {
     }
 
     public void setBiome(Biome biome) {
+        Objects.requireNonNull(biome);
         this.biome = biome;
     }
 

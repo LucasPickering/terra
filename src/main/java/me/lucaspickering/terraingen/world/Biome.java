@@ -18,7 +18,8 @@ public enum Biome {
     PLAINS("Plains", 0xb9f442, new Mapping(0, 40, 0.5f, 1f)),
     FOREST("Forest", 0x249b09, new Mapping(0, 40, 0.3f, 0.8f)),
     DESERT("Desert", 0xe2c909, new Mapping(0, 20, 0.75f, 0.95f)), // TODO color stuff
-    MOUNTAIN("Mountain", 0xbbbbbb, new Mapping(40, 75, 0.3f, 0.6f));
+    MOUNTAIN("Mountain", 0xbbbbbb, new Mapping(40, 75, 0.3f, 0.6f)),
+    NONE("None", Color.BLACK, new Mapping(0, 0, 0f, 0f));
 
     private static class Mapping {
 
