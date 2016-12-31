@@ -88,6 +88,17 @@ public class Tiles implements Map<TilePoint, Tile> {
         return map.put(key, value);
     }
 
+    /**
+     * Puts the given tile in this map. The tile's position ({@link Tile#pos()} is used as the
+     * key, and the tile itself is the value.
+     *
+     * @param tile the tile to add to the map
+     * @return the evicted value (or {@code null} if nothing was evicted)
+     */
+    public Tile putTile(Tile tile) {
+        return put(tile.pos(), tile);
+    }
+
     @Override
     public Tile remove(Object key) {
         return map.remove(key);

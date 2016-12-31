@@ -11,8 +11,8 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  */
 public class LandRougher implements Generator {
 
-    private static final int SLOP = 3;
-    private static final int WEIGHT = 2;
+    private static final int SLOP = 3; // Maximum amount a tile can be shifted in either direction
+    private static final int WEIGHT = 2; // Tendency to shift up (positive) vs down (negative)
 
     @Override
     public void generate(Tiles tiles, Random random) {

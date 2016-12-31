@@ -1,14 +1,11 @@
 package me.lucaspickering.terraingen.world.generate;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.InclusiveRange;
-import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.WorldHelper;
@@ -19,40 +16,24 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  */
 public class PeakGenerator implements Generator {
 
-    // Generation parameters
     private static final InclusiveRange PEAK_COUNT_RANGE = new InclusiveRange(7, 10);
     private static final InclusiveRange PEAK_ELEVATION_RANGE = new InclusiveRange(45, 60);
-    private static final int MIN_PEAK_SEPARATION = 2; // Min distance between two peak
+    private static final int MIN_PEAK_SEPARATION = 3; // Min distance between two peak
     private static final int SMOOTHING_SLOP = 4; // Variation in each direction for smoothing elev
     private static final int MIN_MOUNTAIN_ELEV = 40; // Everything taller than this is mountain
 
     @Override
     public void generate(Tiles tiles, Random random) {
-        // Copy the key set because we're going to be modifying it
-        final Set<TilePoint> potentialPeaks = new HashSet<>(tiles.keySet());
-        final Set<TilePoint> peaks = new HashSet<>();
         final int peaksToGen = PEAK_COUNT_RANGE.randomIn(random);
+        final Tiles peaks = WorldHelper.selectTiles(tiles, random, peaksToGen, MIN_PEAK_SEPARATION);
 
-        while (peaks.size() < peaksToGen && !potentialPeaks.isEmpty()) {
-            // Pick a random peak from the set of potential peaks
-            final TilePoint peak = Funcs.randomFromCollection(random, potentialPeaks);
-            peaks.add(peak); // Add it to the set
-
-            // Get all the tiles that are too close to this one to be peaks themselves,
-            // and remove them from the set of potential peaks
-            final Set<TilePoint> tooClose = WorldHelper.getTilesInRange(tiles.keySet(), peak,
-                                                                        MIN_PEAK_SEPARATION);
-            potentialPeaks.removeAll(tooClose);
-        }
-
-        for (TilePoint peakPoint : peaks) {
-            final Tile peakTile = tiles.get(peakPoint);
-            final int peakElev = peakTile.elevation() + PEAK_ELEVATION_RANGE.randomIn(random);
+        for (Tile peak : peaks.values()) {
+            final int peakElev = peak.elevation() + PEAK_ELEVATION_RANGE.randomIn(random);
             // Pick a random elevation for the peak and assign it
-            setElev(peakTile, peakElev);
+            setElev(peak, peakElev);
 
             // Adjust the elevation of the adjacent tiles
-            for (Map.Entry<Direction, Tile> entry : peakTile.adjacents().entrySet()) {
+            for (Map.Entry<Direction, Tile> entry : peak.adjacents().entrySet()) {
                 final Direction dir = entry.getKey();
                 final Tile adjTile = entry.getValue();
 

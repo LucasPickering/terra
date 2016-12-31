@@ -29,8 +29,8 @@ public class World {
     private static final int SIZE = 20;
 
     private static final Generator[] GENERATORS = new Generator[]{
-        new OceanFloorGenerator(),
         new BiomePainter(),
+        new OceanFloorGenerator(),
         new LandRougher(),
         new PeakGenerator(),
         new WaterPainter(),
@@ -56,8 +56,7 @@ public class World {
             for (int y = -SIZE; y <= SIZE; y++) {
                 for (int z = -SIZE; z <= SIZE; z++) {
                     if (x + y + z == 0) {
-                        final TilePoint point = new TilePoint(x, y, z);
-                        tiles.put(point, new Tile(point));
+                        tiles.putTile(new Tile(new TilePoint(x, y, z)));
                     }
                 }
             }
@@ -71,7 +70,7 @@ public class World {
             // Get all tiles adjacent to this one
             final Map<Direction, Tile> adjacents = new EnumMap<>(Direction.class);
             for (Map.Entry<Direction, TilePoint> adjEntry :
-                WorldHelper.getAdjacentTiles(tiles.keySet(), point).entrySet()) {
+                WorldHelper.getAdjacentTiles(tiles, point).entrySet()) {
 
                 final Direction dir = adjEntry.getKey();
                 final TilePoint adjPoint = adjEntry.getValue();

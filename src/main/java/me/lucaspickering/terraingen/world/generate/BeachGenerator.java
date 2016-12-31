@@ -12,19 +12,17 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  */
 public class BeachGenerator implements Generator {
 
-    // Generation parameters
     // Any tile <= this elevation that borders ocean will become beach
     private static final int MAX_BEACH_ELEV = 5;
 
     @Override
     public void generate(Tiles tiles, Random random) {
         for (Tile tile : tiles.values()) {
-            final Biome biome = tile.biome();
-            // No biome set, or already land, and within our elevation bound. Check the adjacent
-            // tiles, and if there is an ocean tile adjacent, make this a beach.
-            if ((biome == null || biome.isLand()) && tile.elevation() <= MAX_BEACH_ELEV) {
+            // If this tile is land and within our elevation bound, check the adjacent
+            // tiles, and if there is an ocean (or similar) tile adjacent, make this a beach.
+            if (Biome.isLand(tile.biome()) && tile.elevation() <= MAX_BEACH_ELEV) {
                 for (Tile adj : tile.adjacents().values()) {
-                    if (adj.biome() == Biome.OCEAN || adj.biome() == Biome.COAST) {
+                    if (Biome.LARGE_WATER_BIOMES.contains(adj.biome())) {
                         tile.setBiome(Biome.BEACH);
                         break; // Done with this tile
                     }

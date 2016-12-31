@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -79,16 +80,16 @@ public class WorldHelper {
     /**
      * Gets the set of all tiles adjacent to the given tile that exist in the world.
      *
-     * @param world  the set of tiles in the world
-     * @param origin the getCenter of the search
+     * @param tiles  all tiles in the world
+     * @param origin the center of the search
      * @return tiles adjacent to {@code origin}, in a direction:point map
      * @throws IllegalArgumentException if {@code origin} is not in {@code world}
      */
     @NotNull
-    public static Map<Direction, TilePoint> getAdjacentTiles(@NotNull Set<TilePoint> world,
+    public static Map<Direction, TilePoint> getAdjacentTiles(@NotNull Tiles tiles,
                                                              @NotNull TilePoint origin) {
         Objects.requireNonNull(origin);
-        if (!world.contains(origin)) {
+        if (!tiles.containsKey(origin)) {
             throw new IllegalArgumentException("Origin is not in the world");
         }
 
@@ -97,7 +98,7 @@ public class WorldHelper {
             final TilePoint point = dir.shift(origin); // Get the shifted point
 
             // If the shifted point is in the world, add it to the map
-            if (world.contains(point)) {
+            if (tiles.containsKey(point)) {
                 result.put(dir, point);
             }
         }
@@ -111,7 +112,7 @@ public class WorldHelper {
      * origin}. For example, giving a range of 0 returns just the origin, 1 returns the origin
      * and all adjacent tiles, etc.
      *
-     * @param world  all tile points in the world
+     * @param tiles  all tiles in the world
      * @param origin the tile to start counting from
      * @param range  (non-negative)
      * @return all tiles in range of the given origin
@@ -120,10 +121,10 @@ public class WorldHelper {
      *                                  0}
      */
     @NotNull
-    public static Set<TilePoint> getTilesInRange(@NotNull Set<TilePoint> world,
+    public static Set<TilePoint> getTilesInRange(@NotNull Tiles tiles,
                                                  @NotNull TilePoint origin, int range) {
         Objects.requireNonNull(origin);
-        if (!world.contains(origin)) {
+        if (!tiles.containsKey(origin)) {
             throw new IllegalArgumentException("Origin is not in the world");
         }
         if (range < 0) {
@@ -140,13 +141,54 @@ public class WorldHelper {
             // Start with tiles directly adjacent to this one
             final Set<TilePoint>
                 adjacents =
-                new HashSet<>(getAdjacentTiles(world, origin).values());
+                new HashSet<>(getAdjacentTiles(tiles, origin).values());
             for (TilePoint adjacent : lastAdjacents) {
-                adjacents.addAll(getAdjacentTiles(world, adjacent).values());
+                adjacents.addAll(getAdjacentTiles(tiles, adjacent).values());
             }
 
             result.addAll(adjacents);
             lastAdjacents = adjacents;
+        }
+
+        return result;
+    }
+
+    /**
+     * Randomly selects the specified number of tiles from the given {@link Tiles}. If necessary,
+     * this ensures a minimum spacing between selections. If that spacing is 0, nothing in
+     * enforced. If it is 1, it makes sure that no two selections are adjacent, and so on.
+     *
+     * If there are enough tiles in the collection to select as many as requested while keeping the
+     * requested spacing, then fewer tiles will be returned. Note that fewer than the requrested
+     * number can be returned even if the requested number is attainable. This could happen if
+     * the function randomly chooses a suboptimal spread of tiles and forces itself out of space.
+     *
+     * @param tiles      the set of tiles to choose from
+     * @param random     the random instance to use
+     * @param numToPick  the amount of tiles to select
+     * @param minSpacing the minimum amount of tiles separating selections, or 0 for no separation
+     * @return the randomly-selected tiles
+     */
+    @NotNull
+    public static Tiles selectTiles(Tiles tiles, Random random, int numToPick, int minSpacing) {
+        // Copy the tiles because we're going to be modifying it
+        final Tiles candidates = new Tiles(tiles);
+        final Tiles result = new Tiles(); // The tiles that will be returnec
+
+        // While we haven't hit our target number and there are tiles left to pick...
+        while (result.size() < numToPick && !candidates.isEmpty()) {
+            // Pick a random peak from the set of potential peaks
+            final Tile tile = Funcs.randomFromCollection(random, candidates.values());
+            result.putTile(tile); // Add it to the collection
+
+            // If we need spacing, remove nearby tiles
+            if (minSpacing > 0) {
+                // Get all the tiles that are too close to this one to be selected themselves,
+                // and remove them from the set of candidates
+                final Set<TilePoint> tooClose = WorldHelper.getTilesInRange(tiles, tile.pos(),
+                                                                            minSpacing);
+                tooClose.forEach(candidates::remove); // Remove each tile
+            }
         }
 
         return result;
@@ -190,8 +232,8 @@ public class WorldHelper {
             final Tiles uncheckedTiles = new Tiles();
 
             // Add the first tile to the cluster, and remove it from unclusteredTiles
-            cluster.put(firstTile.pos(), firstTile);
-            uncheckedTiles.put(firstTile.pos(), firstTile);
+            cluster.putTile(firstTile);
+            uncheckedTiles.putTile(firstTile);
             unclusteredTiles.remove(firstTile.pos());
 
             // If there is still at least one tile whose adjacents haven't been checked yet...
@@ -206,8 +248,8 @@ public class WorldHelper {
                     if (predicate.test(adjTile) == positive
                         && !cluster.containsKey(adjTile.pos())) {
                         // Add the first tile to the cluster, and remove it from unclusteredTiles
-                        cluster.put(adjTile.pos(), adjTile);
-                        uncheckedTiles.put(adjTile.pos(), adjTile);
+                        cluster.putTile(adjTile);
+                        uncheckedTiles.putTile(adjTile);
                         unclusteredTiles.remove(adjTile.pos(), adjTile);
                     }
                 }

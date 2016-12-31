@@ -11,7 +11,6 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  */
 public class OceanFloorGenerator implements Generator {
 
-    // Generation parameters
     // How far a tile has to be from the origin to be considered coast
     private static final int COAST_DISTANCE_THRESHOLD = 14;
     private static final int COAST_DEPTH = -5; // Average depth of coast
