@@ -12,6 +12,7 @@ import java.util.Set;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
+import me.lucaspickering.terraingen.world.Cluster;
 import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -69,11 +70,11 @@ public class BiomePainter implements Generator {
         unselectedTiles.removeAll(seeds); // We already selected these
 
         // Each biome blotch, keyed by the seed of that blotch
-        final Map<TilePoint, Tiles> blotches = new HashMap<>();
+        final Map<TilePoint, Cluster> blotches = new HashMap<>();
         final Set<TilePoint> incompleteBlotches = new HashSet<>(); // Blotches with room to grow
         for (Tile seed : seeds) {
             // Pick a biome for this seed, then add it to the map
-            final Tiles blotch = new Tiles();
+            final Cluster blotch = new Cluster();
             blotch.add(seed);
             blotches.put(seed.pos(), blotch);
             incompleteBlotches.add(seed.pos());
@@ -84,10 +85,9 @@ public class BiomePainter implements Generator {
         while (!unselectedTiles.isEmpty()) {
             // Pick a seed that still has openings to work from
             final TilePoint seed = Funcs.randomFromCollection(random, incompleteBlotches);
-            final Tiles blotch = blotches.get(seed); // The blotch grown from that seed
+            final Cluster blotch = blotches.get(seed); // The blotch grown from that seed
 
-            // All tiles that are adjacent to any tile in this blotch
-            final Tiles adjTiles = collectAdjacents(blotch);
+            final Tiles adjTiles = blotch.allAdjacents(); // All tiles adjacent to this blotch
             adjTiles.retainAll(unselectedTiles); // Remove tiles that are already in a blotch
 
             if (adjTiles.isEmpty()) {
@@ -116,17 +116,9 @@ public class BiomePainter implements Generator {
             }
         }
 
-        for (Tiles blotch : blotches.values()) {
+        for (Cluster blotch : blotches.values()) {
             final Biome biome = Funcs.randomFromCollection(random, allBiomes);
             blotch.forEach(tile -> tile.setBiome(biome)); // Set the biome for each tile
         }
-    }
-
-    private Tiles collectAdjacents(Tiles tiles) {
-        final Tiles result = new Tiles();
-        for (Tile tile : tiles) {
-            result.addAll(tile.adjacents().values());
-        }
-        return result;
     }
 }

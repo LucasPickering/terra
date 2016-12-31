@@ -24,6 +24,12 @@ import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.ImmutableTile;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
+/**
+ * A set of {@link Tile}s. Internally, tiles are stored in a map, keyed by their position, but
+ * externally this functions as a normal set of tiles would. No two tiles can have the same
+ * position. Some additional map-like operations are provided, such as accessing tiles by their
+ * {@link TilePoint}.
+ */
 public class Tiles extends AbstractSet<Tile> {
 
     // Internal map
@@ -241,14 +247,14 @@ public class Tiles extends AbstractSet<Tile> {
      * @return the isPositive and negative clusters, in a pair (with isPositive first)
      */
     @NotNull
-    public Pair<List<Tiles>, List<Tiles>> clusterTiles(@NotNull Predicate<Tile> predicate) {
+    public Pair<List<Cluster>, List<Cluster>> clusterTiles(@NotNull Predicate<Tile> predicate) {
         // First divided each tile into its own cluster, then iterate over all those clusters and
         // begin joining clusters that have the same state (postive or negative) and have
         // adjacent tiles.
 
         final Tiles unclusteredTiles = new Tiles(this); // Copy the input structure
-        final List<Tiles> posClusters = new LinkedList<>(); // These satisfy the predicate
-        final List<Tiles> negClusters = new LinkedList<>(); // These DON'T satisfy the predicate
+        final List<Cluster> posClusters = new LinkedList<>(); // These satisfy the predicate
+        final List<Cluster> negClusters = new LinkedList<>(); // These DON'T satisfy the predicate
 
         // Each iteration of this loop creates a new cluster
         while (!unclusteredTiles.isEmpty()) {
@@ -257,7 +263,7 @@ public class Tiles extends AbstractSet<Tile> {
             final boolean positive = predicate.test(firstTile); // Get its state (pos/neg)
 
             // Start building a cluster around this tile
-            final Tiles cluster = new Tiles();
+            final Cluster cluster = new Cluster();
             // Keep track of the tiles whose adjacent tiles haven't been checked yet
             final Tiles uncheckedTiles = new Tiles();
 
@@ -317,8 +323,8 @@ public class Tiles extends AbstractSet<Tile> {
      * @return the clusters
      */
     @NotNull
-    public List<Tiles> clusterTiles(@NotNull BiFunction<Tile, Tile, Double> similarityFunc,
-                                    double similarityThreshold) {
+    public List<Cluster> clusterTiles(@NotNull BiFunction<Tile, Tile, Double> similarityFunc,
+                                      double similarityThreshold) {
         throw new UnsupportedOperationException(); // TODO implement if necessary
     }
 }
