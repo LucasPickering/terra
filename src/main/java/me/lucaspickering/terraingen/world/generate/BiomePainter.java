@@ -1,7 +1,10 @@
 package me.lucaspickering.terraingen.world.generate;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -10,7 +13,6 @@ import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
-import me.lucaspickering.terraingen.world.WorldHelper;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -26,6 +28,17 @@ public class BiomePainter implements Generator {
 
     // Minimum number of tiles separating each biome seed
     private static final int MIN_SEED_SPACING = 2;
+
+    // The biomes that we can paint in this routine, and the relative chance that each one will
+    // be selected
+    public static final Map<Biome, Integer> BIOME_WEIGHTS = new EnumMap<>(Biome.class);
+
+    // Initialize all the weights
+    static {
+        BIOME_WEIGHTS.put(Biome.PLAINS, 10);
+        BIOME_WEIGHTS.put(Biome.FOREST, 10);
+        BIOME_WEIGHTS.put(Biome.DESERT, 2);
+    }
 
     @Override
     public void generate(Tiles tiles, Random random) {
@@ -89,9 +102,22 @@ public class BiomePainter implements Generator {
             unselectedTiles.remove(tile);
         }
 
-        // Step 4 - cleanup
+        // Step 4
+        // Create a list of all the selected biomes, with more entries for biomes that are more
+        // likely to be picked, so that one can be picked at random with proper chances.
+        final int totalWeight = BIOME_WEIGHTS.values().stream().reduce(0, (acc, i) -> acc + i);
+        final List<Biome> allBiomes = new ArrayList<>(totalWeight);
+        for (Map.Entry<Biome, Integer> entry : BIOME_WEIGHTS.entrySet()) {
+            final Biome biome = entry.getKey();
+            final int weight = entry.getValue();
+            // Put weight entries in the list for this biome
+            for (int i = 0; i < weight; i++) {
+                allBiomes.add(biome);
+            }
+        }
+
         for (Tiles blotch : blotches.values()) {
-            final Biome biome = Funcs.randomFromCollection(random, Biome.REGULAR_LAND_BIOMES);
+            final Biome biome = Funcs.randomFromCollection(random, allBiomes);
             blotch.forEach(tile -> tile.setBiome(biome)); // Set the biome for each tile
         }
     }

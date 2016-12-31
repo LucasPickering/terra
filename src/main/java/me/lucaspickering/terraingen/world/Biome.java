@@ -14,10 +14,10 @@ public enum Biome {
     OCEAN("Ocean", 0x1653b7, new Mapping(-50, -10, 0.3f, 1f)),
     COAST("Coast", 0x1887b2, new Mapping(-20, 0, 0.5f, 1f)),
     LAKE("Lake", 0x09729b, new Mapping(-10, 0, 0.5f, 1f)),
-    BEACH("Beach", 0xe2c909, new Mapping(0, 5, 0.75f, 0.95f)),
+    BEACH("Beach", 0xf2ef59, new Mapping(0, 5, 0.75f, 0.95f)),
     PLAINS("Plains", 0xb9f442, new Mapping(0, 40, 0.5f, 1f)),
     FOREST("Forest", 0x249b09, new Mapping(0, 40, 0.3f, 0.8f)),
-    DESERT("Desert", 0xe2c909, new Mapping(0, 20, 0.75f, 0.95f)), // TODO color stuff
+    DESERT("Desert", 0xe2c909, new Mapping(0, 40, 0.65f, 0.95f)),
     MOUNTAIN("Mountain", 0xbbbbbb, new Mapping(40, 75, 0.3f, 0.6f)),
     NONE("None", Color.BLACK, new Mapping(0, 0, 0f, 0f));
 
@@ -43,20 +43,6 @@ public enum Biome {
     public static final Set<Biome> LAND_BIOMES = EnumSet.of(BEACH, PLAINS, FOREST, DESERT,
                                                             MOUNTAIN);
     public static final Set<Biome> WATER_BIOMES = EnumSet.of(OCEAN, COAST, LAKE);
-
-    /**
-     * Standard land biomes, that don't require special conditions to exist. Plains, forest,
-     * desert, etc. are regular because they can exist anywhere. Beach and mountain are examples
-     * of special biomes (and are not in this category) because they can only exist on the coast
-     * and at high elevations, respectively.
-     */
-    public static final Set<Biome> REGULAR_LAND_BIOMES = EnumSet.of(PLAINS, FOREST, DESERT);
-
-    /**
-     * Biomes that can exist at large scale, i.e. 30+ tiles. Lakes and the like don't fall under
-     * this category.
-     */
-    public static final Set<Biome> LARGE_WATER_BIOMES = EnumSet.of(OCEAN, COAST);
 
     private final String displayName;
     private final Color baseColor;

@@ -28,7 +28,7 @@ public class World {
     public static final InclusiveRange ELEVATION_RANGE = new InclusiveRange(-50, 75);
 
     // World size
-    private static final int SIZE = 100;
+    private static final int SIZE = 50;
 
     private static final Generator[] GENERATORS = new Generator[]{
         new BiomePainter(),
