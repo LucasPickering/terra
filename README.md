@@ -21,6 +21,5 @@ Uses the Lightweight Java Game Library.
 ### Benchmarking
 For running in IntelliJ, install the JMH plugin. Then, on Windows, you have to set the TMP
 environment variable so that JMH can properly acquire its lock. To do this, edit the configuration
-of your benchmark and add the environment variable TMP with a writeable directory as its value.
-For example:
-`C:\Users\<user>\AppData\Local\Temp`
+of your benchmark and add the environment variable TMP with a writeable directory as its value
+(such as `C:\Users\<user>\AppData\Local\Temp`).
