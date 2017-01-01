@@ -28,7 +28,7 @@ public class World {
     public static final InclusiveRange ELEVATION_RANGE = new InclusiveRange(-50, 75);
 
     // World size
-    private static final int SIZE = 50;
+    private static final int DEFAULT_SIZE = 50;
 
     private static final Generator[] GENERATORS = new Generator[]{
         new BiomePainter(),
@@ -47,20 +47,25 @@ public class World {
     private Point worldCenter;
 
     public World() {
+        this(DEFAULT_SIZE);
+    }
+
+    // Package visible for benchmarking purposes
+    World(int size) {
         logger = Logger.getLogger(getClass().getName());
         random = TerrainGen.instance().random();
-        tiles = genTiles();
+        tiles = genTiles(size);
         worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
     }
 
-    private Tiles genTiles() {
+    private Tiles genTiles(int size) {
         final long startTime = System.currentTimeMillis(); // We're timing this
 
         final Tiles tiles = new Tiles();
         // Fill out the set with a bunch of points
-        for (int x = -SIZE; x <= SIZE; x++) {
-            for (int y = -SIZE; y <= SIZE; y++) {
-                for (int z = -SIZE; z <= SIZE; z++) {
+        for (int x = -size; x <= size; x++) {
+            for (int y = -size; y <= size; y++) {
+                for (int z = -size; z <= size; z++) {
                     if (x + y + z == 0) {
                         tiles.add(new Tile(new TilePoint(x, y, z)));
                     }
