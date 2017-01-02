@@ -41,13 +41,15 @@ public class Funcs {
     @NotNull
     public static <T> T randomFromCollection(@NotNull Random random, @NotNull Collection<T> coll) {
         Objects.requireNonNull(coll);
+        if (coll.isEmpty()) {
+            throw new IllegalArgumentException("Collection cannot be empty");
+        }
 
-        // Select a random element from the collection
-        // Exception will be thrown if the collection is empty
+        // Select a random element from the collection, exception can never be thrown
         return coll.stream()
             .skip(random.nextInt(coll.size()))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Collection cannot be empty"));
+            .orElseThrow(() -> new AssertionError("Can't get here"));
     }
 
     /**

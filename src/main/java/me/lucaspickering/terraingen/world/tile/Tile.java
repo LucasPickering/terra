@@ -23,7 +23,7 @@ public class Tile {
      * The distance between the center point of the hexagon and each vertex. Also the length of
      * one side of the tile.
      */
-    public static final int RADIUS = 74;
+    public static final int RADIUS = 37;
 
     /**
      * Distance in pixels from the left-most vertex to the right-most vertex.

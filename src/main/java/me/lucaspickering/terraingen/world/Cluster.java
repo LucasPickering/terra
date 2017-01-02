@@ -61,6 +61,9 @@ public class Cluster extends Tiles {
      * <li>directly adjacent to one or more tiles in the cluster</li>
      * </ul>
      *
+     * The returned collection is a copy of the one held internally, so it can be freely modified.
+     * Its contents however are not copied so modify the internal objects at your own risk.
+     *
      * @return the tiles that are adjacent to, but not in, this cluster
      */
     @NotNull

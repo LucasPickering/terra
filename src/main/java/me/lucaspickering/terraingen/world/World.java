@@ -10,10 +10,9 @@ import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.util.InclusiveRange;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
-import me.lucaspickering.terraingen.world.generate.BiomePainter;
+import me.lucaspickering.terraingen.world.generate.ContinentGenerator;
 import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.generate.LandRougher;
-import me.lucaspickering.terraingen.world.generate.OceanFloorGenerator;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
 
@@ -22,12 +21,17 @@ public class World {
     // Every tile's elevation must be in this range
     public static final InclusiveRange ELEVATION_RANGE = new InclusiveRange(-25, 25);
 
+    /**
+     * Any tile below, but not equal to, this elevation can feasibly become ocean tiles. Most
+     * land tiles will be at or above this elevation.
+     */
+    public static final int SEA_LEVEL = 0;
+
     // World size
     private static final int DEFAULT_SIZE = 50;
 
     private static final Generator[] GENERATORS = new Generator[]{
-        new BiomePainter(),
-        new OceanFloorGenerator(),
+        new ContinentGenerator(),
         new LandRougher(),
         new PeakGenerator(),
         new WaterPainter(),
