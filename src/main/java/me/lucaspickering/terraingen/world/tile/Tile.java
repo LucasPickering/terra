@@ -8,46 +8,13 @@ import java.util.Objects;
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Colors;
 import me.lucaspickering.terraingen.util.Direction;
-import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.WorldHelper;
 
 public class Tile {
 
     public static final int NUM_SIDES = Direction.values().length;
-
-    // UI constants
-    /**
-     * The distance between the center point of the hexagon and each vertex. Also the length of
-     * one side of the tile.
-     */
-    public static final int RADIUS = 37;
-
-    /**
-     * Distance in pixels from the left-most vertex to the right-most vertex.
-     */
-    public static final int WIDTH = RADIUS * 2;
-
-    /**
-     * Distance in pixels from the top side to the bottom side.
-     */
-    public static final int HEIGHT = (int) (Math.sqrt(3) * RADIUS);
-
-    /**
-     * An array of coordinates referring to each vertex of a tile, with coordinates being relative
-     * to the center of the tile. The first vertex is the top-left, and they move clockwise from
-     * there.
-     */
-    public static final Point[] VERTICES = new Point[]{
-        new Point(-WIDTH / 4, -HEIGHT / 2),
-        new Point(WIDTH / 4, -HEIGHT / 2),
-        new Point(RADIUS, 0),
-        new Point(WIDTH / 4, HEIGHT / 2),
-        new Point(-WIDTH / 4, HEIGHT / 2),
-        new Point(-RADIUS, 0)
-    };
 
     private static final String INFO_STRING = "Biome: %s%nElevation: %d";
     private static final String DEBUG_INFO_STRING = "Pos: %s%nColor: %s";
@@ -62,26 +29,9 @@ public class Tile {
     private Biome biome = Biome.NONE;
     private int elevation;
 
-    /**
-     * Pixel position of the center of the texture of this tile, relative to the origin tile.
-     * This needs to be shifted by the world center
-     * ({@link me.lucaspickering.terraingen.world.World#getWorldCenter}) before being drawn on
-     * screen.
-     */
-    private final Point center;
-    private final Point topLeft;
-    private final Point topRight;
-    private final Point bottomRight;
-    private final Point bottomLeft;
-
     public Tile(TilePoint pos) {
         Objects.requireNonNull(pos);
         this.pos = pos;
-        this.center = WorldHelper.tileToPixel(pos);
-        topLeft = center.plus(-WIDTH / 2, -HEIGHT / 2);
-        topRight = center.plus(WIDTH / 2, -HEIGHT / 2);
-        bottomRight = center.plus(WIDTH / 2, HEIGHT / 2);
-        bottomLeft = center.plus(-WIDTH / 2, HEIGHT / 2);
     }
 
     protected Tile(TilePoint pos, Biome biome, int elevation) {
@@ -155,26 +105,6 @@ public class Tile {
     public void setElevation(int elevation) {
         // Coerce the elevation to be a valid value
         this.elevation = World.ELEVATION_RANGE.coerce(elevation);
-    }
-
-    public final Point getCenter() {
-        return center;
-    }
-
-    public final Point getTopLeft() {
-        return topLeft;
-    }
-
-    public Point getTopRight() {
-        return topRight;
-    }
-
-    public Point getBottomRight() {
-        return bottomRight;
-    }
-
-    public Point getBottomLeft() {
-        return bottomLeft;
     }
 
     public final Color backgroundColor() {

@@ -15,11 +15,14 @@ import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.generate.LandRougher;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
+import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class World {
 
     // Every tile's elevation must be in this range
     public static final InclusiveRange ELEVATION_RANGE = new InclusiveRange(-25, 25);
+
+    public static final InclusiveRange VALID_TILE_RADII = new InclusiveRange(10, 200);
 
     /**
      * Any tile below, but not equal to, this elevation can feasibly become ocean tiles. Most
@@ -45,6 +48,12 @@ public class World {
     // The pixel location of the center of the world
     private Point worldCenter;
 
+    // Tile pixel dimensions
+    private int tileRadius;
+    private int tileWidth;
+    private int tileHeight;
+    private Point[] tileVertices;
+
     public World() {
         this(DEFAULT_SIZE);
     }
@@ -55,6 +64,7 @@ public class World {
         random = TerrainGen.instance().random();
         tiles = generateWorld(size);
         worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
+        setTileRadius(15);
     }
 
     private Tiles generateWorld(int size) {
@@ -94,5 +104,55 @@ public class World {
 
     public void setWorldCenter(Point worldCenter) {
         this.worldCenter = worldCenter;
+    }
+
+    public int getTileRadius() {
+        return tileRadius;
+    }
+
+    public void setTileRadius(int radius) {
+        tileRadius = VALID_TILE_RADII.coerce(radius);
+        tileWidth = tileRadius * 2;
+        tileHeight = (int) (Math.sqrt(3) * tileRadius);
+        tileVertices = new Point[]{
+            new Point(-tileWidth / 4, -tileHeight / 2),
+            new Point(tileWidth / 4, -tileHeight / 2),
+            new Point(tileRadius, 0),
+            new Point(tileWidth / 4, tileHeight / 2),
+            new Point(-tileWidth / 4, tileHeight / 2),
+            new Point(-tileRadius, 0)
+        };
+    }
+
+    public int getTileWidth() {
+        return tileWidth;
+    }
+
+    public int getTileHeight() {
+        return tileHeight;
+    }
+
+    public Point[] getTileVertices() {
+        return tileVertices;
+    }
+
+    public final Point getTileCenter(Tile tile) {
+        return WorldHelper.tileToPixel(this, tile.pos());
+    }
+
+    public final Point getTileTopLeft(Tile tile) {
+        return getTileCenter(tile).plus(-getTileWidth() / 2, -getTileHeight() / 2);
+    }
+
+    public Point getTileTopRight(Tile tile) {
+        return getTileCenter(tile).plus(getTileWidth() / 2, -getTileHeight() / 2);
+    }
+
+    public Point getTileBottomRight(Tile tile) {
+        return getTileCenter(tile).plus(getTileWidth() / 2, getTileHeight() / 2);
+    }
+
+    public Point getTileBottomLeft(Tile tile) {
+        return getTileCenter(tile).plus(-getTileWidth() / 2, getTileHeight() / 2);
     }
 }

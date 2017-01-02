@@ -5,6 +5,7 @@ import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
+import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
@@ -19,6 +20,7 @@ import java.util.logging.Logger;
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
+import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.Screen;
 import me.lucaspickering.terraingen.render.screen.WorldScreen;
 import me.lucaspickering.terraingen.util.Colors;
@@ -37,6 +39,7 @@ public class TerrainGen {
     // These event handlers are initialized at the bottom
     private final GLFWKeyCallback keyHandler;
     private final GLFWMouseButtonCallback mouseButtonHandler;
+    private final GLFWScrollCallback scrollHandler;
     private final GLFWCursorPosCallback cursorPosHandler;
     private final GLFWWindowSizeCallback windowResizeHandler;
 
@@ -106,6 +109,14 @@ public class TerrainGen {
                 if (currentScreen.contains(mousePos)) {
                     currentScreen.onClick(new MouseButtonEvent(window, button, action, mods,
                                                                mousePos));
+                }
+            }
+        };
+        scrollHandler = new GLFWScrollCallback() {
+            @Override
+            public void invoke(long window, double xOffset, double yOffset) {
+                if (currentScreen.contains(mousePos)) {
+                    currentScreen.onScroll(new ScrollEvent(window, xOffset, yOffset, mousePos));
                 }
             }
         };
@@ -179,6 +190,7 @@ public class TerrainGen {
         // Initialize input handlers
         GLFW.glfwSetKeyCallback(window, keyHandler);
         GLFW.glfwSetMouseButtonCallback(window, mouseButtonHandler);
+        GLFW.glfwSetScrollCallback(window, scrollHandler);
         GLFW.glfwSetCursorPosCallback(window, cursorPosHandler);
         GLFW.glfwSetWindowSizeCallback(window, windowResizeHandler);
 

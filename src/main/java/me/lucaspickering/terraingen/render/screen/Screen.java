@@ -13,6 +13,7 @@ import me.lucaspickering.terraingen.render.Font;
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
+import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.GuiElement;
 import me.lucaspickering.terraingen.util.Point;
 
@@ -140,6 +141,14 @@ public abstract class Screen implements ScreenElement {
                 .filter(element -> element.isEnabled() && element.contains(event.mousePos))
                 .forEach(element -> onElementClicked(event, element));
         }
+    }
+
+    /**
+     * Called when the user scrolls while the mouse is over this element.
+     * @param event the event that occurred
+     */
+    public void onScroll(ScrollEvent event) {
+        // By default, do nothing
     }
 
     /**

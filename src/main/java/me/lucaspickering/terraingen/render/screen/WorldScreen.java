@@ -4,11 +4,13 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import me.lucaspickering.terraingen.render.ColorTexture;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
+import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Point;
@@ -35,6 +37,7 @@ public class WorldScreen extends Screen {
     private long mouseDownTime;
 
     public WorldScreen(World world) {
+        Objects.requireNonNull(world);
         this.world = world;
         mouseOverTileInfo = new MouseTextBox();
         mouseOverTileInfo.setVisible(false); // Hide this for now
@@ -55,7 +58,6 @@ public class WorldScreen extends Screen {
             world.setWorldCenter(world.getWorldCenter().plus(diff));
             lastMouseDragPos = mousePos; // Update the mouse pos
         }
-        final Point worldCenter = world.getWorldCenter();
 
         final Tiles tiles = world.getTiles();
 
@@ -67,17 +69,13 @@ public class WorldScreen extends Screen {
         // If there is a mouse position, check which tile it's over
         final TilePoint mouseOverPos;
         if (mousePos != null) {
-            final Point shiftedMousePos = mousePos.minus(worldCenter);
-            mouseOverPos = WorldHelper.pixelToTile(shiftedMousePos);
+            mouseOverPos = WorldHelper.pixelToTile(world, mousePos);
         } else {
             mouseOverPos = null;
         }
 
         // Draw each tile
         {
-            GL11.glPushMatrix();
-            GL11.glTranslatef(worldCenter.x(), worldCenter.y(), 0f);
-
             // Draw the tiles themselves
             onScreenTiles.forEach(this::drawTile);
 
@@ -87,8 +85,6 @@ public class WorldScreen extends Screen {
             onScreenTiles.forEach(tile -> drawTileOverlays(tile, tile.pos().equals(mouseOverPos)));
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             GL11.glDisable(GL11.GL_BLEND);
-
-            GL11.glPopMatrix();
         }
 
         // Update mouseOverTileInfo for the tile that the mouse is over. This HAS to be done
@@ -105,11 +101,10 @@ public class WorldScreen extends Screen {
 
     private boolean containsTile(Tile tile) {
         // If any of the 4 corners of the tile are on-screen, the tile is on-screen
-        final Point worldCenter = world.getWorldCenter();
-        return contains(worldCenter.plus(tile.getTopLeft()))
-               || contains(worldCenter.plus(tile.getTopRight()))
-               || contains(worldCenter.plus(tile.getBottomRight()))
-               || contains(worldCenter.plus(tile.getBottomLeft()));
+        return contains(world.getTileTopLeft(tile))
+               || contains(world.getTileTopRight(tile))
+               || contains(world.getTileBottomRight(tile))
+               || contains(world.getTileBottomLeft(tile));
     }
 
     /**
@@ -120,7 +115,8 @@ public class WorldScreen extends Screen {
     private void drawTile(Tile tile) {
         // Shift to the tile and draw the background
         GL11.glPushMatrix();
-        GL11.glTranslatef(tile.getCenter().x(), tile.getCenter().y(), 0f);
+        final Point tileCenter = world.getTileCenter(tile);
+        GL11.glTranslatef(tileCenter.x(), tileCenter.y(), 0f);
         drawTileBackground(tile);
         // Could draw tile outlines here
         GL11.glPopMatrix();
@@ -130,7 +126,7 @@ public class WorldScreen extends Screen {
         // Set the color then draw a hexagon
         Funcs.setGlColor(tile.backgroundColor());
         GL11.glBegin(GL11.GL_POLYGON);
-        for (Point vertex : Tile.VERTICES) {
+        for (Point vertex : world.getTileVertices()) {
             GL11.glVertex2i(vertex.x(), vertex.y());
         }
         GL11.glEnd();
@@ -139,8 +135,8 @@ public class WorldScreen extends Screen {
     private void drawTileOutline(Tile tile) {
         for (int i = 0; i < Tile.NUM_SIDES; i++) {
             // Get the two vertices that the line will be between
-            final Point vertex1 = Tile.VERTICES[i];
-            final Point vertex2 = Tile.VERTICES[(i + 1) % Tile.NUM_SIDES];
+            final Point vertex1 = world.getTileVertices()[i];
+            final Point vertex2 = world.getTileVertices()[(i + 1) % Tile.NUM_SIDES];
 
             // The line width is based on the elevation between this tile and the adjacent one
             GL11.glLineWidth(OUTLINE_WIDTH);
@@ -161,11 +157,12 @@ public class WorldScreen extends Screen {
     private void drawTileOverlays(Tile tile, boolean mouseOver) {
         // Translate to this tile
         GL11.glPushMatrix();
-        GL11.glTranslatef(tile.getTopLeft().x(), tile.getTopLeft().y(), 0f);
+        final Point tileTopLeft = world.getTileTopLeft(tile);
+        GL11.glTranslatef(tileTopLeft.x(), tileTopLeft.y(), 0f);
 
         // If the mouse is over this tile, draw the mouse-over overlay
         if (mouseOver) {
-            ColorTexture.mouseOver.draw(0, 0, Tile.WIDTH, Tile.HEIGHT);
+            ColorTexture.mouseOver.draw(0, 0, world.getTileWidth(), world.getTileHeight());
         }
 
         GL11.glPopMatrix();
@@ -177,23 +174,37 @@ public class WorldScreen extends Screen {
             switch (event.key) {
                 case GLFW.GLFW_KEY_ESCAPE:
                     setNextScreen(new PauseScreen(this)); // Open the pause menu
+                    break;
             }
         }
     }
 
     @Override
     public void onClick(MouseButtonEvent event) {
-        if (event.button == GLFW.GLFW_MOUSE_BUTTON_1) {
-            if (event.action == GLFW.GLFW_PRESS) {
-                lastMouseDragPos = event.mousePos;
-                mouseDownTime = System.currentTimeMillis();
-            } else if (event.action == GLFW.GLFW_RELEASE) {
-                // If the elapsed time between mouse down and up is below a threshold, call it a click
-                if (System.currentTimeMillis() - mouseDownTime <= MAX_CLICK_TIME) {
-                    super.onClick(event);
+        switch (event.button) {
+            case GLFW.GLFW_MOUSE_BUTTON_1:
+                if (event.action == GLFW.GLFW_PRESS) {
+                    lastMouseDragPos = event.mousePos;
+                    mouseDownTime = System.currentTimeMillis();
+                } else if (event.action == GLFW.GLFW_RELEASE) {
+                    // If the elapsed time between mouse down and up is below a threshold, call it a click
+                    if (System.currentTimeMillis() - mouseDownTime <= MAX_CLICK_TIME) {
+                        super.onClick(event);
+                    }
+                    lastMouseDragPos = null; // Wipe this out
                 }
-                lastMouseDragPos = null; // Wipe this out
-            }
+                break;
+        }
+    }
+
+    @Override
+    public void onScroll(ScrollEvent event) {
+        if (event.yOffset < 0) {
+            // Zoom out
+            world.setTileRadius(world.getTileRadius() - 5);
+        } else if (event.yOffset > 0) {
+            // Zoom in
+            world.setTileRadius(world.getTileRadius() + 5);
         }
     }
 }
