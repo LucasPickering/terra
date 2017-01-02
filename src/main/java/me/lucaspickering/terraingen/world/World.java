@@ -38,13 +38,6 @@ public class World {
         new BeachGenerator()
     };
 
-//    private static final Generator[] GENERATORS = new Generator[]{
-//        new MidpointGenerator(),
-//        new BiomePainter(),
-//        new WaterPainter(),
-//        new BeachGenerator()
-//    };
-
     private final Logger logger;
     private final Random random;
     private final Tiles tiles;
