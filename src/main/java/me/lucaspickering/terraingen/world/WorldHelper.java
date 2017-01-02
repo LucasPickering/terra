@@ -21,7 +21,6 @@ public class WorldHelper {
      */
     @NotNull
     public static Point tileToPixel(@NotNull World world, @NotNull TilePoint tile) {
-        // todo algebra cleanup
         final float x = world.getTileWidth() * tile.x() * 0.75f;
         final float y = -world.getTileHeight() * (tile.x() / 2.0f + tile.y());
         return world.getWorldCenter().plus((int) x, (int) y);
@@ -40,10 +39,9 @@ public class WorldHelper {
      */
     @NotNull
     public static TilePoint pixelToTile(@NotNull World world, @NotNull Point pos) {
-        // todo algebra cleanup
         final Point shiftedPos = pos.minus(world.getWorldCenter());
         // Convert it to a fractional tile point
-        final float fracX = shiftedPos.x() * 2f / 3f / world.getTileRadius();
+        final float fracX = shiftedPos.x() * 4f / 3f / world.getTileWidth();
         final float fracY = -(shiftedPos.x() + (float) Math.sqrt(3) * shiftedPos.y())
                             / (world.getTileRadius() * 3f);
         final float fracZ = -fracX - fracY; // We'll need this later

@@ -64,7 +64,7 @@ public class World {
         random = TerrainGen.instance().random();
         tiles = generateWorld(size);
         worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
-        setTileRadius(15);
+        setTileRadius(VALID_TILE_RADII.min());
     }
 
     private Tiles generateWorld(int size) {

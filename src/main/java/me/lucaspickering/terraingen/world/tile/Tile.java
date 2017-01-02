@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import me.lucaspickering.terraingen.TerrainGen;
-import me.lucaspickering.terraingen.util.Colors;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
@@ -109,10 +108,6 @@ public class Tile {
 
     public final Color backgroundColor() {
         return biome.color(elevation);
-    }
-
-    public final Color outlineColor() {
-        return Colors.TILE_OUTLINE;
     }
 
     public String info() {

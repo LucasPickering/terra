@@ -25,7 +25,8 @@ public class WorldScreen extends Screen {
     // Maximum time a click can be held down to be considered a click and not a drag
     private static final int MAX_CLICK_TIME = 250;
 
-    private static final float OUTLINE_WIDTH = 1.5f;
+    // Change of tile size in pixels with each zoom level
+    private static final int ZOOM_STEP = 5;
 
     private final World world;
     private final MouseTextBox mouseOverTileInfo;
@@ -118,7 +119,6 @@ public class WorldScreen extends Screen {
         final Point tileCenter = world.getTileCenter(tile);
         GL11.glTranslatef(tileCenter.x(), tileCenter.y(), 0f);
         drawTileBackground(tile);
-        // Could draw tile outlines here
         GL11.glPopMatrix();
     }
 
@@ -130,22 +130,6 @@ public class WorldScreen extends Screen {
             GL11.glVertex2i(vertex.x(), vertex.y());
         }
         GL11.glEnd();
-    }
-
-    private void drawTileOutline(Tile tile) {
-        for (int i = 0; i < Tile.NUM_SIDES; i++) {
-            // Get the two vertices that the line will be between
-            final Point vertex1 = world.getTileVertices()[i];
-            final Point vertex2 = world.getTileVertices()[(i + 1) % Tile.NUM_SIDES];
-
-            // The line width is based on the elevation between this tile and the adjacent one
-            GL11.glLineWidth(OUTLINE_WIDTH);
-            Funcs.setGlColor(tile.outlineColor());
-            GL11.glBegin(GL11.GL_LINES);
-            GL11.glVertex2i(vertex1.x(), vertex1.y());
-            GL11.glVertex2i(vertex2.x(), vertex2.y());
-            GL11.glEnd();
-        }
     }
 
     /**
@@ -201,10 +185,10 @@ public class WorldScreen extends Screen {
     public void onScroll(ScrollEvent event) {
         if (event.yOffset < 0) {
             // Zoom out
-            world.setTileRadius(world.getTileRadius() - 5);
+            world.setTileRadius(world.getTileRadius() - ZOOM_STEP);
         } else if (event.yOffset > 0) {
             // Zoom in
-            world.setTileRadius(world.getTileRadius() + 5);
+            world.setTileRadius(world.getTileRadius() + ZOOM_STEP);
         }
     }
 }
