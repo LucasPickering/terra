@@ -36,7 +36,8 @@ public enum Biome {
         }
 
         private float map(float x) {
-            return Funcs.mapToRange(fromMin, fromMax, toMin, toMax, x);
+            final float halfMapped = (x - fromMin) / (fromMax - fromMin); // Map to [0, 1]
+            return halfMapped * (toMax - toMin) + toMin; // Now map to [toMin, toMax]
         }
     }
 
@@ -77,7 +78,7 @@ public enum Biome {
         final float[] hsv = Funcs.toHSV(baseColor());
         // Change the value based on the elevation
         final float value = colorValueMapping.map(elevation);
-        hsv[2] = Funcs.coerce(0f, value, 1f); // Coerce value to [0, 1]
+        hsv[2] = (float) Funcs.coerce(0, value, 1); // Coerce value to [0, 1]
         return Funcs.toRGB(hsv);
     }
 }

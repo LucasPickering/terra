@@ -1,30 +1,24 @@
 package me.lucaspickering.terraingen.util;
 
-import java.util.Random;
+public class DoubleRange {
 
-public class InclusiveRange {
+    private final double min, max;
 
-    private final int min, max;
-
-    public InclusiveRange(int min, int max) {
+    public DoubleRange(double min, double max) {
         if (max < min) {
-            throw new IllegalArgumentException(String.format("Min [%d] must be <= max [%d]",
+            throw new IllegalArgumentException(String.format("Min [%f] must be <= max [%f]",
                                                              min, max));
         }
         this.min = min;
         this.max = max;
     }
 
-    public int min() {
+    public double min() {
         return min;
     }
 
-    public int max() {
+    public double max() {
         return max;
-    }
-
-    public int size() {
-        return max - min + 1;
     }
 
     /**
@@ -37,17 +31,13 @@ public class InclusiveRange {
         return min <= x && x <= max;
     }
 
-    public int randomIn(Random random) {
-        return min + random.nextInt(size());
-    }
-
     /**
      * Coerces the given value into this range.
      *
      * @param x the value to be coerced
      * @return the coerced value
      */
-    public int coerce(int x) {
+    public double coerce(double x) {
         if (x < min) {
             return min;
         }

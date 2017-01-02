@@ -10,7 +10,7 @@ import java.util.Random;
 import java.util.Set;
 
 import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.terraingen.util.InclusiveRange;
+import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Cluster;
@@ -20,11 +20,11 @@ import me.lucaspickering.terraingen.world.tile.Tile;
 public class ContinentGenerator implements Generator {
 
     // Range of number of continents to generate
-    private static final InclusiveRange CONTINENT_COUNT_RANGE = new InclusiveRange(5, 10);
+    private static final IntRange CONTINENT_COUNT_RANGE = new IntRange(5, 10);
 
     // the range that a continent's target size can be in. Note that continents may end up being
     // smaller than the minimum of this range, if there aren't enough tiles to make them bigger.
-    private static final InclusiveRange CONTINENT_SIZE_RANGE = new InclusiveRange(100, 1000);
+    private static final IntRange CONTINENT_SIZE_RANGE = new IntRange(100, 1000);
 
     // Average size of each biome
     private static final int AVERAGE_BIOME_SIZE = 10;

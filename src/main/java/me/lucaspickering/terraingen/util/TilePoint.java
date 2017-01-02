@@ -54,19 +54,19 @@ public class TilePoint {
      * @param z the fractional z
      * @return the rounded point
      */
-    public static TilePoint roundPoint(float x, float y, float z) {
+    public static TilePoint roundPoint(double x, double y, double z) {
         // Convert the fractional tile coordinates to regular coordinates
         // First, get rounded versions of each coord
-        int roundX = Math.round(x);
-        int roundY = Math.round(y);
-        int roundZ = Math.round(z);
+        int roundX = (int) Math.round(x);
+        int roundY = (int) Math.round(y);
+        int roundZ = (int) Math.round(z);
 
         // roundX + roundY + roundZ == 0 is not guaranteed, so we need to recalculate one of them
 
         // Find how much each one needed to be rounded
-        final float xDiff = Math.abs(x - roundX);
-        final float yDiff = Math.abs(y - roundY);
-        final float zDiff = Math.abs(z - roundZ);
+        final double xDiff = Math.abs(x - roundX);
+        final double yDiff = Math.abs(y - roundY);
+        final double zDiff = Math.abs(z - roundZ);
 
         // Recalculate the one that rounded the most
         if (xDiff > yDiff && xDiff > zDiff) {

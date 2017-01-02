@@ -7,7 +7,8 @@ import java.util.logging.Logger;
 
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.render.Renderer;
-import me.lucaspickering.terraingen.util.InclusiveRange;
+import me.lucaspickering.terraingen.util.DoubleRange;
+import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
 import me.lucaspickering.terraingen.world.generate.ContinentGenerator;
@@ -20,9 +21,9 @@ import me.lucaspickering.terraingen.world.tile.Tile;
 public class World {
 
     // Every tile's elevation must be in this range
-    public static final InclusiveRange ELEVATION_RANGE = new InclusiveRange(-25, 25);
+    public static final IntRange ELEVATION_RANGE = new IntRange(-25, 25);
 
-    public static final InclusiveRange VALID_TILE_RADII = new InclusiveRange(10, 200);
+    public static final DoubleRange VALID_TILE_RADII = new DoubleRange(10, 200);
 
     /**
      * Any tile below, but not equal to, this elevation can feasibly become ocean tiles. Most
@@ -31,7 +32,7 @@ public class World {
     public static final int SEA_LEVEL = 0;
 
     // World size
-    private static final int DEFAULT_SIZE = 50;
+    private static final int DEFAULT_SIZE = 100;
 
     private static final Generator[] GENERATORS = new Generator[]{
         new ContinentGenerator(),
@@ -49,9 +50,9 @@ public class World {
     private Point worldCenter;
 
     // Tile pixel dimensions
-    private int tileRadius;
-    private int tileWidth;
-    private int tileHeight;
+    private double tileRadius;
+    private double tileWidth;
+    private double tileHeight;
     private Point[] tileVertices;
 
     public World() {
@@ -106,11 +107,11 @@ public class World {
         this.worldCenter = worldCenter;
     }
 
-    public int getTileRadius() {
+    public double getTileRadius() {
         return tileRadius;
     }
 
-    public void setTileRadius(int radius) {
+    public void setTileRadius(double radius) {
         tileRadius = VALID_TILE_RADII.coerce(radius);
         tileWidth = tileRadius * 2;
         tileHeight = (int) (Math.sqrt(3) * tileRadius);
@@ -124,11 +125,11 @@ public class World {
         };
     }
 
-    public int getTileWidth() {
+    public double getTileWidth() {
         return tileWidth;
     }
 
-    public int getTileHeight() {
+    public double getTileHeight() {
         return tileHeight;
     }
 

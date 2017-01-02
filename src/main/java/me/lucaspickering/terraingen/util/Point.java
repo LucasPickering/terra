@@ -17,7 +17,7 @@ public class Point implements Cloneable {
      */
     public static final Point ZERO = new Point(0, 0);
 
-    private final int x, y;
+    private final double x, y;
 
     /**
      * Constructs a new {@code Point} with the given x and y.
@@ -25,16 +25,16 @@ public class Point implements Cloneable {
      * @param x the x-value
      * @param y the y-value
      */
-    public Point(int x, int y) {
+    public Point(double x, double y) {
         this.x = x;
         this.y = y;
     }
 
-    public int x() {
+    public double x() {
         return x;
     }
 
-    public int y() {
+    public double y() {
         return y;
     }
 
@@ -57,7 +57,7 @@ public class Point implements Cloneable {
      * @param y the y to be added
      * @return the new {@code Point}
      */
-    public Point plus(int x, int y) {
+    public Point plus(double x, double y) {
         return new Point(this.x + x, this.y + y);
     }
 
@@ -65,7 +65,7 @@ public class Point implements Cloneable {
         return minus(p.x(), p.y());
     }
 
-    public Point minus(int x, int y) {
+    public Point minus(double x, double y) {
         return new Point(this.x - x, this.y - y);
     }
 
@@ -95,8 +95,8 @@ public class Point implements Cloneable {
      */
     public double distanceTo(Point p) {
         Objects.requireNonNull(p);
-        final int xDiff = x - p.x;
-        final int yDiff = y - p.y;
+        final double xDiff = x - p.x;
+        final double yDiff = y - p.y;
         return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
     }
 
@@ -115,11 +115,11 @@ public class Point implements Cloneable {
 
     @Override
     public int hashCode() {
-        return x * 31 + y;
+        return (int) (x * 31 + y);
     }
 
     @Override
     public String toString() {
-        return String.format("(%d, %d)", x, y);
+        return String.format("(%f, %f)", x, y);
     }
 }

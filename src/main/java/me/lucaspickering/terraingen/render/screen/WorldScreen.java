@@ -26,7 +26,7 @@ public class WorldScreen extends Screen {
     private static final int MAX_CLICK_TIME = 250;
 
     // Change of tile size in pixels with each zoom level
-    private static final int ZOOM_STEP = 5;
+    private static final double ZOOM_STEP = 5;
 
     private final World world;
     private final MouseTextBox mouseOverTileInfo;
@@ -117,7 +117,7 @@ public class WorldScreen extends Screen {
         // Shift to the tile and draw the background
         GL11.glPushMatrix();
         final Point tileCenter = world.getTileCenter(tile);
-        GL11.glTranslatef(tileCenter.x(), tileCenter.y(), 0f);
+        GL11.glTranslated(tileCenter.x(), tileCenter.y(), 0f);
         drawTileBackground(tile);
         GL11.glPopMatrix();
     }
@@ -127,7 +127,7 @@ public class WorldScreen extends Screen {
         Funcs.setGlColor(tile.backgroundColor());
         GL11.glBegin(GL11.GL_POLYGON);
         for (Point vertex : world.getTileVertices()) {
-            GL11.glVertex2i(vertex.x(), vertex.y());
+            GL11.glVertex2d(vertex.x(), vertex.y());
         }
         GL11.glEnd();
     }
@@ -142,11 +142,12 @@ public class WorldScreen extends Screen {
         // Translate to this tile
         GL11.glPushMatrix();
         final Point tileTopLeft = world.getTileTopLeft(tile);
-        GL11.glTranslatef(tileTopLeft.x(), tileTopLeft.y(), 0f);
+        GL11.glTranslated(tileTopLeft.x(), tileTopLeft.y(), 0f);
 
         // If the mouse is over this tile, draw the mouse-over overlay
         if (mouseOver) {
-            ColorTexture.mouseOver.draw(0, 0, world.getTileWidth(), world.getTileHeight());
+            ColorTexture.mouseOver.draw(0, 0,
+                                        (int) world.getTileWidth(), (int) world.getTileHeight());
         }
 
         GL11.glPopMatrix();
