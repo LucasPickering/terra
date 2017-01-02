@@ -91,7 +91,7 @@ public class Tiles extends AbstractSet<Tile> {
     @Override
     public boolean contains(Object o) {
         // Cast o to a tile and check if its position is in the map
-        return o instanceof Tile && map.containsKey(((Tile) o).pos());
+        return o instanceof Tile && containsPoint(((Tile) o).pos());
     }
 
     public boolean containsPoint(TilePoint point) {
@@ -106,16 +106,22 @@ public class Tiles extends AbstractSet<Tile> {
 
     @Override
     public boolean add(Tile tile) {
-        return map.put(tile.pos(), tile) != null;
+        Objects.requireNonNull(tile);
+        map.put(tile.pos(), tile);
+        return true;
     }
 
     @Override
     public boolean remove(Object o) {
         if (o instanceof Tile) {
             final Tile tile = (Tile) o;
-            return map.remove(tile.pos()) != null;
+            return removePoint(tile.pos());
         }
         return false;
+    }
+
+    public boolean removePoint(TilePoint point) {
+        return map.remove(point) != null;
     }
 
     @Override

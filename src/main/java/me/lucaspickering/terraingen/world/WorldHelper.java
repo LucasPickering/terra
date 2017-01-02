@@ -2,6 +2,10 @@ package me.lucaspickering.terraingen.world;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.EnumMap;
+import java.util.Map;
+
+import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.Tile;
@@ -61,5 +65,46 @@ public class WorldHelper {
         }
 
         return new TilePoint(roundX, roundY, roundZ);
+    }
+
+    /**
+     * Initializes a collection of {@link Tile}s, in a {@link Tiles} object, of the given size.
+     * Each tile will have default biome and elevation, but will have its adjacent tiles properly
+     * initialized.
+     *
+     * @param size the radius of the collection of tiles
+     * @return the initialized {@link Tiles}
+     */
+    @NotNull
+    public static Tiles initTiles(int size) {
+        final Tiles tiles = new Tiles();
+        // Fill out the set with a bunch of points
+        for (int x = -size; x <= size; x++) {
+            for (int y = -size; y <= size; y++) {
+                for (int z = -size; z <= size; z++) {
+                    if (x + y + z == 0) {
+                        tiles.add(new Tile(new TilePoint(x, y, z)));
+                    }
+                }
+            }
+        }
+
+        // Add adjacents for each tile
+        for (Tile tile : tiles) {
+            // Get all tiles adjacent to this one
+            final Map<Direction, Tile> adjacents = new EnumMap<>(Direction.class);
+            for (Map.Entry<Direction, TilePoint> adjEntry :
+                tiles.getAdjacentTiles(tile.pos()).entrySet()) {
+
+                final Direction dir = adjEntry.getKey();
+                final TilePoint adjPoint = adjEntry.getValue();
+
+                // Add the corresponding tile to the map of adjacent tiles
+                adjacents.put(dir, tiles.getByPoint(adjPoint));
+            }
+            tile.setAdjacents(adjacents);
+        }
+
+        return tiles;
     }
 }

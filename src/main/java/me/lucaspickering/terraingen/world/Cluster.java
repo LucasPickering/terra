@@ -2,6 +2,8 @@ package me.lucaspickering.terraingen.world;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -15,12 +17,40 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  */
 public class Cluster extends Tiles {
 
+    // Tiles that border, but are not in, this cluster
+    private Tiles adjacentTiles = new Tiles();
+
     public Cluster() {
         super();
     }
 
     public Cluster(Tiles tiles) {
-        super(tiles);
+        super();
+        addAll(tiles);
+    }
+
+    @Override
+    public boolean add(Tile tile) {
+        final boolean added = super.add(tile);
+
+        // If the tile was added, update the set of adjacent tiles
+        if (added) {
+            adjacentTiles.remove(tile); // Remove this tile because it's no longer external
+            // Add any adjacent tiles that aren't in this cluster
+            final Collection<Tile> adjacents = tile.adjacents().values();
+            for (Tile adjTile : adjacents) {
+                if (!contains(adjTile)) {
+                    adjacentTiles.add(adjTile);
+                }
+            }
+        }
+
+        return added;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        throw new UnsupportedOperationException(); // Not supporting this for now cause I'm lazy
     }
 
     /**
@@ -35,13 +65,6 @@ public class Cluster extends Tiles {
      */
     @NotNull
     public Tiles allAdjacents() {
-        // TODO make this smarter
-        // Add all the adjacents for each tile in this cluster
-        final Tiles result = new Tiles();
-        for (Tile tile : this) {
-            result.addAll(tile.adjacents().values());
-        }
-        result.removeAll(this); // Remove all tiles that are in this cluster
-        return result;
+        return new Tiles(adjacentTiles);
     }
 }
