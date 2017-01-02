@@ -23,10 +23,9 @@ public class BeachGenerator implements Generator {
     @Override
     public void generate(Tiles tiles, Random random) {
         for (Tile tile : tiles) {
-            // If this tile is land and within our elevation bound (and not desert), check the
-            // adjacent tiles, and if there is an ocean (or similar) tile adjacent, make a beach.
-            if (Biome.isLand(tile.biome()) && tile.elevation() <= MAX_BEACH_ELEV
-                && tile.biome() != Biome.DESERT) {
+            // If this tile is land and within our elevation bound, check the adjacent tiles, and
+            // if there is an ocean (or similar) tile adjacent, make a beach.
+            if (tile.biome().isLand() && tile.elevation() <= MAX_BEACH_ELEV) {
                 for (Tile adj : tile.adjacents().values()) {
                     if (BEACHABLE_BIOMES.contains(adj.biome())) {
                         tile.setBiome(Biome.BEACH);
