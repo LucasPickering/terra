@@ -33,12 +33,51 @@ public class TilePoint {
      * @param x the x coord
      * @param y the y coord
      * @param z the z coord
+     * @throws IllegalArgumentException if {@code x + y + z != 0}
      */
     public TilePoint(int x, int y, int z) {
-        assert x + y + z == 0 : "x + y + z must equal 0";
+        if (x + y + z != 0) {
+            throw new IllegalArgumentException("x + y + z must equal 0");
+        }
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    /**
+     * Rounds the given fractional coordinate values into valid integer coordinates, and creates
+     * a {@link TilePoint} from those. The round point closest to the given fractional point will
+     * be returned.
+     *
+     * @param x the fractional x
+     * @param y the fractional y
+     * @param z the fractional z
+     * @return the rounded point
+     */
+    public static TilePoint roundPoint(float x, float y, float z) {
+        // Convert the fractional tile coordinates to regular coordinates
+        // First, get rounded versions of each coord
+        int roundX = Math.round(x);
+        int roundY = Math.round(y);
+        int roundZ = Math.round(z);
+
+        // roundX + roundY + roundZ == 0 is not guaranteed, so we need to recalculate one of them
+
+        // Find how much each one needed to be rounded
+        final float xDiff = Math.abs(x - roundX);
+        final float yDiff = Math.abs(y - roundY);
+        final float zDiff = Math.abs(z - roundZ);
+
+        // Recalculate the one that rounded the most
+        if (xDiff > yDiff && xDiff > zDiff) {
+            roundX = -roundY - roundZ;
+        } else if (yDiff > zDiff) {
+            roundY = -roundX - roundZ;
+        } else {
+            roundZ = -roundX - roundY;
+        }
+
+        return new TilePoint(roundX, roundY, roundZ);
     }
 
     public int x() {
@@ -71,6 +110,10 @@ public class TilePoint {
         return new TilePoint(x + other.x(), y + other.y(), z + other.z());
     }
 
+    public final TilePoint times(int factor) {
+        return new TilePoint(x * factor, y * factor, z * factor);
+    }
+
     @Override
     public String toString() {
         return String.format(STRING_FORMAT, x, y, z);
@@ -91,8 +134,7 @@ public class TilePoint {
 
     @Override
     public int hashCode() {
-        // z is a redundant value, so don't include it in the has because it would just reduce
-        // the accuracy of the hash.
+        // z is redundant, so don't include it in the hash because it would just reduce accuracy
         return x * 31 + y;
     }
 }

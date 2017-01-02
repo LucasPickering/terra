@@ -42,29 +42,8 @@ public class WorldHelper {
         final float fracY = -(pos.x() + (float) Math.sqrt(3) * pos.y()) / (Tile.RADIUS * 3f);
         final float fracZ = -fracX - fracY; // We'll need this later
 
-        // Convert the fraction tile coordinates to regular coordinates
-        // First, get rounded versions of each coord
-        int roundX = Math.round(fracX);
-        int roundY = Math.round(fracY);
-        int roundZ = Math.round(fracZ);
-
-        // roundX + roundY + roundZ == 0 is not guaranteed, so we need to recalculate one of them
-
-        // Find how much each one needed to be rounded
-        final float xDiff = Math.abs(fracX - roundX);
-        final float yDiff = Math.abs(fracY - roundY);
-        final float zDiff = Math.abs(fracZ - roundZ);
-
-        // Recalculate the one that rounded the most
-        if (xDiff > yDiff && xDiff > zDiff) {
-            roundX = -roundY - roundZ;
-        } else if (yDiff > zDiff) {
-            roundY = -roundX - roundZ;
-        } else {
-            roundZ = -roundX - roundY;
-        }
-
-        return new TilePoint(roundX, roundY, roundZ);
+        // Return the rounded point
+        return TilePoint.roundPoint(fracX, fracY, fracZ);
     }
 
     /**
