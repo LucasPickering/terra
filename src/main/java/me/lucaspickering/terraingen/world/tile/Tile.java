@@ -11,6 +11,7 @@ import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
+import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.WorldHelper;
 
 public class Tile {
@@ -152,7 +153,8 @@ public class Tile {
     }
 
     public void setElevation(int elevation) {
-        this.elevation = elevation;
+        // Coerce the elevation to be a valid value
+        this.elevation = World.ELEVATION_RANGE.coerce(elevation);
     }
 
     public final Point getCenter() {

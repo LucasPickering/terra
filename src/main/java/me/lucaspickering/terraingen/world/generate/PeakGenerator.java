@@ -8,7 +8,7 @@ import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.InclusiveRange;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
-import me.lucaspickering.terraingen.world.WorldHelper;
+import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -17,10 +17,10 @@ import me.lucaspickering.terraingen.world.tile.Tile;
 public class PeakGenerator implements Generator {
 
     private static final InclusiveRange PEAK_COUNT_RANGE = new InclusiveRange(7, 10);
-    private static final InclusiveRange PEAK_ELEVATION_RANGE = new InclusiveRange(45, 60);
-    private static final int MIN_PEAK_SEPARATION = 3; // Min distance between two peak
+    private static final InclusiveRange PEAK_ELEVATION_RANGE =
+        new InclusiveRange(15, World.ELEVATION_RANGE.max());
+    private static final int MIN_PEAK_SEPARATION = 3; // Min distance between two peaks
     private static final int SMOOTHING_SLOP = 4; // Variation in each direction for smoothing elev
-    private static final int MIN_MOUNTAIN_ELEV = 40; // Everything taller than this is mountain
 
     @Override
     public void generate(Tiles tiles, Random random) {
@@ -58,7 +58,7 @@ public class PeakGenerator implements Generator {
      */
     private void setElev(Tile tile, int elevation) {
         tile.setElevation(elevation);
-        if (elevation >= MIN_MOUNTAIN_ELEV) {
+        if (elevation >= PEAK_ELEVATION_RANGE.min()) {
             tile.setBiome(Biome.MOUNTAIN);
         }
     }

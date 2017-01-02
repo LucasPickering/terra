@@ -4,6 +4,7 @@ import java.util.Random;
 
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Tiles;
+import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -17,7 +18,7 @@ public class OceanFloorGenerator implements Generator {
     private static final int SHELF_DISTANCE_THRESHOLD = 15;
     private static final int SHELF_DEPTH = -13;
     private static final int FLOOR_DISTANCE_THRESHOLD = 17;
-    private static final int FLOOR_DEPTH = -50;
+    private static final int FLOOR_DEPTH = -World.ELEVATION_RANGE.min();
 
     @Override
     public void generate(Tiles tiles, Random random) {

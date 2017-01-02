@@ -20,7 +20,7 @@ import me.lucaspickering.terraingen.world.generate.WaterPainter;
 public class World {
 
     // Every tile's elevation must be in this range
-    public static final InclusiveRange ELEVATION_RANGE = new InclusiveRange(-50, 75);
+    public static final InclusiveRange ELEVATION_RANGE = new InclusiveRange(-25, 25);
 
     // World size
     private static final int DEFAULT_SIZE = 50;
@@ -58,12 +58,20 @@ public class World {
         final Tiles tiles = WorldHelper.initTiles(size);
 
         // Apply each generator in sequence (this is the heavy lifting)
-        Arrays.stream(GENERATORS).forEach(gen -> gen.generate(tiles, random));
+        Arrays.stream(GENERATORS).forEach(gen -> runGenerator(gen, tiles, random));
 
         final Tiles result = tiles.immutableCopy(); // Make an immutable copy
         logger.log(Level.FINE, String.format("World generation took %d ms",
                                              System.currentTimeMillis() - startTime));
         return result;
+    }
+
+    private void runGenerator(Generator generator, Tiles tiles, Random random) {
+        final long startTime = System.currentTimeMillis();
+        generator.generate(tiles, random);
+        final long runTime = System.currentTimeMillis() - startTime;
+        logger.log(Level.FINER, String.format("Generator stage %s took %d ms",
+                                              generator.getClass().getSimpleName(), runTime));
     }
 
     /**

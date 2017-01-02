@@ -15,6 +15,14 @@ public class InclusiveRange {
         this.max = max;
     }
 
+    public int min() {
+        return min;
+    }
+
+    public int max() {
+        return max;
+    }
+
     public int size() {
         return max - min + 1;
     }
@@ -31,5 +39,21 @@ public class InclusiveRange {
 
     public int randomIn(Random random) {
         return min + random.nextInt(size());
+    }
+
+    /**
+     * Coerces the given value into this range.
+     *
+     * @param x the value to be coerced
+     * @return the coerced value
+     */
+    public int coerce(int x) {
+        if (x < min) {
+            return min;
+        }
+        if (x > max) {
+            return max;
+        }
+        return x;
     }
 }

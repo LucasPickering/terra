@@ -64,10 +64,8 @@ public class BiomePainter implements Generator {
 
         // Step 2
         final Tiles seeds = tiles.selectTiles(random, numSeeds, MIN_SEED_SPACING);
-
-        // Step 3 (this one is a bit longer)
         final Tiles unselectedTiles = new Tiles(tiles); // We need a copy so we can modify it
-        unselectedTiles.removeAll(seeds); // We already selected these
+        unselectedTiles.removeAll(seeds); // We've already selected the seeds, so remove them
 
         // Each biome blotch, keyed by the seed of that blotch
         final Map<TilePoint, Cluster> blotches = new HashMap<>();
