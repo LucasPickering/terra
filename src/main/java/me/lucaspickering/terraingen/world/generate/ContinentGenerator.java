@@ -20,7 +20,7 @@ import me.lucaspickering.terraingen.world.tile.Tile;
 public class ContinentGenerator implements Generator {
 
     // Range of number of continents to generate
-    private static final IntRange CONTINENT_COUNT_RANGE = new IntRange(5, 10);
+    private static final IntRange CONTINENT_COUNT_RANGE = new IntRange(10, 20);
 
     // the range that a continent's target size can be in. Note that continents may end up being
     // smaller than the minimum of this range, if there aren't enough tiles to make them bigger.

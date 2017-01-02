@@ -3,11 +3,9 @@ package me.lucaspickering.terraingen.world.generate;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.TilePoint;
@@ -67,23 +65,39 @@ public class BiomePainter implements Generator {
         final Tiles unselectedTiles = new Tiles(tiles); // We need a copy so we can modify it
         unselectedTiles.removeAll(seeds); // We've already selected the seeds, so remove them
 
-        // Each biome blotch, keyed by the seed of that blotch
+        // Each biome blotch, keyed by its seed
         final Map<TilePoint, Cluster> blotches = new HashMap<>();
-        final Set<TilePoint> incompleteBlotches = new HashSet<>(); // Blotches with room to grow
+
+        // All the blotches that still have room to grow
+        final Map<TilePoint, Cluster> incompleteBlotches = new HashMap<>();
+
         for (Tile seed : seeds) {
-            // Pick a biome for this seed, then add it to the map
+            // Add each seed to its cluster, and each cluster to the maps
             final Cluster blotch = new Cluster();
             blotch.add(seed);
             blotches.put(seed.pos(), blotch);
-            incompleteBlotches.add(seed.pos());
+            incompleteBlotches.put(seed.pos(), blotch);
         }
 
         // Step 3 (the hard part)
         // While there are tiles left to assign...
         while (!unselectedTiles.isEmpty()) {
-            // Pick a seed that still has openings to work from
-            final TilePoint seed = Funcs.randomFromCollection(random, incompleteBlotches);
-            final Cluster blotch = blotches.get(seed); // The blotch grown from that seed
+            if (incompleteBlotches.isEmpty()) {
+                throw new IllegalStateException(
+                    "No biomes to grow, but there are tiles left to assign");
+            }
+
+            // Get the smallest biome and try to grow it
+            Map.Entry<TilePoint, Cluster> smallestBlotch = null;
+            for (Map.Entry<TilePoint, Cluster> entry : incompleteBlotches.entrySet()) {
+                if (smallestBlotch == null || entry.getValue().size()
+                                              < smallestBlotch.getValue().size()) {
+                    smallestBlotch = entry;
+                }
+            }
+            assert smallestBlotch != null; // Should have been assigned
+            final TilePoint seed = smallestBlotch.getKey();
+            final Cluster blotch = smallestBlotch.getValue();
 
             final Tiles adjTiles = blotch.allAdjacents(); // All tiles adjacent to this blotch
             adjTiles.retainAll(unselectedTiles); // Remove tiles that are already in a blotch
