@@ -3,7 +3,6 @@ package me.lucaspickering.terraingen.world;
 import org.junit.Test;
 
 import java.util.Map;
-import java.util.Set;
 
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.TilePoint;
@@ -27,18 +26,18 @@ public class TestTiles {
             }
         }
 
-        Map<Direction, TilePoint> result;
+        Map<Direction, Tile> result;
 
         // Center tile has 6 adjacents
-        result = tiles.getAdjacentTiles(new TilePoint(0, 0, 0));
+        result = tiles.getAdjacentTiles(tiles.getByPoint(new TilePoint(0, 0, 0)));
         assertEquals("Should have 6 adjacent tiles", 6, result.size());
 
         // Another one with 6 adjacents
-        result = tiles.getAdjacentTiles(new TilePoint(0, 1, -1));
+        result = tiles.getAdjacentTiles(tiles.getByPoint(new TilePoint(0, 1, -1)));
         assertEquals("Should have 6 adjacent tiles", 6, result.size());
 
         // One on the edge with only 3 adjacents
-        result = tiles.getAdjacentTiles(new TilePoint(2, 0, -2));
+        result = tiles.getAdjacentTiles(tiles.getByPoint(new TilePoint(2, 0, -2)));
         assertEquals("Should have 3 adjacent tiles", 3, result.size());
     }
 
@@ -58,18 +57,18 @@ public class TestTiles {
         }
 
         final TilePoint origin = new TilePoint(0, 0, 0);
-        Set<TilePoint> result;
+        Tiles result;
 
         // Range of 0 returns just the 1 tile
-        result = tiles.getTilesInRange(origin, 0);
+        result = tiles.getTilesInRange(tiles.getByPoint(origin), 0);
         assertEquals("Should return just 1 tile", 1, result.size());
 
         // Range of 1 returns the origin and 6 adjacents
-        result = tiles.getTilesInRange(origin, 1);
+        result = tiles.getTilesInRange(tiles.getByPoint(origin), 1);
         assertEquals("Should return 7 tiles", 7, result.size());
 
         // Range of 2 returns every tile in the world
-        result = tiles.getTilesInRange(origin, 2);
+        result = tiles.getTilesInRange(tiles.getByPoint(origin), 2);
         assertEquals("Should return the entire world", tiles.size(), result.size());
     }
 }

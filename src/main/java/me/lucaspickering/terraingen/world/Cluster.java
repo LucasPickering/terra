@@ -24,9 +24,8 @@ public class Cluster extends Tiles {
         super();
     }
 
-    public Cluster(Tiles tiles) {
-        super();
-        addAll(tiles);
+    public Cluster(Collection<? extends Tile> tiles) {
+        super(tiles);
     }
 
     @Override
@@ -37,7 +36,7 @@ public class Cluster extends Tiles {
         if (added) {
             adjacentTiles.remove(tile); // Remove this tile because it's no longer external
             // Add any adjacent tiles that aren't in this cluster
-            final Collection<Tile> adjacents = tile.adjacents().values();
+            final Collection<Tile> adjacents = getAdjacentTiles(tile).values();
             for (Tile adjTile : adjacents) {
                 if (!contains(adjTile)) {
                     adjacentTiles.add(adjTile);

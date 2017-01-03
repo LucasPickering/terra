@@ -2,10 +2,6 @@ package me.lucaspickering.terraingen.world;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.EnumMap;
-import java.util.Map;
-
-import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.Tile;
@@ -71,23 +67,6 @@ public class WorldHelper {
                 }
             }
         }
-
-        // Add adjacents for each tile
-        for (Tile tile : tiles) {
-            // Get all tiles adjacent to this one
-            final Map<Direction, Tile> adjacents = new EnumMap<>(Direction.class);
-            for (Map.Entry<Direction, TilePoint> adjEntry :
-                tiles.getAdjacentTiles(tile.pos()).entrySet()) {
-
-                final Direction dir = adjEntry.getKey();
-                final TilePoint adjPoint = adjEntry.getValue();
-
-                // Add the corresponding tile to the map of adjacent tiles
-                adjacents.put(dir, tiles.getByPoint(adjPoint));
-            }
-            tile.setAdjacents(adjacents);
-        }
-
         return tiles;
     }
 }

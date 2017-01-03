@@ -31,13 +31,22 @@ public class ContinentGenerator implements Generator {
 
     // The biomes that we can paint in this routine, and the relative chance that each one will
     // be selected
-    public static final Map<Biome, Integer> BIOME_WEIGHTS = new EnumMap<>(Biome.class);
+    public static Map<Biome, Integer> BIOME_WEIGHTS;
+
+    static {
+        try {
+            BIOME_WEIGHTS = new EnumMap<>(Biome.class);
+            BIOME_WEIGHTS.put(Biome.PLAINS, 10);
+            BIOME_WEIGHTS.put(Biome.FOREST, 10);
+            BIOME_WEIGHTS.put(Biome.DESERT, 2);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
     // Initialize all the weights
     static {
-        BIOME_WEIGHTS.put(Biome.PLAINS, 10);
-        BIOME_WEIGHTS.put(Biome.FOREST, 10);
-        BIOME_WEIGHTS.put(Biome.DESERT, 2);
     }
 
     @Override

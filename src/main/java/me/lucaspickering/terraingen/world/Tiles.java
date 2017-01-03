@@ -3,17 +3,16 @@ package me.lucaspickering.terraingen.world;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -46,8 +45,9 @@ public class Tiles extends AbstractSet<Tile> {
      *
      * @param tiles the object to copy
      */
-    public Tiles(Tiles tiles) {
-        map = new HashMap<>(tiles.map);
+    public Tiles(Collection<? extends Tile> tiles) {
+        this();
+        addAll(tiles);
     }
 
     /**
@@ -132,24 +132,26 @@ public class Tiles extends AbstractSet<Tile> {
     /**
      * Gets the set of all tiles adjacent to the given tile.
      *
-     * @param origin the center of the search
-     * @return tiles adjacent to {@code origin}, in a direction:point map
-     * @throws IllegalArgumentException if {@code origin} is not in this collection
+     * @param tile the center of the search
+     * @return tiles adjacent to {@code tile}, in a direction:point map
+     * @throws IllegalArgumentException if {@code tile} is not in this collection
      */
     @NotNull
-    public Map<Direction, TilePoint> getAdjacentTiles(@NotNull TilePoint origin) {
-        Objects.requireNonNull(origin);
-        if (!map.containsKey(origin)) {
-            throw new IllegalArgumentException("Origin is not in the world");
+    public Map<Direction, Tile> getAdjacentTiles(@NotNull Tile tile) {
+        Objects.requireNonNull(tile);
+        final TilePoint point = tile.pos();
+        if (!map.containsKey(point)) {
+            throw new IllegalArgumentException("Tile is not in the world");
         }
 
-        final Map<Direction, TilePoint> result = new EnumMap<>(Direction.class);
+        final Map<Direction, Tile> result = new EnumMap<>(Direction.class);
         for (Direction dir : Direction.values()) {
-            final TilePoint point = dir.shift(origin); // Get the shifted point
+            final TilePoint otherPoint = dir.shift(point); // Get the shifted point
 
             // If the shifted point is in the world, add it to the map
-            if (map.containsKey(point)) {
-                result.put(dir, point);
+            final Tile otherTile = map.get(otherPoint);
+            if (otherTile != null) {
+                result.put(dir, otherTile);
             }
         }
 
@@ -157,38 +159,39 @@ public class Tiles extends AbstractSet<Tile> {
     }
 
     /**
-     * Gets all tile points in the given range of the given point. A tile will be included in
+     * Gets all tile points in the given range of the given tile. A tile will be included in
      * the output if it is in this collection, and it is within {@code range} steps of {@code
-     * origin}. For example, giving a range of 0 returns just the origin, 1 returns the origin
+     * tile}. For example, giving a range of 0 returns just the given tile, 1 returns the tile
      * and all adjacent tiles, etc.
      *
-     * @param origin the tile to start counting from
-     * @param range  (non-negative)
-     * @return all tiles in range of the given origin
-     * @throws NullPointerException     if {@code origin == null}
-     * @throws IllegalArgumentException if {@code origin} is not in this collection or range is
+     * @param tile  the tile to start counting from
+     * @param range (non-negative)
+     * @return all tiles in range of the given tile
+     * @throws NullPointerException     if {@code tile == null}
+     * @throws IllegalArgumentException if {@code tile} is not in this collection or range is
      *                                  negative
      */
     @NotNull
-    public Set<TilePoint> getTilesInRange(@NotNull TilePoint origin, int range) {
-        Objects.requireNonNull(origin);
-        if (!map.containsKey(origin)) {
-            throw new IllegalArgumentException("Origin is not in the world");
+    public Tiles getTilesInRange(@NotNull Tile tile, int range) {
+        Objects.requireNonNull(tile);
+        final TilePoint point = tile.pos();
+        if (!map.containsKey(point)) {
+            throw new IllegalArgumentException("Tile is not in the world");
         }
         if (range < 0) {
             throw new IllegalArgumentException(String.format("Range must be positive, was [%d]",
                                                              range));
         }
 
-        final Set<TilePoint> result = new HashSet<>();
-        result.add(origin); // The result always has the origin in it
+        final Tiles result = new Tiles();
+        result.add(tile); // The result always has the tile in it
 
-        // Add everything other than the origin
-        Set<TilePoint> lastAdjacents = new HashSet<>(result);
+        // Add everything other than the tile
+        Tiles lastAdjacents = new Tiles(result);
         for (int i = 1; i <= range; i++) {
             // Start with tiles directly adjacent to this one
-            final Set<TilePoint> adjacents = new HashSet<>(getAdjacentTiles(origin).values());
-            for (TilePoint adjacent : lastAdjacents) {
+            final Tiles adjacents = new Tiles();
+            for (Tile adjacent : lastAdjacents) {
                 adjacents.addAll(getAdjacentTiles(adjacent).values());
             }
 
@@ -230,7 +233,7 @@ public class Tiles extends AbstractSet<Tile> {
             if (minSpacing > 0) {
                 // Get all the tiles that are too close to this one to be selected themselves,
                 // and remove them from the set of candidates
-                final Set<TilePoint> tooClose = getTilesInRange(tile.pos(), minSpacing);
+                final Tiles tooClose = getTilesInRange(tile, minSpacing);
                 tooClose.forEach(candidates::remove); // Remove each tile
             }
         }
@@ -284,7 +287,7 @@ public class Tiles extends AbstractSet<Tile> {
                 final Tile tile = Funcs.firstFromCollection(uncheckedTiles);
 
                 // For each tile adjacent to that one...
-                for (final Tile adjTile : tile.adjacents().values()) {
+                for (final Tile adjTile : getAdjacentTiles(tile).values()) {
                     // If this adjacent tile has the same pos/neg state, and it's not already in
                     // the cluster...
                     if (predicate.test(adjTile) == positive

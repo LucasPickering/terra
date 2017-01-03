@@ -33,7 +33,7 @@ public class PeakGenerator implements Generator {
             setElev(peak, peakElev);
 
             // Adjust the elevation of the adjacent tiles
-            for (Map.Entry<Direction, Tile> entry : peak.adjacents().entrySet()) {
+            for (Map.Entry<Direction, Tile> entry : tiles.getAdjacentTiles(peak).entrySet()) {
                 final Direction dir = entry.getKey();
                 final Tile adjTile = entry.getValue();
 

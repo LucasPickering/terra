@@ -1,8 +1,6 @@
 package me.lucaspickering.terraingen.world.tile;
 
 import java.awt.Color;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
 
 import me.lucaspickering.terraingen.TerrainGen;
@@ -22,7 +20,6 @@ public class Tile {
      * The position of this tile within the world. Non-null.
      */
     private final TilePoint pos;
-    private Map<Direction, Tile> adjacents;
 
     // Terrain features
     private Biome biome = Biome.NONE;
@@ -42,37 +39,6 @@ public class Tile {
 
     public final TilePoint pos() {
         return pos;
-    }
-
-    /**
-     * Gets the set of tiles adjacent to this one. The returned {@link Map} will be unmodifiable.
-     *
-     * @return the tiles adjacent to this one
-     * @throws IllegalStateException if this tile's adjacent tiles has not yet been set
-     */
-    public final Map<Direction, Tile> adjacents() {
-        if (adjacents == null) {
-            throw new IllegalStateException("Map of adjacent tiles has not yet been initialized");
-        }
-        return adjacents;
-    }
-
-    /**
-     * Sets the set of tiles adjacent to this one. An unmodifiable map will be created, backed by
-     * the given map, and that will be passed out to callers of {@link #adjacents()}. Any changes to
-     * the map passed to this function will be reflected in this tile's adjacents map so throw the
-     * given map away after calling this function!
-     *
-     * @param adjacents the tiles adjacent to this one
-     * @throws NullPointerException  if {@code adjacents == null}
-     * @throws IllegalStateException if this tile's adjacent tiles has already been set
-     */
-    public void setAdjacents(Map<Direction, Tile> adjacents) {
-        if (this.adjacents != null) {
-            throw new IllegalStateException("Map of adjacent tiles has already been initialized");
-        }
-        Objects.requireNonNull(adjacents);
-        this.adjacents = Collections.unmodifiableMap(adjacents);
     }
 
     /**
