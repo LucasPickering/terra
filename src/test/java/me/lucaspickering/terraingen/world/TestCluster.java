@@ -11,7 +11,7 @@ public class TestCluster {
     @Test
     public void testAllAdjacents() throws Exception {
         final Tiles tiles = WorldHelper.initTiles(5);
-        final Cluster cluster = new Cluster();
+        final Cluster cluster = Cluster.fromWorld(tiles);
         Tiles adjacents;
 
         adjacents = cluster.allAdjacents();
@@ -30,7 +30,7 @@ public class TestCluster {
 //        adjacents = cluster.allAdjacents();
 //        assertEquals(6, adjacents.size());
 
-        final Cluster clone = new Cluster(cluster);
+        final Cluster clone = Cluster.copy(cluster);
         assertEquals(cluster.allAdjacents(), clone.allAdjacents());
     }
 }

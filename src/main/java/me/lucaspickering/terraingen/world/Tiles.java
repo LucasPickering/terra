@@ -272,7 +272,7 @@ public class Tiles extends AbstractSet<Tile> {
             final boolean positive = predicate.test(firstTile); // Get its state (pos/neg)
 
             // Start building a cluster around this tile
-            final Cluster cluster = new Cluster();
+            final Cluster cluster = Cluster.fromWorld(this);
             // Keep track of the tiles whose adjacent tiles haven't been checked yet
             final Tiles uncheckedTiles = new Tiles();
 

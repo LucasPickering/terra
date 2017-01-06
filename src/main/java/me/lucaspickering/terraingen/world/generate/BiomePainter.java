@@ -73,7 +73,7 @@ public class BiomePainter implements Generator {
 
         for (Tile seed : seeds) {
             // Add each seed to its cluster, and each cluster to the maps
-            final Cluster blotch = new Cluster();
+            final Cluster blotch = Cluster.fromWorld(tiles);
             blotch.add(seed);
             blotches.put(seed.pos(), blotch);
             incompleteBlotches.put(seed.pos(), blotch);

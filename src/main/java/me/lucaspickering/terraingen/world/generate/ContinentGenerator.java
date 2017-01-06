@@ -86,7 +86,7 @@ public class ContinentGenerator implements Generator {
     }
 
     private Cluster generateContinent(Tiles availableTiles, Random random) {
-        final Cluster cluster = new Cluster(); // The continent we are generating
+        final Cluster cluster = Cluster.fromWorld(availableTiles); // The continent we are generating
         final int targetSize = CONTINENT_SIZE_RANGE.randomIn(random); // Pick a target size
 
         // Add the seed to the continent, and remove it from the pool of available tiles
@@ -165,7 +165,7 @@ public class ContinentGenerator implements Generator {
         final Set<TilePoint> incompleteBiomes = new HashSet<>(); // Biomes with room to grow
         for (Tile seed : seeds) {
             // Pick a biome for this seed, then add it to the map
-            final Cluster blotch = new Cluster();
+            final Cluster blotch = Cluster.fromWorld(continent);
             blotch.add(seed);
             biomes.put(seed.pos(), blotch);
             incompleteBiomes.add(seed.pos());

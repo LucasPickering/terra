@@ -17,15 +17,27 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  */
 public class Cluster extends Tiles {
 
+    private Tiles world;
+
     // Tiles that border, but are not in, this cluster
     private Tiles adjacentTiles = new Tiles();
 
-    public Cluster() {
-        super();
+    private Cluster(Tiles world) {
+        this.world = world;
     }
 
-    public Cluster(Collection<? extends Tile> tiles) {
-        super(tiles);
+    private Cluster(Cluster cluster) {
+        // Copy everything
+        this.world = cluster.world;
+        this.adjacentTiles = new Tiles(cluster.adjacentTiles);
+    }
+
+    public static Cluster fromWorld(Tiles world) {
+        return new Cluster(world);
+    }
+
+    public static Cluster copy(Cluster cluster) {
+        return new Cluster(cluster);
     }
 
     @Override
@@ -36,7 +48,7 @@ public class Cluster extends Tiles {
         if (added) {
             adjacentTiles.remove(tile); // Remove this tile because it's no longer external
             // Add any adjacent tiles that aren't in this cluster
-            final Collection<Tile> adjacents = getAdjacentTiles(tile).values();
+            final Collection<Tile> adjacents = world.getAdjacentTiles(tile).values();
             for (Tile adjTile : adjacents) {
                 if (!contains(adjTile)) {
                     adjacentTiles.add(adjTile);
