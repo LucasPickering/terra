@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.IntRange;
@@ -86,35 +87,56 @@ public class ContinentGenerator implements Generator {
     }
 
     private Cluster generateContinent(Tiles availableTiles, Random random) {
-        final Cluster cluster = Cluster.fromWorld(availableTiles); // The continent we are generating
+        final Cluster
+            continent =
+            Cluster.fromWorld(availableTiles); // The continent we're generating
         final int targetSize = CONTINENT_SIZE_RANGE.randomIn(random); // Pick a target size
 
         // Add the seed to the continent, and remove it from the pool of available tiles
         final Tile seed = Funcs.randomFromCollection(random, availableTiles); // The first tile
-        cluster.add(seed);
+        continent.add(seed);
         availableTiles.remove(seed); // No longer available
 
         // Keep adding until we hit our target size
-        while (cluster.size() < targetSize) {
-            final Tiles adjTiles = cluster.allAdjacents();
-            adjTiles.retainAll(availableTiles);
+        while (continent.size() < targetSize) {
+            // If a tile is adjacent to any tile in the continent, it becomes a candidate
+            final Tiles candidates = continent.allAdjacents();
+            candidates.retainAll(availableTiles); // Filter out tiles that aren't available
 
-            // Out of tiles to add
-            if (adjTiles.isEmpty()) {
+            // No candidates, done with this continent
+            if (candidates.isEmpty()) {
                 break;
             }
 
+            // Count how many continent tiles each candidate is adjacent to
+            final Map<TilePoint, Integer> adjCounts = new HashMap<>();
+            int maxAdj = 0; // Maximum number of adjacents among all candidates
+            for (Tile candidate : candidates) {
+                // Populate the map and get the max
+                final int adjCount = continent.getAdjacentTiles(candidate).size();
+                adjCounts.put(candidate.pos(), adjCount);
+                if (adjCount > maxAdj) {
+                    maxAdj = adjCount;
+                }
+            }
+
+            // Filter down to tiles with the the most adjacent continent tiles
+            final int maxAdjFinal = maxAdj; // Must be final for the lambda
+            final List<Tile> filteredCandidates = candidates.stream()
+                .filter(tile -> adjCounts.get(tile.pos()) >= maxAdjFinal)
+                .collect(Collectors.toList());
+
             // Pick a random tile adjacent to the continent and add it in
-            final Tile nextTile = Funcs.randomFromCollection(random, adjTiles);
-            cluster.add(nextTile);
+            final Tile nextTile = Funcs.randomFromCollection(random, filteredCandidates);
+            continent.add(nextTile);
             availableTiles.remove(nextTile);
         }
 
         // Remove all tiles adjacent to this continent to ensure at least 1 tile of spacing
         // between all continents
-        availableTiles.removeAll(cluster.allAdjacents());
+        availableTiles.removeAll(continent.allAdjacents());
 
-        return cluster;
+        return continent;
     }
 
     private void generateOceanFloor(Tiles nonContinentTiles, List<Cluster> continents,

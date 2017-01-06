@@ -140,9 +140,6 @@ public class Tiles extends AbstractSet<Tile> {
     public Map<Direction, Tile> getAdjacentTiles(@NotNull Tile tile) {
         Objects.requireNonNull(tile);
         final TilePoint point = tile.pos();
-        if (!map.containsKey(point)) {
-            throw new IllegalArgumentException("Tile is not in the world");
-        }
 
         final Map<Direction, Tile> result = new EnumMap<>(Direction.class);
         for (Direction dir : Direction.values()) {
@@ -168,16 +165,11 @@ public class Tiles extends AbstractSet<Tile> {
      * @param range (non-negative)
      * @return all tiles in range of the given tile
      * @throws NullPointerException     if {@code tile == null}
-     * @throws IllegalArgumentException if {@code tile} is not in this collection or range is
-     *                                  negative
+     * @throws IllegalArgumentException if range is negative
      */
     @NotNull
     public Tiles getTilesInRange(@NotNull Tile tile, int range) {
         Objects.requireNonNull(tile);
-        final TilePoint point = tile.pos();
-        if (!map.containsKey(point)) {
-            throw new IllegalArgumentException("Tile is not in the world");
-        }
         if (range < 0) {
             throw new IllegalArgumentException(String.format("Range must be positive, was [%d]",
                                                              range));
