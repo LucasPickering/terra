@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
+import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -60,8 +61,20 @@ public class Cluster extends Tiles {
     }
 
     @Override
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException(); // Not supporting this for now cause I'm lazy
+    public boolean removePoint(TilePoint point) {
+        final boolean removed = super.removePoint(point);
+
+        if (removed) {
+            final Tile tile = world.getByPoint(point); // super.remove asserts that o is a Tile
+            for (Tile adjTile : adjacentTiles.getAdjacentTiles(tile).values()) {
+                if (getAdjacentTiles(adjTile).isEmpty()) {
+                    adjacentTiles.remove(adjTile);
+                }
+            }
+            adjacentTiles.add(tile);
+        }
+
+        return removed;
     }
 
     /**

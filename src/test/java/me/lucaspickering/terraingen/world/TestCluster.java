@@ -25,10 +25,9 @@ public class TestCluster {
         adjacents = cluster.allAdjacents();
         assertEquals(8, adjacents.size());
 
-        // Not supported for now
-//        cluster.removePoint(TilePoint.ZERO);
-//        adjacents = cluster.allAdjacents();
-//        assertEquals(6, adjacents.size());
+        cluster.removePoint(TilePoint.ZERO);
+        adjacents = cluster.allAdjacents();
+        assertEquals(6, adjacents.size());
 
         final Cluster clone = Cluster.copy(cluster);
         assertEquals(cluster.allAdjacents(), clone.allAdjacents());
