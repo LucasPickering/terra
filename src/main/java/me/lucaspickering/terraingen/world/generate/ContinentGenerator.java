@@ -1,6 +1,7 @@
 package me.lucaspickering.terraingen.world.generate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.IntRange;
@@ -87,9 +87,7 @@ public class ContinentGenerator implements Generator {
     }
 
     private Cluster generateContinent(Tiles availableTiles, Random random) {
-        final Cluster
-            continent =
-            Cluster.fromWorld(availableTiles); // The continent we're generating
+        final Cluster continent = Cluster.fromWorld(availableTiles); // The continent
         final int targetSize = CONTINENT_SIZE_RANGE.randomIn(random); // Pick a target size
 
         // Add the seed to the continent, and remove it from the pool of available tiles
@@ -108,35 +106,51 @@ public class ContinentGenerator implements Generator {
                 break;
             }
 
-            // Count how many continent tiles each candidate is adjacent to
-            final Map<TilePoint, Integer> adjCounts = new HashMap<>();
-            int maxAdj = 0; // Maximum number of adjacents among all candidates
-            for (Tile candidate : candidates) {
-                // Populate the map and get the max
-                final int adjCount = continent.getAdjacentTiles(candidate).size();
-                adjCounts.put(candidate.pos(), adjCount);
-                if (adjCount > maxAdj) {
-                    maxAdj = adjCount;
-                }
-            }
-
-            // Filter down to tiles with the the most adjacent continent tiles
-            final int maxAdjFinal = maxAdj; // Must be final for the lambda
-            final List<Tile> filteredCandidates = candidates.stream()
-                .filter(tile -> adjCounts.get(tile.pos()) >= maxAdjFinal)
-                .collect(Collectors.toList());
-
             // Pick a random tile adjacent to the continent and add it in
-            final Tile nextTile = Funcs.randomFromCollection(random, filteredCandidates);
+            final Tile nextTile = Funcs.randomFromCollection(random, candidates);
             continent.add(nextTile);
             availableTiles.remove(nextTile);
         }
+
+        cleanupContinent(availableTiles, continent);
 
         // Remove all tiles adjacent to this continent to ensure at least 1 tile of spacing
         // between all continents
         availableTiles.removeAll(continent.allAdjacents());
 
         return continent;
+    }
+
+    private void cleanupContinent(Tiles availableTiles, Cluster continent) {
+        final Tiles adjTiles = continent.allAdjacents();
+        for (Tile adjTile : adjTiles) {
+            final Collection<Tile> adjContinents = continent.getAdjacentTiles(adjTile).values();
+            if (adjContinents.size() == Tile.NUM_SIDES) {
+                continent.add(adjTile);
+                availableTiles.remove(adjTile);
+            }
+        }
+
+        final Tiles stringTiles = new Tiles();
+        for (Tile tile : continent) {
+            if (continent.getAdjacentTiles(tile).size() <= 1) {
+                stringTiles.add(tile);
+            }
+        }
+        
+
+        boolean done = false;
+        outer:
+        while (!done) {
+            for (Tile tile : continent) {
+                if (continent.getAdjacentTiles(tile).size() <= 1) {
+                    availableTiles.add(tile);
+                    continent.remove(tile);
+                    continue outer;
+                }
+            }
+            done = true;
+        }
     }
 
     private void generateOceanFloor(Tiles nonContinentTiles, List<Cluster> continents,
