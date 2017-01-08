@@ -58,8 +58,8 @@ public class Renderer {
      */
     public void loadTexture(String name) {
         try {
-            BufferedImage image =
-                ImageIO.read(TerrainGen.getResource(Constants.TEXTURE_PATH, name));
+            BufferedImage image = ImageIO.read(new File(Funcs.getResource(Constants.TEXTURE_PATH,
+                                                                      name));
             textures.put(name, new Texture(loadTextureFromImage(image)));
         } catch (IOException e) {
             System.err.println("Error loading texture: " + name);

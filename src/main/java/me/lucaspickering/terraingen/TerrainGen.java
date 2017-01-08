@@ -12,7 +12,6 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
-import java.net.URL;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -151,6 +150,10 @@ public class TerrainGen {
     }
 
     private void initWindow() {
+        // There is a bug in certain parts of AWT that causes the program to hang when
+        // initialized on MacOS. This prevents those parts from being initialized.
+        System.setProperty("java.awt.headless", "true");
+
         // Setup error callback to print to System.err
         GLFW.glfwSetErrorCallback(GLFWErrorCallback.createPrint(System.err));
 
@@ -276,9 +279,5 @@ public class TerrainGen {
 
     public int getFps() {
         return fps;
-    }
-
-    public static URL getResource(String path, String fileName) {
-        return TerrainGen.class.getResource(String.format(path, fileName));
     }
 }

@@ -1,109 +1,73 @@
 package me.lucaspickering.terraingen.render;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.stb.STBTTAlignedQuad;
+import org.lwjgl.stb.STBTTBakedChar;
+import org.lwjgl.stb.STBTruetype;
+import org.lwjgl.system.MemoryStack;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsEnvironment;
-import java.awt.RenderingHints;
-import java.awt.Transparency;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.awt.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Pair;
 
+import static org.lwjgl.system.MemoryStack.stackPush;
+
 public class TrueTypeFont {
 
-    private static final List<String> CHARS = new ArrayList<String>() {{
-        add("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-        add("abcdefghijklmnopqrstuvwxyz");
-        add("0123456789");
-        add("ÄÖÜäöüß");
-        add(" $+-*/=%\"'#@&_(),.;:?!\\|<>[]§`^~");
-    }};
+    private static final int BITMAP_W = 512, BITMAP_H = 512;
 
-    private final Font font;
-    private final FontMetrics fontMetrics;
-    private final BufferedImage bufferedImage;
-    private final int fontTextureId;
-    private final int fontImageWidth;
-    private final int fontImageHeight;
-    private final float charHeight;
+    private final String name;
+    private final float fontHeight;
+    private final STBTTBakedChar.Buffer charData;
 
-    public TrueTypeFont(String name, float size) throws IOException, FontFormatException {
-        // Load the font from the file
-        font = Font.createFont(Font.TRUETYPE_FONT, new File(TerrainGen.getResource(
-            Constants.FONT_PATH, name).getPath())).deriveFont(size);
-
-        // Generate buffered image
-        GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment()
-            .getDefaultScreenDevice().getDefaultConfiguration();
-        Graphics2D graphics =
-            gc.createCompatibleImage(1, 1, Transparency.TRANSLUCENT).createGraphics();
-        graphics.setFont(font);
-
-        // Create the font
-        fontMetrics = graphics.getFontMetrics();
-
-        // Get font measurements
-        fontImageWidth = CHARS.stream()
-            .mapToInt(e -> (int) fontMetrics.getStringBounds(e, null).getWidth())
-            .max()
-            .orElse(0);
-        charHeight = fontMetrics.getMaxAscent() + fontMetrics.getMaxDescent();
-        fontImageHeight = (int) (CHARS.size() * charHeight);
-
-        // Make an image of the font
-        bufferedImage = graphics.getDeviceConfiguration()
-            .createCompatibleImage(fontImageWidth, fontImageHeight, Transparency.TRANSLUCENT);
-
-        // Generate texture
-        fontTextureId = GL11.glGenTextures();
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, fontTextureId);
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, fontImageWidth, fontImageHeight, 0,
-                          GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, asByteBuffer());
-
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+    public TrueTypeFont(String name, float fontHeight) throws IOException, FontFormatException {
+        this.name = name;
+        this.fontHeight = fontHeight;
+        this.charData = init();
     }
 
-    private float getCharX(char c) {
-        final String s = Character.toString(c); // String containing just the character
-        // Find the string in CHARS that contains the character
-        final String originStr = CHARS.stream().filter(e -> e.contains(s)).findFirst().orElse(s);
-        return (float) fontMetrics
-            .getStringBounds(originStr.substring(0, originStr.indexOf(c)), null)
-            .getWidth();
-    }
+    private STBTTBakedChar.Buffer init() {
+        final int texID = GL11.glGenTextures();
+        final STBTTBakedChar.Buffer cdata = STBTTBakedChar.malloc(96);
 
-    private float getCharY(char c) {
-        final String s = Character.toString(c); // String containing just the character
-        int lineId;
-        // Find the line containing c
-        for (lineId = 0; lineId < CHARS.size(); lineId++) {
-            if (CHARS.get(lineId).contains(s)) {
-                break;
-            }
+        try {
+            final ByteBuffer ttf = Funcs.ioResourceToByteBuffer(Constants.FONT_PATH, name,
+                                                                160 * 1024);
+
+            final ByteBuffer bitmap = BufferUtils.createByteBuffer(BITMAP_W * BITMAP_H);
+            STBTruetype.stbtt_BakeFontBitmap(ttf, fontHeight, bitmap, BITMAP_W, BITMAP_H,
+                                             32, cdata);
+
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, texID);
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_ALPHA, BITMAP_W, BITMAP_H, 0,
+                              GL11.GL_ALPHA, GL11.GL_UNSIGNED_BYTE, bitmap);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return charHeight * lineId;
+
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        return cdata;
     }
 
     private float getCharWidth(char c) {
         return fontMetrics.charWidth(c);
+    }
+
+    private float getFontHeight() {
+        return fontHeight;
     }
 
     private int getStringWidth(String s) {
@@ -123,7 +87,7 @@ public class TrueTypeFont {
             .orElse(0); // Get the max or 0 if there is none
 
         // Calculate height as the sum of the height of each line
-        final int height = (int) (charHeight * lines.size());
+        final int height = (int) (getFontHeight() * lines.size());
 
         return new Pair<>(width, height);
     }
@@ -144,45 +108,6 @@ public class TrueTypeFont {
         return Arrays.asList(text.split("\n"));
     }
 
-    private ByteBuffer asByteBuffer() {
-        ByteBuffer byteBuffer;
-
-        // Draw the characters on our image
-        Graphics2D imageGraphics = (Graphics2D) bufferedImage.getGraphics();
-        imageGraphics.setFont(font);
-        imageGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                       RenderingHints.VALUE_ANTIALIAS_OFF);
-        imageGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                                       RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-        // Draw every char by line...
-        imageGraphics.setColor(Color.WHITE);
-        for (int i = 0; i < CHARS.size(); i++) {
-            imageGraphics.drawString(CHARS.get(i), 0, fontMetrics.getMaxAscent() + charHeight * i);
-        }
-
-        // Generate texture data
-        int[] pixels = new int[bufferedImage.getWidth() * bufferedImage.getHeight()];
-        bufferedImage.getRGB(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), pixels, 0,
-                             bufferedImage.getWidth());
-        byteBuffer =
-            ByteBuffer.allocateDirect(bufferedImage.getWidth() * bufferedImage.getHeight() * 4);
-
-        for (int y = 0; y < bufferedImage.getHeight(); y++) {
-            for (int x = 0; x < bufferedImage.getWidth(); x++) {
-                int pixel = pixels[y * bufferedImage.getWidth() + x];
-                byteBuffer.put((byte) ((pixel >> 16) & 0xFF));  // Red
-                byteBuffer.put((byte) ((pixel >> 8) & 0xFF));   // Green
-                byteBuffer.put((byte) (pixel & 0xFF));          // Blue
-                byteBuffer.put((byte) ((pixel >> 24) & 0xFF));  // Alpha
-            }
-        }
-
-        byteBuffer.flip();
-
-        return byteBuffer;
-    }
-
     /**
      * Draw the given text in this font.
      *
@@ -197,54 +122,42 @@ public class TrueTypeFont {
     public void draw(String text, int x, int y, Color color,
                      HorizAlignment horizAlign, VertAlignment vertAlign) {
         Objects.requireNonNull(text);
-        // Set the color (aren't bitshifts cool?)
         Funcs.setGlColor(color);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, fontTextureId);
-        final List<String> lines = splitLines(text);
-        final Pair<Integer, Integer> size = getStringSize(lines);
+        try (MemoryStack stack = stackPush()) {
+            final FloatBuffer floatX = stack.floats(x);
+            final FloatBuffer floatY = stack.floats(y);
+            final STBTTAlignedQuad quad = STBTTAlignedQuad.mallocStack(stack);
 
-        int xTmp = x + horizAlign.leftAdjustment(size.first());
-        int yTmp = y + vertAlign.topAdjustment(size.second());
+            GL11.glBegin(GL11.GL_QUADS);
+            for (int i = 0; i < text.length(); i++) {
+                char c = text.charAt(i);
+                if (c == '\n') {
+                    floatX.put(0, 0.0f);
+                    floatY.put(0, floatY.get(0) + getFontHeight());
+                    continue;
+                } else if (c < 32 || 128 <= c) {
+                    continue;
+                }
+                STBTruetype.stbtt_GetBakedQuad(charData, BITMAP_W, BITMAP_H, c - 32,
+                                               floatX, floatY, quad, true);
 
-        GL11.glBegin(GL11.GL_QUADS);
-        for (String line : lines) {
-            // Draw each character
-            for (char c : line.toCharArray()) {
-                final float width = getCharWidth(c);
+                GL11.glTexCoord2f(quad.s0(), quad.t0());
+                GL11.glVertex2f(quad.x0(), quad.y0());
 
-                final float cw = 1f / fontImageWidth * width; // Character width
-                final float ch = 1f / fontImageHeight * charHeight; // Character height
-                final float cx = 1f / fontImageWidth * getCharX(c); // Character x-pos in texture
-                final float cy = 1f / fontImageHeight * getCharY(c); // Character y-pos in texture
+                GL11.glTexCoord2f(quad.s1(), quad.t0());
+                GL11.glVertex2f(quad.x1(), quad.y0());
 
-                // Top-left corner
-                GL11.glTexCoord2f(cx, cy);
-                GL11.glVertex2f(xTmp, yTmp);
+                GL11.glTexCoord2f(quad.s1(), quad.t1());
+                GL11.glVertex2f(quad.x1(), quad.y1());
 
-                // Top-right corner
-                GL11.glTexCoord2f(cx + cw, cy);
-                GL11.glVertex2f(xTmp + width, yTmp);
-
-                // Bottom-right corner
-                GL11.glTexCoord2f(cx + cw, cy + ch);
-                GL11.glVertex2f(xTmp + width, yTmp + charHeight);
-
-                // Bottom-left corner
-                GL11.glTexCoord2f(cx, cy + ch);
-                GL11.glVertex2f(xTmp, yTmp + charHeight);
-
-                // Increase x for the next character
-                xTmp += width;
+                GL11.glTexCoord2f(quad.s0(), quad.t1());
+                GL11.glVertex2f(quad.x0(), quad.y1());
             }
-
-            // Reset x and increase y for the next line
-            xTmp = x;
-            yTmp += charHeight;
+            GL11.glEnd();
         }
-        GL11.glEnd();
     }
 
     public void delete() {
-        GL11.glDeleteTextures(fontTextureId);
+        charData.free();
     }
 }

@@ -1,14 +1,33 @@
 package me.lucaspickering.terraingen.util;
 
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.Color;
+import sun.nio.ch.IOUtil;
+
+import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Random;
 
+import me.lucaspickering.terraingen.TerrainGen;
+
+import static org.lwjgl.BufferUtils.createByteBuffer;
+
 public class Funcs {
+
+    private Funcs() {
+        // This should never be instantiated
+    }
 
     /**
      * Returns the first element in a {@link Collection}. Technically collections don't have
@@ -50,6 +69,61 @@ public class Funcs {
             .skip(random.nextInt(coll.size()))
             .findFirst()
             .orElseThrow(() -> new AssertionError("Can't get here"));
+    }
+
+    public static String getResource(String path, String fileName) {
+        return TerrainGen.class.getResource(String.format(path, fileName)).getPath();
+    }
+
+    private static ByteBuffer resizeBuffer(ByteBuffer buffer, int newCapacity) {
+        ByteBuffer newBuffer = BufferUtils.createByteBuffer(newCapacity);
+        buffer.flip();
+        newBuffer.put(buffer);
+        return newBuffer;
+    }
+
+    /**
+     * Reads the specified resource and returns the raw data as a ByteBuffer.
+     *
+     * @param resourcePath the path of the resource to read
+     * @param fileName     the file name of the resource
+     * @param bufferSize   the initial buffer size
+     * @return the resource data
+     * @throws IOException if an IO error occurs
+     */
+    public static ByteBuffer ioResourceToByteBuffer(String resourcePath, String fileName,
+                                                    int bufferSize) throws IOException {
+        final String resource = getResource(resourcePath, fileName);
+        ByteBuffer buffer;
+
+        java.nio.file.Path path = Paths.get(resource);
+        if (Files.isReadable(path)) {
+            try (SeekableByteChannel fc = Files.newByteChannel(path)) {
+                buffer = BufferUtils.createByteBuffer((int) fc.size() + 1);
+                while (fc.read(buffer) != -1) {
+                }
+            }
+        } else {
+            try (
+                InputStream source = IOUtil.class.getClassLoader().getResourceAsStream(resource);
+                ReadableByteChannel rbc = Channels.newChannel(source)
+            ) {
+                buffer = createByteBuffer(bufferSize);
+
+                while (true) {
+                    int bytes = rbc.read(buffer);
+                    if (bytes == -1) {
+                        break;
+                    }
+                    if (buffer.remaining() == 0) {
+                        buffer = resizeBuffer(buffer, buffer.capacity() * 2);
+                    }
+                }
+            }
+        }
+
+        buffer.flip();
+        return buffer;
     }
 
     /**
