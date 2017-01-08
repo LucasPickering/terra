@@ -7,11 +7,11 @@ import org.lwjgl.stb.STBTTBakedChar;
 import org.lwjgl.stb.STBTruetype;
 import org.lwjgl.system.MemoryStack;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.FontFormatException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -19,7 +19,6 @@ import java.util.Objects;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Pair;
-
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 public class TrueTypeFont {
@@ -27,10 +26,10 @@ public class TrueTypeFont {
     private static final int BITMAP_W = 512, BITMAP_H = 512;
 
     private final String name;
-    private final float fontHeight;
+    private final int fontHeight;
     private final STBTTBakedChar.Buffer charData;
 
-    public TrueTypeFont(String name, float fontHeight) throws IOException, FontFormatException {
+    public TrueTypeFont(String name, int fontHeight) throws IOException, FontFormatException {
         this.name = name;
         this.fontHeight = fontHeight;
         this.charData = init();
@@ -63,10 +62,10 @@ public class TrueTypeFont {
     }
 
     private float getCharWidth(char c) {
-        return fontMetrics.charWidth(c);
+        return 16;
     }
 
-    private float getFontHeight() {
+    private int getFontHeight() {
         return fontHeight;
     }
 
@@ -87,7 +86,7 @@ public class TrueTypeFont {
             .orElse(0); // Get the max or 0 if there is none
 
         // Calculate height as the sum of the height of each line
-        final int height = (int) (getFontHeight() * lines.size());
+        final int height = getFontHeight() * lines.size();
 
         return new Pair<>(width, height);
     }
@@ -135,10 +134,10 @@ public class TrueTypeFont {
                     floatX.put(0, 0.0f);
                     floatY.put(0, floatY.get(0) + getFontHeight());
                     continue;
-                } else if (c < 32 || 128 <= c) {
+                } else if (c < ' ' || 128 <= c) {
                     continue;
                 }
-                STBTruetype.stbtt_GetBakedQuad(charData, BITMAP_W, BITMAP_H, c - 32,
+                STBTruetype.stbtt_GetBakedQuad(charData, BITMAP_W, BITMAP_H, c - ' ',
                                                floatX, floatY, quad, true);
 
                 GL11.glTexCoord2f(quad.s0(), quad.t0());

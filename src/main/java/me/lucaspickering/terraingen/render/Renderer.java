@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL12;
 import java.awt.Color;
 import java.awt.FontFormatException;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.EnumMap;
@@ -15,7 +16,6 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Pair;
@@ -59,7 +59,7 @@ public class Renderer {
     public void loadTexture(String name) {
         try {
             BufferedImage image = ImageIO.read(new File(Funcs.getResource(Constants.TEXTURE_PATH,
-                                                                      name));
+                                                                          name)));
             textures.put(name, new Texture(loadTextureFromImage(image)));
         } catch (IOException e) {
             System.err.println("Error loading texture: " + name);

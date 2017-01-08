@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import sun.nio.ch.IOUtil;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -20,7 +20,6 @@ import java.util.Objects;
 import java.util.Random;
 
 import me.lucaspickering.terraingen.TerrainGen;
-
 import static org.lwjgl.BufferUtils.createByteBuffer;
 
 public class Funcs {
@@ -93,10 +92,9 @@ public class Funcs {
      */
     public static ByteBuffer ioResourceToByteBuffer(String resourcePath, String fileName,
                                                     int bufferSize) throws IOException {
-        final String resource = getResource(resourcePath, fileName);
         ByteBuffer buffer;
-
-        java.nio.file.Path path = Paths.get(resource);
+        final String resource = String.format(resourcePath, fileName);
+        final java.nio.file.Path path = Paths.get(resource);
         if (Files.isReadable(path)) {
             try (SeekableByteChannel fc = Files.newByteChannel(path)) {
                 buffer = BufferUtils.createByteBuffer((int) fc.size() + 1);
@@ -105,7 +103,7 @@ public class Funcs {
             }
         } else {
             try (
-                InputStream source = IOUtil.class.getClassLoader().getResourceAsStream(resource);
+                InputStream source = Funcs.class.getClassLoader().getResourceAsStream(resource);
                 ReadableByteChannel rbc = Channels.newChannel(source)
             ) {
                 buffer = createByteBuffer(bufferSize);

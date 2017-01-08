@@ -7,26 +7,26 @@ import me.lucaspickering.terraingen.util.Constants;
 
 public enum Font {
 
-    DEBUG(Constants.FONT_BOMBARDIER, 30f),
-    TILE(Constants.FONT_BOMBARDIER, 60f),
-    UI(Constants.FONT_BOMBARDIER, 100f),
-    LARGE(Constants.FONT_BOMBARDIER, 150f),
-    TITLE(Constants.FONT_BOMBARDIER, 250f);
+    DEBUG(Constants.FONT_BOMBARDIER, 30),
+    TILE(Constants.FONT_BOMBARDIER, 60),
+    UI(Constants.FONT_BOMBARDIER, 100),
+    LARGE(Constants.FONT_BOMBARDIER, 150),
+    TITLE(Constants.FONT_BOMBARDIER, 250);
 
     private final String fontName;
-    private final float size;
+    private final int fontHeight;
 
-    Font(String fontName, float size) {
+    Font(String fontName, int fontHeight) {
         this.fontName = fontName;
-        this.size = size;
+        this.fontHeight = fontHeight;
     }
 
     public TrueTypeFont load() throws IOException, FontFormatException {
-        return new TrueTypeFont(fontName, size);
+        return new TrueTypeFont(fontName, fontHeight);
     }
 
     @Override
     public String toString() {
-        return String.format("%s: [fontName=%s, size=%f]", name(), fontName, size);
+        return String.format("%s: [fontName=%s, size=%f]", name(), fontName, fontHeight);
     }
 }
