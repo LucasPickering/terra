@@ -24,7 +24,9 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 
 public class TrueTypeFont {
 
-    private static final int BITMAP_W = 512, BITMAP_H = 512;
+    private static final int CHAR_DATA_SIZE = 96; // Size of the character data buffer, in bytes
+    private static final int BITMAP_SIZE = 1024;
+    private static final int TTF_BUFFER_SIZE = 160 * 1024; // Size of the buffer to load TTF into
     private static final int FIRST_CHAR = 32;
 
     private final Font font;
@@ -38,19 +40,19 @@ public class TrueTypeFont {
 
     private STBTTBakedChar.Buffer init() {
         textureID = GL11.glGenTextures();
-        final STBTTBakedChar.Buffer cdata = STBTTBakedChar.malloc(96);
+        final STBTTBakedChar.Buffer cdata = STBTTBakedChar.malloc(CHAR_DATA_SIZE);
 
         try {
             final ByteBuffer ttf = Funcs.ioResourceToByteBuffer(Constants.FONT_PATH,
                                                                 font.getFontName(),
-                                                                160 * 1024);
+                                                                TTF_BUFFER_SIZE);
 
-            final ByteBuffer bitmap = BufferUtils.createByteBuffer(BITMAP_W * BITMAP_H);
-            STBTruetype.stbtt_BakeFontBitmap(ttf, getFontHeight(), bitmap, BITMAP_W, BITMAP_H,
+            final ByteBuffer bitmap = BufferUtils.createByteBuffer(BITMAP_SIZE * BITMAP_SIZE);
+            STBTruetype.stbtt_BakeFontBitmap(ttf, getFontHeight(), bitmap, BITMAP_SIZE, BITMAP_SIZE,
                                              FIRST_CHAR, cdata);
 
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_ALPHA, BITMAP_W, BITMAP_H, 0,
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_ALPHA, BITMAP_SIZE, BITMAP_SIZE, 0,
                               GL11.GL_ALPHA, GL11.GL_UNSIGNED_BYTE, bitmap);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
@@ -157,8 +159,9 @@ public class TrueTypeFont {
                         continue;
                     }
 
-                    STBTruetype.stbtt_GetBakedQuad(charData, BITMAP_W, BITMAP_H, c - FIRST_CHAR,
-                                                   xFloatBuffer, yFloatBuffer, quad, true);
+                    STBTruetype.stbtt_GetBakedQuad(charData, BITMAP_SIZE, BITMAP_SIZE,
+                                                   c - FIRST_CHAR, xFloatBuffer, yFloatBuffer,
+                                                   quad, true);
 
                     GL11.glTexCoord2f(quad.s0(), quad.t0());
                     GL11.glVertex2f(quad.x0(), quad.y0());
