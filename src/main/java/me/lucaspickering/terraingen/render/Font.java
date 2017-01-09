@@ -35,6 +35,6 @@ public enum Font {
 
     @Override
     public String toString() {
-        return String.format("%s: [fontName=%s, size=%f]", name(), fontName, fontHeight);
+        return String.format("%s: [fontName=%s, size=%d]", name(), fontName, fontHeight);
     }
 }
