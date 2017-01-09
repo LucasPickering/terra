@@ -24,6 +24,7 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 public class TrueTypeFont {
 
     private static final int BITMAP_W = 512, BITMAP_H = 512;
+    private static final int FIRST_CHAR = 32;
 
     private final Font font;
     private final STBTTBakedChar.Buffer charData;
@@ -45,7 +46,7 @@ public class TrueTypeFont {
 
             final ByteBuffer bitmap = BufferUtils.createByteBuffer(BITMAP_W * BITMAP_H);
             STBTruetype.stbtt_BakeFontBitmap(ttf, getFontHeight(), bitmap, BITMAP_W, BITMAP_H,
-                                             32, cdata);
+                                             FIRST_CHAR, cdata);
 
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
             GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_ALPHA, BITMAP_W, BITMAP_H, 0,
@@ -107,7 +108,7 @@ public class TrueTypeFont {
 
     private boolean isDrawable(char c) {
         // Range of drawable ASCII characters
-        return 32 <= c && c <= 127;
+        return FIRST_CHAR <= c && c <= 127;
     }
 
     /**
@@ -137,7 +138,7 @@ public class TrueTypeFont {
         // Draw the text
         try (MemoryStack stack = stackPush()) {
             final FloatBuffer xFloatBuffer = stack.floats(x);
-            final FloatBuffer yFloatBuffer = stack.floats(y + 37);
+            final FloatBuffer yFloatBuffer = stack.floats(y + getFontHeight() / 2);
             final STBTTAlignedQuad quad = STBTTAlignedQuad.mallocStack(stack);
             GL11.glBegin(GL11.GL_QUADS);
 
@@ -150,7 +151,7 @@ public class TrueTypeFont {
                         continue;
                     }
 
-                    STBTruetype.stbtt_GetBakedQuad(charData, BITMAP_W, BITMAP_H, c - 32,
+                    STBTruetype.stbtt_GetBakedQuad(charData, BITMAP_W, BITMAP_H, c - FIRST_CHAR,
                                                    xFloatBuffer, yFloatBuffer, quad, true);
 
                     GL11.glTexCoord2f(quad.s0(), quad.t0());
