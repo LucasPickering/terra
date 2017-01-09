@@ -22,7 +22,15 @@ public enum Font {
     }
 
     public TrueTypeFont load() throws IOException, FontFormatException {
-        return new TrueTypeFont(fontName, fontHeight);
+        return new TrueTypeFont(this);
+    }
+
+    public String getFontName() {
+        return fontName;
+    }
+
+    public int getFontHeight() {
+        return fontHeight;
     }
 
     @Override

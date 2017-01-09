@@ -25,29 +25,29 @@ public class TrueTypeFont {
 
     private static final int BITMAP_W = 512, BITMAP_H = 512;
 
-    private final String name;
-    private final int fontHeight;
+    private final Font font;
     private final STBTTBakedChar.Buffer charData;
+    private int textureID;
 
-    public TrueTypeFont(String name, int fontHeight) throws IOException, FontFormatException {
-        this.name = name;
-        this.fontHeight = fontHeight;
+    public TrueTypeFont(Font font) throws IOException, FontFormatException {
+        this.font = font;
         this.charData = init();
     }
 
     private STBTTBakedChar.Buffer init() {
-        final int texID = GL11.glGenTextures();
+        textureID = GL11.glGenTextures();
         final STBTTBakedChar.Buffer cdata = STBTTBakedChar.malloc(96);
 
         try {
-            final ByteBuffer ttf = Funcs.ioResourceToByteBuffer(Constants.FONT_PATH, name,
+            final ByteBuffer ttf = Funcs.ioResourceToByteBuffer(Constants.FONT_PATH,
+                                                                font.getFontName(),
                                                                 160 * 1024);
 
             final ByteBuffer bitmap = BufferUtils.createByteBuffer(BITMAP_W * BITMAP_H);
-            STBTruetype.stbtt_BakeFontBitmap(ttf, fontHeight, bitmap, BITMAP_W, BITMAP_H,
+            STBTruetype.stbtt_BakeFontBitmap(ttf, getFontHeight(), bitmap, BITMAP_W, BITMAP_H,
                                              32, cdata);
 
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, texID);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
             GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_ALPHA, BITMAP_W, BITMAP_H, 0,
                               GL11.GL_ALPHA, GL11.GL_UNSIGNED_BYTE, bitmap);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
@@ -55,8 +55,6 @@ public class TrueTypeFont {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         return cdata;
     }
@@ -66,7 +64,7 @@ public class TrueTypeFont {
     }
 
     private int getFontHeight() {
-        return fontHeight;
+        return font.getFontHeight();
     }
 
     private int getStringWidth(String s) {
@@ -107,6 +105,11 @@ public class TrueTypeFont {
         return Arrays.asList(text.split("\n"));
     }
 
+    private boolean isDrawable(char c) {
+        // Range of drawable ASCII characters
+        return 32 <= c && c <= 127;
+    }
+
     /**
      * Draw the given text in this font.
      *
@@ -121,36 +124,51 @@ public class TrueTypeFont {
     public void draw(String text, int x, int y, Color color,
                      HorizAlignment horizAlign, VertAlignment vertAlign) {
         Objects.requireNonNull(text);
+
+        final List<String> lines = splitLines(text);
+        final Pair<Integer, Integer> stringSize = getStringSize(lines); // Pair of (width, height)
+        x += horizAlign.leftAdjustment(stringSize.first()); // Shift x for alignment
+        y += vertAlign.topAdjustment(stringSize.second()); // Shift y for alignment
+
+        // Bind this font's texture and set the color
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
         Funcs.setGlColor(color);
+
+        // Draw the text
         try (MemoryStack stack = stackPush()) {
-            final FloatBuffer floatX = stack.floats(x);
-            final FloatBuffer floatY = stack.floats(y);
+            final FloatBuffer xFloatBuffer = stack.floats(x);
+            final FloatBuffer yFloatBuffer = stack.floats(y + 37);
             final STBTTAlignedQuad quad = STBTTAlignedQuad.mallocStack(stack);
-
             GL11.glBegin(GL11.GL_QUADS);
-            for (int i = 0; i < text.length(); i++) {
-                char c = text.charAt(i);
-                if (c == '\n') {
-                    floatX.put(0, 0.0f);
-                    floatY.put(0, floatY.get(0) + getFontHeight());
-                    continue;
-                } else if (c < ' ' || 128 <= c) {
-                    continue;
+
+            // Draw each line
+            for (String line : lines) {
+                // Draw each character in the line
+                for (char c : line.toCharArray()) {
+                    // Skip invalid characters
+                    if (!isDrawable(c)) {
+                        continue;
+                    }
+
+                    STBTruetype.stbtt_GetBakedQuad(charData, BITMAP_W, BITMAP_H, c - 32,
+                                                   xFloatBuffer, yFloatBuffer, quad, true);
+
+                    GL11.glTexCoord2f(quad.s0(), quad.t0());
+                    GL11.glVertex2f(quad.x0(), quad.y0());
+
+                    GL11.glTexCoord2f(quad.s1(), quad.t0());
+                    GL11.glVertex2f(quad.x1(), quad.y0());
+
+                    GL11.glTexCoord2f(quad.s1(), quad.t1());
+                    GL11.glVertex2f(quad.x1(), quad.y1());
+
+                    GL11.glTexCoord2f(quad.s0(), quad.t1());
+                    GL11.glVertex2f(quad.x0(), quad.y1());
                 }
-                STBTruetype.stbtt_GetBakedQuad(charData, BITMAP_W, BITMAP_H, c - ' ',
-                                               floatX, floatY, quad, true);
 
-                GL11.glTexCoord2f(quad.s0(), quad.t0());
-                GL11.glVertex2f(quad.x0(), quad.y0());
-
-                GL11.glTexCoord2f(quad.s1(), quad.t0());
-                GL11.glVertex2f(quad.x1(), quad.y0());
-
-                GL11.glTexCoord2f(quad.s1(), quad.t1());
-                GL11.glVertex2f(quad.x1(), quad.y1());
-
-                GL11.glTexCoord2f(quad.s0(), quad.t1());
-                GL11.glVertex2f(quad.x0(), quad.y1());
+                // Keep the same x, increase y by the height of the font
+                xFloatBuffer.put(0, x);
+                yFloatBuffer.put(0, yFloatBuffer.get(0) + getFontHeight());
             }
             GL11.glEnd();
         }
