@@ -19,6 +19,7 @@ import java.util.Objects;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Pair;
+
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 public class TrueTypeFont {
@@ -111,6 +112,11 @@ public class TrueTypeFont {
         return FIRST_CHAR <= c && c <= 127;
     }
 
+    private float shiftY(int y) {
+        // Magic method for correcting y position of text. Not sure why this works.
+        return y + getFontHeight() * 0.5f + 4f;
+    }
+
     /**
      * Draw the given text in this font.
      *
@@ -138,7 +144,7 @@ public class TrueTypeFont {
         // Draw the text
         try (MemoryStack stack = stackPush()) {
             final FloatBuffer xFloatBuffer = stack.floats(x);
-            final FloatBuffer yFloatBuffer = stack.floats(y + getFontHeight() / 2);
+            final FloatBuffer yFloatBuffer = stack.floats(shiftY(y));
             final STBTTAlignedQuad quad = STBTTAlignedQuad.mallocStack(stack);
             GL11.glBegin(GL11.GL_QUADS);
 
