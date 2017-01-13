@@ -19,7 +19,6 @@ import java.util.Objects;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Pair;
-
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 public class TrueTypeFont {
@@ -30,16 +29,16 @@ public class TrueTypeFont {
     private static final int FIRST_CHAR = 32;
 
     private final Font font;
+    private final int textureID;
     private final STBTTBakedChar.Buffer charData;
-    private int textureID;
 
     public TrueTypeFont(Font font) throws IOException, FontFormatException {
         this.font = font;
-        this.charData = init();
+        this.textureID = GL11.glGenTextures(); // Create a new texture ID for the font map
+        this.charData = initCharBuffer();
     }
 
-    private STBTTBakedChar.Buffer init() {
-        textureID = GL11.glGenTextures();
+    private STBTTBakedChar.Buffer initCharBuffer() {
         final STBTTBakedChar.Buffer cdata = STBTTBakedChar.malloc(CHAR_DATA_SIZE);
 
         try {
@@ -63,18 +62,23 @@ public class TrueTypeFont {
         return cdata;
     }
 
-    private float getCharWidth(char c) {
-        return 16;
-    }
-
     private int getFontHeight() {
         return font.getFontHeight();
     }
 
     private int getStringWidth(String s) {
-        return (int) s.chars()
-            .mapToDouble(c -> getCharWidth((char) c)) // Get the width of each character
-            .sum(); // Sum up all the widths
+        // Width of the string is the sum of all the character widths
+        try (MemoryStack stack = stackPush()) {
+            final FloatBuffer xFloatBuffer = stack.floats(0f);
+            final FloatBuffer yFloatBuffer = stack.floats(0f);
+            final STBTTAlignedQuad quad = STBTTAlignedQuad.mallocStack(stack);
+            for (char c : s.toCharArray()) {
+                STBTruetype.stbtt_GetBakedQuad(charData, BITMAP_SIZE, BITMAP_SIZE,
+                                               c - FIRST_CHAR, xFloatBuffer, yFloatBuffer,
+                                               quad, true);
+            }
+            return (int) xFloatBuffer.get(0);
+        }
     }
 
     /**
