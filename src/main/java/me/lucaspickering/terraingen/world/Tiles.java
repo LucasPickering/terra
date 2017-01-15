@@ -234,13 +234,32 @@ public class Tiles extends AbstractSet<Tile> {
     }
 
     /**
-     * Clusters the tiles in this collection into two sets of clusters. Each tile in each cluster is
+     * Clusters the tiles in this collection based on adjacency. Each tile in each cluster is
      * adjacent to at least one other tile in the cluster, so that each cluster is one contiguous
-     * set of tiles.
+     * set of tiles. The clusters are also disjoint, so that no two clusters are adjacent to each
+     * other.
+     *
+     * In other words, this groups all tiles in this collection into contiguous clusters that are
+     * each as large as possible.
+     *
+     * Each tile in the given map will be in EXACTLY ONE of the returned clusters.
+     *
+     * @return the cluster
+     */
+    public List<Cluster> cluster() {
+        return cluster(tile -> true).first();
+    }
+
+    /**
+     * Clusters the tiles in this collection into two sets of clusters based on adjacency. Each tile
+     * in each cluster is adjacent to at least one other tile in the cluster, so that each
+     * cluster is one contiguous set of tiles.
      *
      * The returned pair of clusters contains both the positive and negative clusters. For the
      * isPositive clusters, each tile in each cluster <i>satisfies</i> the predicate. For the
-     * negative clusters, each tile in each cluster <i>does not satisy</i> the predicate.
+     * negative clusters, each tile in each cluster <i>does not satisy</i> the predicate. Two
+     * clusters of the same state (positive or negative) will not be adjacent to each other. In
+     * other words, each cluster will be as big as possible.
      *
      * Each tile in the given map will be in EXACTLY ONE of the returned clusters.
      *
@@ -248,7 +267,7 @@ public class Tiles extends AbstractSet<Tile> {
      * @return the isPositive and negative clusters, in a pair (with isPositive first)
      */
     @NotNull
-    public Pair<List<Cluster>, List<Cluster>> clusterTiles(@NotNull Predicate<Tile> predicate) {
+    public Pair<List<Cluster>, List<Cluster>> cluster(@NotNull Predicate<Tile> predicate) {
         // First divided each tile into its own cluster, then iterate over all those clusters and
         // begin joining clusters that have the same state (postive or negative) and have
         // adjacent tiles.
@@ -324,8 +343,8 @@ public class Tiles extends AbstractSet<Tile> {
      * @return the clusters
      */
     @NotNull
-    public List<Cluster> clusterTiles(@NotNull BiFunction<Tile, Tile, Double> similarityFunc,
-                                      double similarityThreshold) {
+    public List<Cluster> cluster(@NotNull BiFunction<Tile, Tile, Double> similarityFunc,
+                                 double similarityThreshold) {
         throw new UnsupportedOperationException(); // TODO implement if necessary
     }
 }
