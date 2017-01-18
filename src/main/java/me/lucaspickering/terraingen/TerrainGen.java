@@ -3,11 +3,11 @@ package me.lucaspickering.terraingen;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
@@ -40,7 +40,7 @@ public class TerrainGen {
     private final GLFWMouseButtonCallback mouseButtonHandler;
     private final GLFWScrollCallback scrollHandler;
     private final GLFWCursorPosCallback cursorPosHandler;
-    private final GLFWWindowSizeCallback windowResizeHandler;
+    private final GLFWFramebufferSizeCallback windowResizeHandler;
 
     private long window;
     private Renderer renderer;
@@ -127,7 +127,7 @@ public class TerrainGen {
                                      (int) (yPos * Renderer.RES_HEIGHT / windowHeight));
             }
         };
-        windowResizeHandler = new GLFWWindowSizeCallback() {
+        windowResizeHandler = new GLFWFramebufferSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
                 windowWidth = width;
@@ -195,7 +195,7 @@ public class TerrainGen {
         GLFW.glfwSetMouseButtonCallback(window, mouseButtonHandler);
         GLFW.glfwSetScrollCallback(window, scrollHandler);
         GLFW.glfwSetCursorPosCallback(window, cursorPosHandler);
-        GLFW.glfwSetWindowSizeCallback(window, windowResizeHandler);
+        GLFW.glfwSetFramebufferSizeCallback(window, windowResizeHandler);
 
         renderer = new Renderer();
         world = new World(); // Generate the world
