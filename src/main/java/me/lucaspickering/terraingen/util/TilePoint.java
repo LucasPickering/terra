@@ -16,17 +16,6 @@ public class TilePoint {
     private final int x, y, z;
 
     /**
-     * Constructs a new TilePoint using the given x and y, inferring the z coordinate (as
-     * {@code x + y + z == 0}.
-     *
-     * @param x the x coord
-     * @param y the y coord
-     */
-    public TilePoint(int x, int y) {
-        this(x, y, -x - y); // x + y + z == 0, so z == -x - y
-    }
-
-    /**
      * Constructs a new TilePoint using the given coordinates. Verifies that
      * {@code x + y + z == 0} first.
      *
@@ -106,8 +95,12 @@ public class TilePoint {
                 + Math.abs(z - other.z())) / 2;
     }
 
+    public final TilePoint plus(int x, int y, int z) {
+        return new TilePoint(this.x + x, this.y + y, this.z + z);
+    }
+
     public final TilePoint plus(TilePoint other) {
-        return new TilePoint(x + other.x(), y + other.y(), z + other.z());
+        return plus(other.x(), other.y(), other.z());
     }
 
     public final TilePoint times(int factor) {
@@ -117,6 +110,10 @@ public class TilePoint {
     @Override
     public String toString() {
         return String.format(STRING_FORMAT, x, y, z);
+    }
+
+    public boolean equals(int x, int y, int z) {
+        return this.x == x && this.y == y && this.z == z;
     }
 
     @Override
@@ -129,7 +126,7 @@ public class TilePoint {
         }
 
         final TilePoint point = (TilePoint) o;
-        return x == point.x && y == point.y; // No need to check z because x + y + z == 0
+        return equals(point.x, point.y, point.z);
     }
 
     @Override

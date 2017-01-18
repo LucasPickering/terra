@@ -2,11 +2,13 @@ package me.lucaspickering.terraingen.world;
 
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.Tile;
+
 import static org.junit.Assert.assertEquals;
 
 public class TestTiles {
@@ -70,5 +72,29 @@ public class TestTiles {
         // Range of 2 returns every tile in the world
         result = tiles.getTilesInRange(tiles.getByPoint(origin), 2);
         assertEquals("Should return the entire world", tiles.size(), result.size());
+    }
+
+    @Test
+    public void testCluster() throws Exception {
+        final int size = 2;
+        final Tiles world = WorldHelper.initTiles(size);
+
+        List<Cluster> clusters;
+
+        // Verify that there is one cluster of the entire world
+        clusters = world.cluster();
+        assertEquals(1, clusters.size());
+        assertEquals(world.size(), clusters.get(0).size());
+
+        final Tiles shiftedWorld = new Tiles(world);
+        final int shift = size * 3;
+        for (Tile tile : world) {
+            shiftedWorld.add(new Tile(tile.pos().plus(shift, -shift, 0)));
+        }
+
+        clusters = shiftedWorld.cluster();
+        assertEquals(2, clusters.size());
+        assertEquals(world.size(), clusters.get(0).size());
+        assertEquals(world.size(), clusters.get(1).size());
     }
 }

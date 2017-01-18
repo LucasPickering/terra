@@ -280,17 +280,15 @@ public class Tiles extends AbstractSet<Tile> {
         while (!unclusteredTiles.isEmpty()) {
             // Grab a tile to work with
             final Tile firstTile = Funcs.firstFromCollection(unclusteredTiles);
-            final boolean positive = predicate.test(firstTile); // Get its state (pos/neg)
+            final boolean isPositive = predicate.test(firstTile); // Get its state (pos/neg)
 
             // Start building a cluster around this tile
             final Cluster cluster = Cluster.fromWorld(this);
             // Keep track of the tiles whose adjacent tiles haven't been checked yet
             final Tiles uncheckedTiles = new Tiles();
 
-            // Add the first tile to the cluster, and remove it from unclusteredTiles
-            cluster.add(firstTile);
-            uncheckedTiles.add(firstTile);
-            unclusteredTiles.remove(firstTile);
+            // Add the first tile to the cluster
+            addToCluster(firstTile, cluster, uncheckedTiles, unclusteredTiles);
 
             // If there is still at least one tile whose adjacents haven't been checked yet...
             while (!uncheckedTiles.isEmpty()) {
@@ -301,19 +299,16 @@ public class Tiles extends AbstractSet<Tile> {
                 for (final Tile adjTile : getAdjacentTiles(tile).values()) {
                     // If this adjacent tile has the same pos/neg state, and it's not already in
                     // the cluster...
-                    if (predicate.test(adjTile) == positive
-                        && !cluster.contains(adjTile)) {
-                        // Add the first tile to the cluster, and remove it from unclusteredTiles
-                        cluster.add(adjTile);
-                        uncheckedTiles.add(adjTile);
-                        unclusteredTiles.remove(adjTile);
+                    if (predicate.test(adjTile) == isPositive && !cluster.contains(adjTile)) {
+                        // Add the tile to the cluster
+                        addToCluster(adjTile, cluster, uncheckedTiles, unclusteredTiles);
                     }
                 }
 
                 uncheckedTiles.remove(tile); // We've now checked this tile
             }
 
-            if (positive) {
+            if (isPositive) {
                 posClusters.add(cluster);
             } else {
                 negClusters.add(cluster);
@@ -321,6 +316,13 @@ public class Tiles extends AbstractSet<Tile> {
         }
 
         return new Pair<>(posClusters, negClusters);
+    }
+
+    private void addToCluster(Tile tile, Cluster cluster, Tiles uncheckedTiles,
+                              Tiles unclusteredTiles) {
+        cluster.add(tile);
+        uncheckedTiles.add(tile);
+        unclusteredTiles.remove(tile);
     }
 
     /**

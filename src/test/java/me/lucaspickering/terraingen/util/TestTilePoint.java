@@ -2,7 +2,9 @@ package me.lucaspickering.terraingen.util;
 
 import org.junit.Test;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class TestTilePoint {
 
@@ -32,5 +34,13 @@ public class TestTilePoint {
         assertEquals(3, tile3.distanceTo(origin));
         assertEquals(2, tile3.distanceTo(tile1));
         assertEquals(7, tile3.distanceTo(tile2));
+    }
+
+    @Test
+    public void testEquals() throws Exception {
+        final TilePoint point = new TilePoint(-1, 1, 0);
+        assertFalse(point.equals(TilePoint.ZERO));
+        assertTrue(point.equals(-1, 1, 0));
+        assertFalse(point.equals(1, -1, 1));
     }
 }
