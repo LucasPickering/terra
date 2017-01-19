@@ -11,7 +11,7 @@ public enum Biome {
     // You can adjust how much the value of the tile color changes in relation to the elevation.
     // For more value change, use a larger range. You can have the range extend outside [0, 1],
     // and it will be coerced if necessary.
-    OCEAN("Ocean", 0x1653b7, new Mapping(-25, -10, 0.3f, 1f)),
+    OCEAN("Ocean", 0x1653b7, new Mapping(-25, -10, 0.4f, 0.7f)),
     COAST("Coast", 0x1887b2, new Mapping(-15, 0, 0.5f, 1f)),
     LAKE("Lake", 0x09729b, new Mapping(-10, 0, 0.5f, 1f)),
     BEACH("Beach", 0xf2ef59, new Mapping(0, 5, 0.75f, 0.95f)),
