@@ -85,9 +85,20 @@ public class ContinentGenerator implements Generator {
             continents.add(continent);
         }
 
-        cleanupContinents(world, availableTiles, continents);
+        // Potential optimization? - make the continents join earlier on
+        // Re-cluster the continents to join any continents that connected to each other
+        final Tiles continentTiles = new Tiles();
+        continents.forEach(continentTiles::addAll);
+        final List<Cluster> newContinents = continentTiles.cluster();
+        for (Cluster continent : newContinents) {
+            for (Tile tile : continent) {
+                tileToContinentMap.put(tile.pos(), continent);
+            }
+        }
 
-        return continents;
+        cleanupContinents(world, availableTiles, newContinents);
+
+        return newContinents;
     }
 
     /**
@@ -254,8 +265,7 @@ public class ContinentGenerator implements Generator {
 
     /**
      * Adds the given tile to the given continent and removes the tile from the collection of
-     * available tiles. Available tiles are ones that are not yet in a continent. If the tile is
-     * added to the continent, then {@link #tileToContinentMap} will be updated.
+     * available tiles. Available tiles are ones that are not yet in a continent.
      *
      * @param tile           the tile to be added to the continent
      * @param availableTiles the collection of tiles that are available to be added, i.e. the tiles
@@ -265,7 +275,6 @@ public class ContinentGenerator implements Generator {
     private void addToContinent(Tile tile, Tiles availableTiles, Cluster continent) {
         final boolean added = continent.add(tile);
         if (added) {
-            tile.setBiome(Biome.LAND);
             tileToContinentMap.put(tile.pos(), continent);
             if (!availableTiles.remove(tile)) {
                 throw new IllegalStateException("Tile is not available to be added");

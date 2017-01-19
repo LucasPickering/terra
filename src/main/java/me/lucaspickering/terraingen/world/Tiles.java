@@ -293,6 +293,7 @@ public class Tiles extends AbstractSet<Tile> {
      */
     @NotNull
     public Pair<List<Cluster>, List<Cluster>> cluster(@NotNull Predicate<Tile> predicate) {
+        // Potential optimization?
         // First divided each tile into its own cluster, then iterate over all those clusters and
         // begin joining clusters that have the same state (postive or negative) and have
         // adjacent tiles.

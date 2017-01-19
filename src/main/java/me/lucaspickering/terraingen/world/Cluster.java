@@ -124,6 +124,7 @@ public class Cluster extends Tiles {
      */
     @NotNull
     public Tiles allAdjacents() {
+        // Potential optimization?
         return new Tiles(adjacentTiles);
     }
 }

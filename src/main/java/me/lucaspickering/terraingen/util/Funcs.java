@@ -95,7 +95,8 @@ public class Funcs {
             throw new IllegalArgumentException("Collection cannot be empty");
         }
 
-        // TODO figure out a better way to do this
+        // Potential optimization?
+        // Create a list with x entires for each element, where x is its weight of being chosen
         final List<T> weightedList = new LinkedList<>();
         for (T value : coll) {
             final int weight = weightFunction.apply(value);
@@ -104,6 +105,7 @@ public class Funcs {
             }
         }
 
+        // Select an element from the weighted list
         return randomFromCollection(random, weightedList);
     }
 
