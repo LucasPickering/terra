@@ -265,7 +265,8 @@ public class ContinentGenerator implements Generator {
 
     /**
      * Adds the given tile to the given continent and removes the tile from the collection of
-     * available tiles. Available tiles are ones that are not yet in a continent.
+     * available tiles. Available tiles are ones that are not yet in a continent. If the tile is
+     * added to the continent, then {@link #tileToContinentMap} will be updated.
      *
      * @param tile           the tile to be added to the continent
      * @param availableTiles the collection of tiles that are available to be added, i.e. the tiles
