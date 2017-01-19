@@ -1,5 +1,7 @@
 package me.lucaspickering.terraingen.util;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents the position of one hex tile. This is meant to be used with the coordinate system
  * described by http://www.redblobgames.com/grids/hexagons/, so {@code x + y + z == 0} must
@@ -7,7 +9,7 @@ package me.lucaspickering.terraingen.util;
  * makes certain things more elegant (like the distance calculation). Some computations, like
  * {@link #equals} and {@link #hashCode}, don't use z for efficiency purposes.
  */
-public class TilePoint {
+public class TilePoint implements Comparable<TilePoint> {
 
     public static final TilePoint ZERO = new TilePoint(0, 0, 0);
 
@@ -133,5 +135,24 @@ public class TilePoint {
     public int hashCode() {
         // z is redundant, so don't include it in the hash because it would just reduce accuracy
         return x * 31 + y;
+    }
+
+    @Override
+    public int compareTo(@NotNull TilePoint other) {
+        // Compares by x then y
+        int comp;
+
+        // Compare x, fall back to y if x's are equal
+        comp = Integer.compare(x, other.x());
+        if (comp != 0) {
+            return comp;
+        }
+
+        // Compare y and return that result
+        comp = Integer.compare(y, other.y());
+        return comp;
+
+        // No need to compare z. If x and y are equal, z must be equal, by this class's contract
+        // of x + y + z == 0.
     }
 }

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -35,7 +36,7 @@ public class Tiles extends AbstractSet<Tile> {
     private final Map<TilePoint, Tile> map;
 
     public Tiles() {
-        map = new HashMap<>();
+        map = new TreeMap<>(); // Uses TilePoint's compareTo method for ordering
     }
 
     /**
