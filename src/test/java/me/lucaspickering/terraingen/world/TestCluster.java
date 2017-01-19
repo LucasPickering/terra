@@ -10,7 +10,7 @@ public class TestCluster {
 
     @Test
     public void testAllAdjacents() throws Exception {
-        final Tiles tiles = WorldHelper.initTiles(5);
+        final Tiles tiles = Tiles.initByRadius(5);
         final Cluster cluster = Cluster.fromWorld(tiles);
         Tiles adjacents;
 
