@@ -80,7 +80,7 @@ public class ContinentGenerator implements Generator {
         // generate a new continent
         while (continents.size() < numToGenerate && availableTiles.size() >= CONTINENT_SIZE_RANGE
             .min()) {
-            final Cluster continent = generateContinent(availableTiles, random);
+            final Cluster continent = generateContinent(world, availableTiles, random);
             continents.add(continent);
         }
 
@@ -96,13 +96,13 @@ public class ContinentGenerator implements Generator {
      * @param random         the {@link Random} instance to use
      * @return the generated continent
      */
-    private Cluster generateContinent(Tiles availableTiles, Random random) {
-        final Cluster continent = Cluster.fromWorld(availableTiles); // The continent
+    private Cluster generateContinent(Tiles world, Tiles availableTiles, Random random) {
+        final Cluster continent = Cluster.fromWorld(world); // The continent
         final int targetSize = CONTINENT_SIZE_RANGE.randomIn(random); // Pick a target size
 
         // Add the seed to the continent, and remove it from the pool of available tiles
         final Tile seed = Funcs.randomFromCollection(random, availableTiles); // The first tile
-        addToContinent(seed, continent, availableTiles);
+        addToContinent(seed, availableTiles, continent);
 
         // Keep adding until we hit our target size
         while (continent.size() < targetSize) {
@@ -117,7 +117,7 @@ public class ContinentGenerator implements Generator {
 
             // Pick a random tile adjacent to the continent and add it in
             final Tile nextTile = Funcs.randomFromCollection(random, candidates);
-            addToContinent(nextTile, continent, availableTiles);
+            addToContinent(nextTile, availableTiles, continent);
         }
 
         assert !continent.isEmpty(); // At least one tile should have been added
@@ -134,7 +134,7 @@ public class ContinentGenerator implements Generator {
      * @param continents     all the continents to clean up
      */
     private void cleanupContinents(Tiles world, Tiles availableTiles, List<Cluster> continents) {
-        // Cluster the negative tiles
+        // Cluster the negative tilesK
         final List<Cluster> nonContinentClusters = availableTiles.cluster();
 
         // Fill in the "holes" in each continent, i.e. find all clusters that are entirely inside
@@ -151,7 +151,7 @@ public class ContinentGenerator implements Generator {
                 if (surroundingContinent != null) {
                     // Add the cluster to the continent that completely surrounds it
                     for (Tile tile : nonContinentCluster) {
-                        addToContinent(tile, surroundingContinent, availableTiles);
+                        addToContinent(tile, availableTiles, surroundingContinent);
                     }
                 }
             }
@@ -229,11 +229,11 @@ public class ContinentGenerator implements Generator {
      * added to the continent, then {@link #tileToContinentMap} will be updated.
      *
      * @param tile           the tile to be added to the continent
-     * @param continent      the continent receiving the tile
      * @param availableTiles the collection of tiles that are available to be added, i.e. the tiles
      *                       that are not yet in any continent
+     * @param continent      the continent receiving the tile
      */
-    private void addToContinent(Tile tile, Cluster continent, Tiles availableTiles) {
+    private void addToContinent(Tile tile, Tiles availableTiles, Cluster continent) {
         final boolean added = continent.add(tile);
         if (added) {
             tileToContinentMap.put(tile.pos(), continent);

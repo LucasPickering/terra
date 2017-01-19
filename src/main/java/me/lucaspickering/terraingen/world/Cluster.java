@@ -95,7 +95,10 @@ public class Cluster extends Tiles {
 
         if (removed) {
             final Tile tile = world.getByPoint(point); // super.remove asserts that o is a Tile
+            // For each tile adjacent to the removed one...
             for (Tile adjTile : adjacentTiles.getAdjacentTiles(tile).values()) {
+                // If there are no more tiles in the cluster adjacent to this one, then it is no
+                // longer adjacent to the cluster and should therefore be removed from that set
                 if (getAdjacentTiles(adjTile).isEmpty()) {
                     adjacentTiles.remove(adjTile);
                 }
