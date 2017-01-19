@@ -92,7 +92,8 @@ public class ContinentGenerator implements Generator {
     /**
      * Generates a single continent from the given collection of available tiles.
      *
-     * @param availableTiles the tiles that aren't yet in a continent
+     * @param world          the tiles that make up the world (will NOT be modified)
+     * @param availableTiles the tiles that aren't not yet in a continent (to be modified)
      * @param random         the {@link Random} instance to use
      * @return the generated continent
      */
