@@ -21,12 +21,12 @@ public class BeachGenerator implements Generator {
     public static final Set<Biome> BEACHABLE_BIOMES = EnumSet.of(Biome.OCEAN, Biome.COAST);
 
     @Override
-    public void generate(Tiles tiles, Random random) {
-        for (Tile tile : tiles) {
+    public void generate(Tiles world, Random random) {
+        for (Tile tile : world) {
             // If this tile is land and within our elevation bound, check the adjacent tiles, and
             // if there is an ocean (or similar) tile adjacent, make a beach.
             if (tile.biome().isLand() && tile.elevation() <= MAX_BEACH_ELEV) {
-                for (Tile adj : tiles.getAdjacentTiles(tile).values()) {
+                for (Tile adj : world.getAdjacentTiles(tile).values()) {
                     if (BEACHABLE_BIOMES.contains(adj.biome())) {
                         tile.setBiome(Biome.BEACH);
                         break; // Done with this tile

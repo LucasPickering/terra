@@ -17,8 +17,8 @@ public class MidpointGenerator implements Generator {
     private final static float SLOP_FACTOR = 0.2f;
 
     @Override
-    public void generate(Tiles tiles, Random random) {
-        final Map<Direction, Tile> corners = getCorners(tiles);
+    public void generate(Tiles world, Random random) {
+        final Map<Direction, Tile> corners = getCorners(world);
 
         // Set the elevation for each corner
         for (Tile tile : corners.values()) {
@@ -29,12 +29,12 @@ public class MidpointGenerator implements Generator {
         for (Tile tile1 : corners.values()) {
             for (Tile tile2 : corners.values()) {
                 if (!tile1.pos().equals(tile2.pos())) {
-                    gradeBetween(tiles, random, tile1, tile2);
+                    gradeBetween(world, random, tile1, tile2);
                 }
             }
         }
 
-        tiles.forEach(tile -> tile.setBiome(Biome.FOREST));
+        world.forEach(tile -> tile.setBiome(Biome.FOREST));
     }
 
     /**

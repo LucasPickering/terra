@@ -40,7 +40,7 @@ public class BiomePainter implements Generator {
     }
 
     @Override
-    public void generate(Tiles tiles, Random random) {
+    public void generate(Tiles world, Random random) {
         // Step 1 - calculate n
         // Figure out how many biome blotches we want
         // n = number of tiles / average size of blotch
@@ -58,11 +58,11 @@ public class BiomePainter implements Generator {
         // each tile in that blotch.
 
         // Step 1
-        final int numSeeds = tiles.size() / AVERAGE_BLOTCH_SIZE;
+        final int numSeeds = world.size() / AVERAGE_BLOTCH_SIZE;
 
         // Step 2
-        final Tiles seeds = tiles.selectTiles(random, numSeeds, MIN_SEED_SPACING);
-        final Tiles unselectedTiles = new Tiles(tiles); // We need a copy so we can modify it
+        final Tiles seeds = world.selectTiles(random, numSeeds, MIN_SEED_SPACING);
+        final Tiles unselectedTiles = new Tiles(world); // We need a copy so we can modify it
         unselectedTiles.removeAll(seeds); // We've already selected the seeds, so remove them
 
         // Each biome blotch, keyed by its seed
@@ -73,7 +73,7 @@ public class BiomePainter implements Generator {
 
         for (Tile seed : seeds) {
             // Add each seed to its cluster, and each cluster to the maps
-            final Cluster blotch = Cluster.fromWorld(tiles);
+            final Cluster blotch = Cluster.fromWorld(world);
             blotch.add(seed);
             blotches.put(seed.pos(), blotch);
             incompleteBlotches.put(seed.pos(), blotch);

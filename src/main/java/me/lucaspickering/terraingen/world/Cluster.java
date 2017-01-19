@@ -15,6 +15,10 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  * Note that this class doesn't actually enforce that all of its tiles are contiguous, for
  * performance purposes. It is up to the user to only provide contiguous sets of tiles. The
  * results of this class's operations are undefined if called with disjoint tiles.
+ *
+ * Each cluster exists in a world, which is meant to be a super set of the tiles in the cluster.
+ * This is never enforced by the structure, for efficiency purposes, but all operations of this
+ * class are undefined if you add a tile to the cluster that is not in its world.
  */
 public class Cluster extends Tiles {
 
@@ -33,12 +37,37 @@ public class Cluster extends Tiles {
         this.adjacentTiles = new Tiles(cluster.adjacentTiles);
     }
 
+    /**
+     * Creates a new {@link Cluster} that exists as a subset of the given world.
+     *
+     * @param world the world of tiles that is the superset of the returned {@link Cluster}
+     * @return the created {@link Cluster}
+     */
     public static Cluster fromWorld(Tiles world) {
         return new Cluster(world);
     }
 
+    /**
+     * Copies the given {@link Cluster}.
+     *
+     * @param cluster the {@link Cluster} to copy
+     * @return the created {@link Cluster}
+     */
     public static Cluster copy(Cluster cluster) {
         return new Cluster(cluster);
+    }
+
+    /**
+     * Copies the given {@link Cluster}, but uses a new {@link Tiles} as the world.
+     *
+     * @param world   the new world for the cluster to exist in
+     * @param cluster the cluster to copy
+     * @return the copied cluster, in the new world
+     */
+    public static Cluster copyToWorld(Tiles world, Cluster cluster) {
+        final Cluster copy = new Cluster(world);
+        copy.addAll(cluster);
+        return copy;
     }
 
     @Override

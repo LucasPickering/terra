@@ -49,13 +49,13 @@ public class ContinentGenerator implements Generator {
     private Map<TilePoint, Cluster> tileToContinentMap = new HashMap<>();
 
     @Override
-    public void generate(Tiles tiles, Random random) {
-        final Tiles nonContinentTiles = new Tiles(tiles); // Copy this because we'll be modifying it
+    public void generate(Tiles world, Random random) {
+        final Tiles availableTiles = new Tiles(world); // Copy this because we'll be modifying it
         // Cluster tiles to make the continents
-        final List<Cluster> continents = generateContinents(nonContinentTiles, random);
+        final List<Cluster> continents = generateContinents(world, availableTiles, random);
 
         // Adjust elevation to create oceans/coasts
-        generateOceanFloor(nonContinentTiles, continents, random);
+        generateOceanFloor(availableTiles, continents, random);
 
         // Paint biomes onto each continent
         continents.forEach(c -> paintContinent(c, random));
@@ -67,22 +67,24 @@ public class ContinentGenerator implements Generator {
      * a continent are removed. In other words, everything left in the Tiles object after this
      * function is called will be exactly the tiles that are not part of or adjacent to a continent.
      *
-     * @param tiles  the tiles that make up the world
-     * @param random the {@link Random} instance to use
+     * @param world          the tiles that make up the world (will NOT be modified)
+     * @param availableTiles the tiles that make up the world (to be modified)
+     * @param random         the {@link Random} instance to use
      * @return the continents created
      */
-    private List<Cluster> generateContinents(Tiles tiles, Random random) {
-        final int numToGenerate = 1;//CONTINENT_COUNT_RANGE.randomIn(random);
+    private List<Cluster> generateContinents(Tiles world, Tiles availableTiles, Random random) {
+        final int numToGenerate = CONTINENT_COUNT_RANGE.randomIn(random);
         final List<Cluster> continents = new ArrayList<>(numToGenerate);
 
         // While we haven't hit our target number and there are enough tiles left,
         // generate a new continent
-        while (continents.size() < numToGenerate && tiles.size() >= CONTINENT_SIZE_RANGE.min()) {
-            final Cluster continent = generateContinent(tiles, random);
+        while (continents.size() < numToGenerate && availableTiles.size() >= CONTINENT_SIZE_RANGE
+            .min()) {
+            final Cluster continent = generateContinent(availableTiles, random);
             continents.add(continent);
         }
 
-        cleanupContinents(tiles, continents);
+        cleanupContinents(world, availableTiles, continents);
 
         return continents;
     }
@@ -90,7 +92,7 @@ public class ContinentGenerator implements Generator {
     /**
      * Generates a single continent from the given collection of available tiles.
      *
-     * @param availableTiles tiles that aren't yet in a continent
+     * @param availableTiles the tiles that aren't yet in a continent
      * @param random         the {@link Random} instance to use
      * @return the generated continent
      */
@@ -118,18 +120,22 @@ public class ContinentGenerator implements Generator {
             addToContinent(nextTile, continent, availableTiles);
         }
 
-        // Remove all tiles adjacent to this continent to ensure at least 1 tile of spacing
-        // between all continents
-//        availableTiles.removeAll(continent.allAdjacents());
-
         assert !continent.isEmpty(); // At least one tile should have been added
 
         return continent;
     }
 
-    private void cleanupContinents(Tiles nonContinentTiles, List<Cluster> continents) {
+    /**
+     * "Cleans up" all the given continents. This fixes errors/imperfections  such as unassigned
+     * tiles inside of continents and long strings of land that look strange.
+     *
+     * @param world          the world (will NOT be modified)
+     * @param availableTiles tiles that are not yet in a continent (will most likely be modified)
+     * @param continents     all the continents to clean up
+     */
+    private void cleanupContinents(Tiles world, Tiles availableTiles, List<Cluster> continents) {
         // Cluster the negative tiles
-        final List<Cluster> nonContinentClusters = nonContinentTiles.cluster();
+        final List<Cluster> nonContinentClusters = availableTiles.cluster();
 
         // Fill in the "holes" in each continent, i.e. find all clusters that are entirely inside
         // one continent, and add them into that continent.
@@ -138,15 +144,22 @@ public class ContinentGenerator implements Generator {
             // one continent. This is just an optimization, as extremely large clusters are
             // all but guaranteed to not be entirely inside one continent. Skipping them saves time.
             if (nonContinentCluster.size() < WaterPainter.MIN_OCEAN_SIZE) {
-                final Cluster surroundingContinent = getSurroundingContinent(nonContinentCluster);
+                // Copy the cluster so that it exists in the context of the entire world, then
+                // check if it is entirely within one continent.
+                final Cluster copiedCluster = Cluster.copyToWorld(world, nonContinentCluster);
+                final Cluster surroundingContinent = getSurroundingContinent(copiedCluster);
                 if (surroundingContinent != null) {
                     // Add the cluster to the continent that completely surrounds it
                     for (Tile tile : nonContinentCluster) {
-                        addToContinent(tile, surroundingContinent, nonContinentTiles);
+                        addToContinent(tile, surroundingContinent, availableTiles);
                     }
                 }
             }
+        }
 
+        // Remove the stringy bits of land on each continent
+        for (Cluster continent : continents) {
+            removeStringyLand(availableTiles, continent);
         }
     }
 
@@ -187,7 +200,15 @@ public class ContinentGenerator implements Generator {
         return prevAdjContinent;
     }
 
-    private void cleanupContinent(Tiles availableTiles, Cluster continent) {
+    /**
+     * Removes "stringy" portions of a continent, which are long & thin pieces of land that stick
+     * out into the ocean.
+     *
+     * @param availableTiles the tiles that aren't in any continent (some tiles will probably be
+     *                       added back to this)
+     * @param continent      the continent to be de-stringified
+     */
+    private void removeStringyLand(Tiles availableTiles, Cluster continent) {
         boolean done = false;
         outer:
         while (!done) {

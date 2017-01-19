@@ -21,8 +21,8 @@ public class OceanFloorGenerator implements Generator {
     private static final int FLOOR_DEPTH = World.ELEVATION_RANGE.min();
 
     @Override
-    public void generate(Tiles tiles, Random random) {
-        for (Tile tile : tiles) {
+    public void generate(Tiles world, Random random) {
+        for (Tile tile : world) {
             final int distance = tile.pos().distanceTo(TilePoint.ZERO);
             final int elev;
             if (distance >= FLOOR_DISTANCE_THRESHOLD) {

@@ -12,8 +12,10 @@ import me.lucaspickering.terraingen.util.DoubleRange;
 import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
+import me.lucaspickering.terraingen.world.generate.BeachGenerator;
 import me.lucaspickering.terraingen.world.generate.ContinentGenerator;
 import me.lucaspickering.terraingen.world.generate.Generator;
+import me.lucaspickering.terraingen.world.generate.LandRougher;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -35,10 +37,10 @@ public class World {
 
     private static final Generator[] GENERATORS = new Generator[]{
         new ContinentGenerator(),
-//        new LandRougher(),
+        new LandRougher(),
 //        new PeakGenerator(),
         new WaterPainter(),
-//        new BeachGenerator()
+        new BeachGenerator()
     };
 
     private final Logger logger;

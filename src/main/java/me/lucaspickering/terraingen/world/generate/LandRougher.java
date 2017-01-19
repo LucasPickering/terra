@@ -15,8 +15,8 @@ public class LandRougher implements Generator {
     private static final int WEIGHT = 2; // Tendency to shift up (positive) vs down (negative)
 
     @Override
-    public void generate(Tiles tiles, Random random) {
-        for (Tile tile : tiles) {
+    public void generate(Tiles world, Random random) {
+        for (Tile tile : world) {
             // If the tile is land, adjust its elevation a bit
             final int elev = Funcs.randomSlop(random, tile.elevation(), SLOP) + WEIGHT;
             tile.setElevation(elev);

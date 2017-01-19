@@ -18,9 +18,9 @@ public interface Generator {
     /**
      * Modifies the given world, generating new terrain features.
      *
-     * @param tiles  the tiles to modify
+     * @param world  the tiles to modify
      * @param random the source of random for generation
      */
-    void generate(Tiles tiles, Random random);
+    void generate(Tiles world, Random random);
 
 }

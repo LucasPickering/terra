@@ -23,9 +23,9 @@ public class WaterPainter implements Generator {
     private static final int MIN_COAST_DEPTH = -10; // Everything in an ocean >= this is coast
 
     @Override
-    public void generate(Tiles tiles, Random random) {
+    public void generate(Tiles world, Random random) {
         // Get clusters of tiles that are at or below sea level
-        final List<Cluster> clusters = tiles.cluster(t -> t.elevation() < World.SEA_LEVEL).first();
+        final List<Cluster> clusters = world.cluster(t -> t.elevation() < World.SEA_LEVEL).first();
 
         for (Cluster cluster : clusters) {
             final int size = cluster.size();
