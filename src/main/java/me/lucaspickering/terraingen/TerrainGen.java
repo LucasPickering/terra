@@ -129,7 +129,7 @@ public class TerrainGen {
         }
     }
 
-    private long initRandomSeed() {
+    public long initRandomSeed() {
         // Set random seed
         final String seedString = System.getProperty("seed");
         // If a seed was provided, use that, otherwise generate our own seed
