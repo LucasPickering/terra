@@ -21,11 +21,13 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.AverageTime)
 public class WorldBenchmark {
 
-    @Param({"100", "175"})
+    private final long seed = "this is a great seed".hashCode();
+
+    @Param({"150", "250"})
     private int size;
 
     @Benchmark
     public void measureGenerate() {
-        new World(size);
+        new World(seed, size);
     }
 }

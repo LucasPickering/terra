@@ -8,10 +8,29 @@ import java.util.Map;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.Tile;
-
 import static org.junit.Assert.assertEquals;
 
 public class TestTiles {
+
+    @Test
+    public void testInitByRadius() throws Exception {
+        // Test every size 0-10
+        testInitByRadius(0, 10, 1);
+
+        // Test every 10th size 20-100
+        testInitByRadius(20, 100, 10);
+
+        // Test every 50th size 150-500
+        testInitByRadius(150, 1000, 50);
+    }
+
+    private void testInitByRadius(int start, int end, int step) {
+        for (int size = start; size <= end; size += step) {
+            final Tiles tiles = Tiles.initByRadius(size);
+            final int expectedSize = 3 * size * (size + 1) + 1; // Mathematically sound
+            assertEquals(expectedSize, tiles.size());
+        }
+    }
 
     @Test
     public void testAdjacentTiles() throws Exception {
@@ -77,7 +96,7 @@ public class TestTiles {
     @Test
     public void testCluster() throws Exception {
         final int size = 2;
-        final Tiles world = WorldHelper.initTiles(size);
+        final Tiles world = Tiles.initByRadius(size);
 
         List<Cluster> clusters;
 
