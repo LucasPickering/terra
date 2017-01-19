@@ -17,7 +17,6 @@ import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.WorldHelper;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class WorldScreen extends Screen {
@@ -70,7 +69,7 @@ public class WorldScreen extends Screen {
         // If there is a mouse position, check which tile it's over
         final TilePoint mouseOverPos;
         if (mousePos != null) {
-            mouseOverPos = WorldHelper.pixelToTile(world, mousePos);
+            mouseOverPos = world.pixelToTile(mousePos);
         } else {
             mouseOverPos = null;
         }
@@ -102,10 +101,11 @@ public class WorldScreen extends Screen {
 
     private boolean containsTile(Tile tile) {
         // If any of the 4 corners of the tile are on-screen, the tile is on-screen
-        return contains(world.getTileTopLeft(tile))
-               || contains(world.getTileTopRight(tile))
-               || contains(world.getTileBottomRight(tile))
-               || contains(world.getTileBottomLeft(tile));
+        final Point tileCenter = world.getTileCenter(tile);
+        return contains(world.getTileTopLeft(tileCenter))
+               || contains(world.getTileTopRight(tileCenter))
+               || contains(world.getTileBottomRight(tileCenter))
+               || contains(world.getTileBottomLeft(tileCenter));
     }
 
     /**
@@ -141,7 +141,7 @@ public class WorldScreen extends Screen {
     private void drawTileOverlays(Tile tile, boolean mouseOver) {
         // Translate to this tile
         GL11.glPushMatrix();
-        final Point tileTopLeft = world.getTileTopLeft(tile);
+        final Point tileTopLeft = world.getTileTopLeft(world.getTileCenter(tile));
         GL11.glTranslated(tileTopLeft.x(), tileTopLeft.y(), 0f);
 
         // If the mouse is over this tile, draw the mouse-over overlay

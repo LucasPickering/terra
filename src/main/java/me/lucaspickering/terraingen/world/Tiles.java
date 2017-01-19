@@ -60,6 +60,30 @@ public class Tiles extends AbstractSet<Tile> {
     }
 
     /**
+     * Initializes a {@link Tiles} collection of the given ardius. Each tile will have default
+     * biome and elevation. The returned {@link Tiles} will have an origin tile and {@code
+     * radius} rings of tiles around that origin.
+     *
+     * @param radius the radius of the collection of tiles
+     * @return the initialized {@link Tiles}
+     */
+    @NotNull
+    public static Tiles initByRadius(int radius) {
+        final Tiles tiles = new Tiles();
+        // Fill out the set with a bunch of points
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    if (x + y + z == 0) {
+                        tiles.add(new Tile(new TilePoint(x, y, z)));
+                    }
+                }
+            }
+        }
+        return tiles;
+    }
+
+    /**
      * Creates a deep immutable copy of this object. Each internal tile will also be copied and
      * made immutable.
      *
