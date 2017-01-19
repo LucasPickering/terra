@@ -1,6 +1,7 @@
 package me.lucaspickering.terraingen.world.generate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,12 +91,16 @@ public class ContinentGenerator implements Generator {
     }
 
     /**
-     * Generates a single continent from the given collection of available tiles.
+     * Generates a single continent from the given collection of available tiles. It is possible
+     * that, in the process of generating a new continent, this method connects to a
+     * previously-existing continent. If that happens, this will join the two continents and
+     * return {@code null}, indicating that no new continent was created.
      *
      * @param world          the tiles that make up the world (will NOT be modified)
      * @param availableTiles the tiles that aren't not yet in a continent (to be modified)
      * @param random         the {@link Random} instance to use
-     * @return the generated continent
+     * @return the generated continent, or {@code null} if the generated tiles are joined onto an
+     * existing continent
      */
     private Cluster generateContinent(Tiles world, Tiles availableTiles, Random random) {
         final Cluster continent = Cluster.fromWorld(world); // The continent
@@ -119,11 +124,34 @@ public class ContinentGenerator implements Generator {
             // Pick a random tile adjacent to the continent and add it in
             final Tile nextTile = Funcs.randomFromCollection(random, candidates);
             addToContinent(nextTile, availableTiles, continent);
+
+            // Get all tiles adjacent to the one we just added. If it is adjacent to a land tile
+            // that is part of another continent, join the two continents
+            final Collection<Tile> adjTiles = world.getAdjacentTiles(nextTile).values();
+            for (Tile adjTile : adjTiles) {
+                // If the adjacent tile is part of another continent, join the two continents
+                final Cluster adjContinent = tileToContinentMap.get(adjTile.pos());
+                if (adjContinent != null && adjContinent != continent) {
+
+                }
+            }
         }
 
         assert !continent.isEmpty(); // At least one tile should have been added
 
         return continent;
+    }
+
+    /**
+     * Joins two continents, adding all tiles in one continent to the other. The source continent
+     * will have new tiles added to it, while the extra continent will not be modified (it should
+     * be thrown away after this operation).
+     *
+     * @param sourceContinent the continent to be added to
+     * @param extraContinent  the continent to be added from
+     */
+    private void joinContinents(Cluster sourceContinent, Cluster extraContinent) {
+
     }
 
     /**
@@ -237,6 +265,7 @@ public class ContinentGenerator implements Generator {
     private void addToContinent(Tile tile, Tiles availableTiles, Cluster continent) {
         final boolean added = continent.add(tile);
         if (added) {
+            tile.setBiome(Biome.LAND);
             tileToContinentMap.put(tile.pos(), continent);
             if (!availableTiles.remove(tile)) {
                 throw new IllegalStateException("Tile is not available to be added");
