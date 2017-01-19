@@ -5,7 +5,6 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.util.DoubleRange;
 import me.lucaspickering.terraingen.util.IntRange;
@@ -54,14 +53,15 @@ public class World {
     private double tileHeight;
     private Point[] tileVertices;
 
-    public World() {
-        this(DEFAULT_SIZE);
+    public World(long seed) {
+        this(seed, DEFAULT_SIZE);
     }
 
     // Package visible for benchmarking purposes
-    World(int size) {
+    World(long seed, int size) {
         logger = Logger.getLogger(getClass().getName());
-        random = TerrainGen.instance().random();
+        random = new Random(seed);
+        logger.log(Level.FINE, String.format("Using seed '%d'", seed));
         tiles = generateWorld(size);
         worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
         setTileRadius(VALID_TILE_RADII.min());
@@ -72,7 +72,7 @@ public class World {
         final Tiles tiles = WorldHelper.initTiles(size);
 
         // Apply each generator in sequence (this is the heavy lifting)
-        Arrays.stream(GENERATORS).forEach(gen -> runGenerator(gen, tiles, random));
+        Arrays.stream(GENERATORS).forEach(gen -> runGenerator(gen, tiles));
 
         final Tiles result = tiles.immutableCopy(); // Make an immutable copy
         logger.log(Level.FINE, String.format("World generation took %d ms",
@@ -80,7 +80,7 @@ public class World {
         return result;
     }
 
-    private void runGenerator(Generator generator, Tiles tiles, Random random) {
+    private void runGenerator(Generator generator, Tiles tiles) {
         final long startTime = System.currentTimeMillis();
         generator.generate(tiles, random);
         final long runTime = System.currentTimeMillis() - startTime;

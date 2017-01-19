@@ -160,6 +160,10 @@ public class WorldScreen extends Screen {
                 case GLFW.GLFW_KEY_ESCAPE:
                     setNextScreen(new PauseScreen(this)); // Open the pause menu
                     break;
+                case GLFW.GLFW_KEY_R:
+                    // Re-generate the world
+                    final World newWorld = new World(getTerrainGen().getSeed());
+                    setNextScreen(new WorldScreen(newWorld));
             }
         }
     }

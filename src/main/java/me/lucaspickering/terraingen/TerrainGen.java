@@ -33,7 +33,6 @@ public class TerrainGen {
     private final Logger logger;
     private final boolean debug; // True if we are in debug mode (set by a VM argument)
     private final long seed;
-    private final Random random;
 
     // These event handlers are initialized at the bottom
     private final GLFWKeyCallback keyHandler;
@@ -51,8 +50,6 @@ public class TerrainGen {
     private double lastFpsUpdate; // Time of the last FPS update, in seconds
     private int framesSinceCheck; // Number of frames since the last FPS update
     private int fps; // Current framerate
-
-    private World world;
 
     public static void main(String[] args) {
         TERRAIN_GEN.run();
@@ -75,24 +72,7 @@ public class TerrainGen {
             logger.log(Level.FINE, "Debug mode enabled");
         }
 
-        // Set random instance
-        final String seedString = System.getProperty("seed");
-        // If a seed was provided, use that, otherwise generate our own seed
-        if (seedString != null) {
-            long seed;
-            // Try to parse the seed as a Long, and if that fails, just hash the string
-            try {
-                seed = Long.parseLong(seedString);
-            } catch (NumberFormatException e) {
-                seed = seedString.hashCode();
-            }
-            this.seed = seed;
-        } else {
-            // Generate a seed and record it, so that it can be logged
-            // Maybe we could just use system time here? This seems more xD random though
-            this.seed = new Random().nextLong();
-        }
-        random = new Random(seed);
+        seed = initRandomSeed();
         logger.log(Level.CONFIG, "Random seed: " + seed);
 
         // Init event handlers
@@ -139,7 +119,7 @@ public class TerrainGen {
 
     private void run() {
         try {
-            initWindow(); // Initialize
+            initWindow(); // Initialize the window
             gameLoop(); // Run the game
         } catch (Exception e) {
             System.err.println("Error in Terrain Gen:");
@@ -149,7 +129,27 @@ public class TerrainGen {
         }
     }
 
+    private long initRandomSeed() {
+        // Set random seed
+        final String seedString = System.getProperty("seed");
+        // If a seed was provided, use that, otherwise generate our own seed
+        if (seedString != null) {
+            // Try to parse the seed as a Long, and if that fails, just hash the string
+            try {
+                return Long.parseLong(seedString);
+            } catch (NumberFormatException e) {
+                return seedString.hashCode();
+            }
+        } else {
+            // Generate a seed and record it, so that it can be logged
+            // Maybe we could just use system time here? This seems more xD random though
+            return new Random().nextLong();
+        }
+    }
+
     private void initWindow() {
+        logger.log(Level.FINE, "Initializing window...");
+
         // There is a bug in certain parts of AWT that causes the program to hang when
         // initialized on MacOS. This prevents those parts from being initialized.
         System.setProperty("java.awt.headless", "true");
@@ -198,7 +198,7 @@ public class TerrainGen {
         GLFW.glfwSetFramebufferSizeCallback(window, windowResizeHandler);
 
         renderer = new Renderer();
-        world = new World(); // Generate the world
+        final World world = new World(getSeed());
         currentScreen = new WorldScreen(world); // Initialize the current screen
         lastFpsUpdate = GLFW.glfwGetTime(); // Set this for FPS calculation
     }
@@ -267,10 +267,6 @@ public class TerrainGen {
 
     public long getSeed() {
         return seed;
-    }
-
-    public Random random() {
-        return random;
     }
 
     public Renderer renderer() {

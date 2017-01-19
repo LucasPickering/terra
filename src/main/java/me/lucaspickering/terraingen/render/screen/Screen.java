@@ -29,6 +29,7 @@ public abstract class Screen implements ScreenElement {
 
     protected final Point center = new Point(Renderer.RES_WIDTH / 2,
                                              Renderer.RES_HEIGHT / 2);
+    private final TerrainGen terrainGen = TerrainGen.instance();
     private List<GuiElement> guiElements = new LinkedList<>();
     private Screen nextScreen;
     private boolean shouldExit; // Set to true to close the game
@@ -43,7 +44,7 @@ public abstract class Screen implements ScreenElement {
             .forEach(element -> drawElement(mousePos, element)); // Draw each element
 
         // If debug mode is enabled, draw debug info
-        if (TerrainGen.instance().debug()) {
+        if (getTerrainGen().debug()) {
             drawDebugInfo();
         }
 
@@ -60,9 +61,12 @@ public abstract class Screen implements ScreenElement {
     }
 
     private void drawDebugInfo() {
-        final TerrainGen terrainGen = TerrainGen.instance();
-        final String debugString = String.format(DEBUG_FORMAT, terrainGen.getFps());
+        final String debugString = String.format(DEBUG_FORMAT, getTerrainGen().getFps());
         renderer().drawString(Font.DEBUG, debugString, 10, 10); // Draw FPS
+    }
+
+    public final TerrainGen getTerrainGen() {
+        return terrainGen;
     }
 
     /**
@@ -145,6 +149,7 @@ public abstract class Screen implements ScreenElement {
 
     /**
      * Called when the user scrolls while the mouse is over this element.
+     *
      * @param event the event that occurred
      */
     public void onScroll(ScrollEvent event) {
