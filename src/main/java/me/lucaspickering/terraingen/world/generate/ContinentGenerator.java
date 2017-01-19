@@ -72,13 +72,14 @@ public class ContinentGenerator implements Generator {
      * @return the continents created
      */
     private List<Cluster> generateContinents(Tiles tiles, Random random) {
-        final int numToGenerate = CONTINENT_COUNT_RANGE.randomIn(random);
+        final int numToGenerate = 1;//CONTINENT_COUNT_RANGE.randomIn(random);
         final List<Cluster> continents = new ArrayList<>(numToGenerate);
 
         // While we haven't hit our target number and there are enough tiles left,
         // generate a new continent
         while (continents.size() < numToGenerate && tiles.size() >= CONTINENT_SIZE_RANGE.min()) {
-            continents.add(generateContinent(tiles, random));
+            final Cluster continent = generateContinent(tiles, random);
+            continents.add(continent);
         }
 
         cleanupContinents(tiles, continents);
@@ -119,7 +120,7 @@ public class ContinentGenerator implements Generator {
 
         // Remove all tiles adjacent to this continent to ensure at least 1 tile of spacing
         // between all continents
-        availableTiles.removeAll(continent.allAdjacents());
+//        availableTiles.removeAll(continent.allAdjacents());
 
         assert !continent.isEmpty(); // At least one tile should have been added
 
@@ -133,10 +134,10 @@ public class ContinentGenerator implements Generator {
         // Fill in the "holes" in each continent, i.e. find all clusters that are entirely inside
         // one continent, and add them into that continent.
         for (Cluster nonContinentCluster : nonContinentClusters) {
-            // If the cluster is large enough that it will become an ocean, don't check if its
-            // inside one continent. This is just an optimization, as extremely large clusters are
+            // If the cluster is small enough that it won't become an ocean, check if its  inside
+            // one continent. This is just an optimization, as extremely large clusters are
             // all but guaranteed to not be entirely inside one continent. Skipping them saves time.
-            if (nonContinentCluster.size() >= WaterPainter.MIN_OCEAN_SIZE) {
+            if (nonContinentCluster.size() < WaterPainter.MIN_OCEAN_SIZE) {
                 final Cluster surroundingContinent = getSurroundingContinent(nonContinentCluster);
                 if (surroundingContinent != null) {
                     // Add the cluster to the continent that completely surrounds it
