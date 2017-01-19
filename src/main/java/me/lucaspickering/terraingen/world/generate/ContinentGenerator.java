@@ -78,8 +78,8 @@ public class ContinentGenerator implements Generator {
 
         // While we haven't hit our target number and there are enough tiles left,
         // generate a new continent
-        while (continents.size() < numToGenerate && availableTiles.size() >= CONTINENT_SIZE_RANGE
-            .min()) {
+        while (continents.size() < numToGenerate
+               && availableTiles.size() >= CONTINENT_SIZE_RANGE.min()) {
             final Cluster continent = generateContinent(world, availableTiles, random);
             continents.add(continent);
         }
