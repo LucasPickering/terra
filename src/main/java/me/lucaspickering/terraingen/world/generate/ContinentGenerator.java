@@ -321,21 +321,11 @@ public class ContinentGenerator implements Generator {
         }
 
         // Step 4
-        // Create a list of all the selected biomes, with more entries for biomes that are more
-        // likely to be picked, so that one can be picked at random with proper chances.
-        final int totalWeight = BIOME_WEIGHTS.values().stream().reduce(0, (acc, i) -> acc + i);
-        final List<Biome> allBiomes = new ArrayList<>(totalWeight);
-        for (Map.Entry<Biome, Integer> entry : BIOME_WEIGHTS.entrySet()) {
-            final Biome biome = entry.getKey();
-            final int weight = entry.getValue();
-            // Put weight entries in the list for this biome
-            for (int i = 0; i < weight; i++) {
-                allBiomes.add(biome);
-            }
-        }
-
+        // Pick a biome for each cluster, using weighted chance as defined in BIOME_WEIGHTS
         for (Cluster blotch : biomes.values()) {
-            final Biome biome = Funcs.randomFromCollection(random, allBiomes);
+            final Biome biome = Funcs.randomFromCollectionWeighted(random,
+                                                                   BIOME_WEIGHTS.keySet(),
+                                                                   BIOME_WEIGHTS::get);
             blotch.forEach(tile -> tile.setBiome(biome)); // Set the biome for each tile
         }
     }

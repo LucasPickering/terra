@@ -4,9 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import sun.nio.ch.IOUtil;
-
-import java.awt.Color;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -16,10 +14,14 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Function;
 
 import me.lucaspickering.terraingen.TerrainGen;
+
 import static org.lwjgl.BufferUtils.createByteBuffer;
 
 public class Funcs {
@@ -58,6 +60,7 @@ public class Funcs {
      */
     @NotNull
     public static <T> T randomFromCollection(@NotNull Random random, @NotNull Collection<T> coll) {
+        Objects.requireNonNull(random);
         Objects.requireNonNull(coll);
         if (coll.isEmpty()) {
             throw new IllegalArgumentException("Collection cannot be empty");
@@ -68,6 +71,40 @@ public class Funcs {
             .skip(random.nextInt(coll.size()))
             .findFirst()
             .orElseThrow(() -> new AssertionError("Can't get here"));
+    }
+
+    /**
+     * Randomly selects one element from the given non-empty collection. Each element has a
+     * chance of being chosen that is proportional to that element's return value from {@code
+     * weightFunction}.
+     *
+     * @param random         the {@link Random} to generate numbers from
+     * @param coll           the collection to be chosen from (non-null, non-empty)
+     * @param weightFunction the function that provides a weight for each element in the collection
+     * @param <T>            the type of the element in the collection
+     * @return one randomly-selected element from the given collection
+     */
+    @NotNull
+    public static <T> T randomFromCollectionWeighted(@NotNull Random random,
+                                                     @NotNull Collection<T> coll,
+                                                     @NotNull Function<T, Integer> weightFunction) {
+        Objects.requireNonNull(random);
+        Objects.requireNonNull(coll);
+        Objects.requireNonNull(weightFunction);
+        if (coll.isEmpty()) {
+            throw new IllegalArgumentException("Collection cannot be empty");
+        }
+
+        // TODO figure out a better way to do this
+        final List<T> weightedList = new LinkedList<>();
+        for (T value : coll) {
+            final int weight = weightFunction.apply(value);
+            for (int i = 0; i < weight; i++) {
+                weightedList.add(value);
+            }
+        }
+
+        return randomFromCollection(random, weightedList);
     }
 
     public static String getResource(String path, String fileName) {
