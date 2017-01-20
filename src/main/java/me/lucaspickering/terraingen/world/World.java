@@ -15,7 +15,6 @@ import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
 import me.lucaspickering.terraingen.world.generate.ContinentGenerator;
 import me.lucaspickering.terraingen.world.generate.Generator;
-import me.lucaspickering.terraingen.world.generate.LandRougher;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -35,9 +34,9 @@ public class World {
     // World size
     private static final int DEFAULT_SIZE = 100;
 
-    private static final Generator[] GENERATORS = new Generator[]{
+    private final Generator[] generators = new Generator[]{
         new ContinentGenerator(),
-        new LandRougher(),
+//        new LandRougher(),
 //        new PeakGenerator(),
         new WaterPainter(),
         new BeachGenerator()
@@ -75,7 +74,7 @@ public class World {
         final Tiles tiles = Tiles.initByRadius(size);
 
         // Apply each generator in sequence (this is the heavy lifting)
-        Arrays.stream(GENERATORS).forEach(gen -> runGenerator(gen, tiles));
+        Arrays.stream(generators).forEach(gen -> runGenerator(gen, tiles));
 
         final Tiles result = tiles.immutableCopy(); // Make an immutable copy
         logger.log(Level.FINE, String.format("World generation took %d ms",

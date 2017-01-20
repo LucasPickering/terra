@@ -1,7 +1,6 @@
 package me.lucaspickering.terraingen.world.generate;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.util.TilePoint;
@@ -47,7 +47,7 @@ public class ContinentGenerator implements Generator {
         }
     }
 
-    private Map<TilePoint, Cluster> tileToContinentMap = new HashMap<>();
+    private final Map<TilePoint, Cluster> tileToContinentMap = new HashMap<>();
 
     @Override
     public void generate(Tiles world, Random random) {
@@ -75,43 +75,35 @@ public class ContinentGenerator implements Generator {
      */
     private List<Cluster> generateContinents(Tiles world, Tiles availableTiles, Random random) {
         final int numToGenerate = CONTINENT_COUNT_RANGE.randomIn(random);
-        final List<Cluster> continents = new ArrayList<>(numToGenerate);
+        List<Cluster> continents = new ArrayList<>(numToGenerate);
 
         // While we haven't hit our target number and there are enough tiles left,
         // generate a new continent
         while (continents.size() < numToGenerate
                && availableTiles.size() >= CONTINENT_SIZE_RANGE.min()) {
             final Cluster continent = generateContinent(world, availableTiles, random);
-            continents.add(continent);
-        }
-
-        // Potential optimization? - make the continents join earlier on
-        // Re-cluster the continents to join any continents that connected to each other
-        final Tiles continentTiles = new Tiles();
-        continents.forEach(continentTiles::addAll);
-        final List<Cluster> newContinents = continentTiles.cluster();
-        for (Cluster continent : newContinents) {
-            for (Tile tile : continent) {
-                tileToContinentMap.put(tile.pos(), continent);
+            // If the continent is null, that means that it was generated, but merged into
+            // another continent that is already in the list.
+            if (continent != null) {
+                continents.add(continent);
             }
         }
 
-        cleanupContinents(world, availableTiles, newContinents);
+        // Re-cluster the continents to join any continents that connected to each other
+        continents = reclusterContinents(continents);
 
-        return newContinents;
+        cleanupContinents(world, availableTiles, continents);
+
+        return continents;
     }
 
     /**
-     * Generates a single continent from the given collection of available tiles. It is possible
-     * that, in the process of generating a new continent, this method connects to a
-     * previously-existing continent. If that happens, this will join the two continents and
-     * return {@code null}, indicating that no new continent was created.
+     * Generates a single continent from the given collection of available tiles.
      *
      * @param world          the tiles that make up the world (will NOT be modified)
      * @param availableTiles the tiles that aren't not yet in a continent (to be modified)
      * @param random         the {@link Random} instance to use
-     * @return the generated continent, or {@code null} if the generated tiles are joined onto an
-     * existing continent
+     * @return the generated continent
      */
     private Cluster generateContinent(Tiles world, Tiles availableTiles, Random random) {
         final Cluster continent = Cluster.fromWorld(world); // The continent
@@ -135,17 +127,6 @@ public class ContinentGenerator implements Generator {
             // Pick a random tile adjacent to the continent and add it in
             final Tile nextTile = Funcs.randomFromCollection(random, candidates);
             addToContinent(nextTile, availableTiles, continent);
-
-            // Get all tiles adjacent to the one we just added. If it is adjacent to a land tile
-            // that is part of another continent, join the two continents
-            final Collection<Tile> adjTiles = world.getAdjacentTiles(nextTile).values();
-            for (Tile adjTile : adjTiles) {
-                // If the adjacent tile is part of another continent, join the two continents
-                final Cluster adjContinent = tileToContinentMap.get(adjTile.pos());
-                if (adjContinent != null && adjContinent != continent) {
-
-                }
-            }
         }
 
         assert !continent.isEmpty(); // At least one tile should have been added
@@ -153,16 +134,20 @@ public class ContinentGenerator implements Generator {
         return continent;
     }
 
-    /**
-     * Joins two continents, adding all tiles in one continent to the other. The source continent
-     * will have new tiles added to it, while the extra continent will not be modified (it should
-     * be thrown away after this operation).
-     *
-     * @param sourceContinent the continent to be added to
-     * @param extraContinent  the continent to be added from
-     */
-    private void joinContinents(Cluster sourceContinent, Cluster extraContinent) {
+    private List<Cluster> reclusterContinents(List<Cluster> continents) {
+        final Tiles allTiles = new Tiles();
+        for (Cluster continent : continents) {
+            allTiles.addAll(continent);
+        }
 
+        final List<Cluster> newContinents = allTiles.cluster();
+        for (Cluster continent : newContinents) {
+            for (Tile tile : continent) {
+                tileToContinentMap.put(tile.pos(), continent);
+            }
+        }
+
+        return newContinents;
     }
 
     /**
@@ -197,9 +182,9 @@ public class ContinentGenerator implements Generator {
             }
         }
 
-        // Remove the stringy bits of land on each continent
+        // Smooth each continent
         for (Cluster continent : continents) {
-            removeStringyLand(availableTiles, continent);
+            smoothCoast(availableTiles, continent);
         }
     }
 
@@ -241,25 +226,41 @@ public class ContinentGenerator implements Generator {
     }
 
     /**
-     * Removes "stringy" portions of a continent, which are long & thin pieces of land that stick
-     * out into the ocean.
+     * Smooth the coast of continents by removing thin bits of land that stick out.
      *
      * @param availableTiles the tiles that aren't in any continent (some tiles will probably be
      *                       added back to this)
-     * @param continent      the continent to be de-stringified
+     * @param continent      the continent to be smoothed
      */
-    private void removeStringyLand(Tiles availableTiles, Cluster continent) {
-        boolean done = false;
-        outer:
-        while (!done) {
-            for (Tile tile : continent) {
-                if (continent.getAdjacentTiles(tile).size() <= 1) {
-                    availableTiles.add(tile);
-                    continent.remove(tile);
-                    continue outer;
+    private void smoothCoast(Tiles availableTiles, Cluster continent) {
+        for (Tile tile : continent) {
+            final Map<Direction, Tile> adjTiles = continent.getAdjacentTiles(tile);
+
+            // If the tile borders only 1 other tile in the continent (or none), mark it for
+            // removal
+            boolean remove = adjTiles.size() <= 1;
+
+            // If it isn't already marked for removal, check if it borders only two tiles
+            // that aren't adjacent to each other (i.e. check if this tile is a "bridge")
+            if (!remove && adjTiles.size() == 2) {
+                final List<Direction> dir = new ArrayList<>(adjTiles.keySet());
+                // Check that the two directions aren't adjacent to each otherK
+                if (!dir.get(0).isAdjacentTo(dir.get(1))) {
+                    remove = true;
                 }
             }
-            done = true;
+
+            if (remove) {
+                // Remove the tile from the continent
+                availableTiles.add(tile);
+                continent.remove(tile);
+                tileToContinentMap.remove(tile.pos());
+
+                // Let a recursive call handle the rest (we can't modify the continent then
+                // continue to iterate on it)
+                smoothCoast(availableTiles, continent);
+                return;
+            }
         }
     }
 
