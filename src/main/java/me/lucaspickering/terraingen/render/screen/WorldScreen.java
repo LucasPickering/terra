@@ -162,8 +162,7 @@ public class WorldScreen extends Screen {
                     break;
                 case GLFW.GLFW_KEY_R:
                     // Re-generate the world
-                    final World newWorld = new World(getTerrainGen().initRandomSeed());
-                    setNextScreen(new WorldScreen(newWorld));
+                    world.generateParallel();
             }
         }
     }

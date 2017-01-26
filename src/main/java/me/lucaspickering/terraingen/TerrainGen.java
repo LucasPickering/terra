@@ -199,6 +199,7 @@ public class TerrainGen {
 
         renderer = new Renderer();
         final World world = new World(getSeed());
+        world.generate(); // Generate a world
         currentScreen = new WorldScreen(world); // Initialize the current screen
         lastFpsUpdate = GLFW.glfwGetTime(); // Set this for FPS calculation
     }

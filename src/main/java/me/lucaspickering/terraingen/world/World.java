@@ -43,8 +43,9 @@ public class World {
     };
 
     private final Logger logger;
-    private final Random random;
-    private final Tiles tiles;
+    private final long seed;
+    private final int size; // Radius of the world
+    private Tiles tiles;
 
     // The pixel location of the center of the world
     private Point worldCenter;
@@ -61,29 +62,44 @@ public class World {
 
     // Package visible for benchmarking purposes
     World(long seed, int size) {
-        logger = Logger.getLogger(getClass().getName());
-        random = new Random(seed);
+        this.logger = Logger.getLogger(getClass().getName());
+        this.seed = seed;
+        this.size = size;
+
         logger.log(Level.FINE, String.format("Using seed '%d'", seed));
-        tiles = generateWorld(size);
         worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
         setTileRadius(VALID_TILE_RADII.min());
     }
 
-    private Tiles generateWorld(int size) {
+    /**
+     * Generates a new set of tiles to represent this world in parallel with the current thread.
+     * The generation process is executed in another thread, so this method will return
+     * immediately, before the generation is completed.
+     */
+    public void generateParallel() {
+        // Launch the generation process in a new thread
+        new Thread(this::generate).start();
+    }
+
+    /**
+     * Generates a new set of tiles to represent this world. This method does not return until
+     * the generation process is complete.
+     */
+    public void generate() {
         final long startTime = System.currentTimeMillis(); // We're timing this
         final Tiles tiles = Tiles.initByRadius(size);
 
         // Apply each generator in sequence (this is the heavy lifting)
         Arrays.stream(generators).forEach(gen -> runGenerator(gen, tiles));
 
-        final Tiles result = tiles.immutableCopy(); // Make an immutable copy
+        this.tiles = tiles.immutableCopy(); // Make an immutable copy and save it for the class
         logger.log(Level.FINE, String.format("World generation took %d ms",
                                              System.currentTimeMillis() - startTime));
-        return result;
     }
 
     private void runGenerator(Generator generator, Tiles tiles) {
         final long startTime = System.currentTimeMillis();
+        final Random random = new Random(seed);
         generator.generate(tiles, random);
         final long runTime = System.currentTimeMillis() - startTime;
         logger.log(Level.FINER, String.format("Generator stage %s took %d ms",
