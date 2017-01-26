@@ -163,8 +163,10 @@ public class WorldScreen extends Screen {
                 case GLFW.GLFW_KEY_R:
                     // Re-generate the world
                     world.generateParallel();
+                    break;
             }
         }
+        super.onKey(event);
     }
 
     @Override

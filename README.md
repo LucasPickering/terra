@@ -10,7 +10,7 @@ Uses the Lightweight Java Game Library.
 
 ### JVM Parameters
 #### Debug Mode
-`-Dme.lucaspickering.terraingen.debug=true`
+Use `F3` to enable debug mode.
 
 #### Debug Logging
 `-Djava.util.logging.config.file="src/test/resources/logging.properties"`

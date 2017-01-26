@@ -78,7 +78,7 @@ public class Tile {
 
     public String info() {
         // If in debug mode, display extra debug info
-        if (TerrainGen.instance().debug()) {
+        if (TerrainGen.instance().getDebug()) {
             final Color bgColor = backgroundColor();
             return String.format(INFO_STRING + "%n" + DEBUG_INFO_STRING,
                                  biome.displayName(), elevation, pos, bgColor);

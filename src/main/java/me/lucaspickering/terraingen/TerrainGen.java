@@ -31,8 +31,8 @@ public class TerrainGen {
     private static final TerrainGen TERRAIN_GEN = new TerrainGen();
 
     private final Logger logger;
-    private final boolean debug; // True if we are in debug mode (set by a VM argument)
     private final long seed;
+    private boolean debug; // True if we are in debug mode
 
     // These event handlers are initialized at the bottom
     private final GLFWKeyCallback keyHandler;
@@ -64,13 +64,6 @@ public class TerrainGen {
 
         // Init logging
         logger = Logger.getLogger(getClass().getName());
-
-        // Check if we should be in debug mode ("me.lucaspickering.terraingen.debug")
-        debug = "true".equalsIgnoreCase(System.getProperty(getClass().getPackage().getName() +
-                                                           ".debug"));
-        if (debug) {
-            logger.log(Level.FINE, "Debug mode enabled");
-        }
 
         seed = initRandomSeed();
         logger.log(Level.CONFIG, "Random seed: " + seed);
@@ -262,8 +255,12 @@ public class TerrainGen {
         framesSinceCheck++;
     }
 
-    public boolean debug() {
+    public boolean getDebug() {
         return debug;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     public long getSeed() {

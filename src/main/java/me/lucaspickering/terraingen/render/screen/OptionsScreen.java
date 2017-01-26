@@ -56,6 +56,7 @@ public class OptionsScreen extends Screen {
                     break;
             }
         }
+        super.onKey(event);
     }
 
     @Override

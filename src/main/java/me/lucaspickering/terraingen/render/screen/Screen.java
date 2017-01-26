@@ -44,7 +44,7 @@ public abstract class Screen implements ScreenElement {
             .forEach(element -> drawElement(mousePos, element)); // Draw each element
 
         // If debug mode is enabled, draw debug info
-        if (getTerrainGen().debug()) {
+        if (getTerrainGen().getDebug()) {
             drawDebugInfo();
         }
 
@@ -130,7 +130,15 @@ public abstract class Screen implements ScreenElement {
      * @param event the event that occurred
      */
     public void onKey(KeyEvent event) {
-        // By default, nothing is done on key press
+        if (event.action == GLFW.GLFW_RELEASE) {
+            switch (event.key) {
+                case GLFW.GLFW_KEY_F3:
+                    // Toggle debug mode
+                    final TerrainGen terrainGen = getTerrainGen();
+                    terrainGen.setDebug(!terrainGen.getDebug());
+                    break;
+            }
+        }
     }
 
     /**

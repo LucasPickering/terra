@@ -58,6 +58,7 @@ public class PauseScreen extends Screen {
                     break;
             }
         }
+        super.onKey(event);
     }
 
     @Override
