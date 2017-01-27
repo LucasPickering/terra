@@ -2,7 +2,6 @@ package me.lucaspickering.terraingen.world.generate;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 import me.lucaspickering.terraingen.world.util.Cluster;
+import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
 
@@ -48,7 +48,7 @@ public class ContinentGenerator implements Generator {
         }
     }
 
-    private final Map<TilePoint, Cluster> tileToContinentMap = new HashMap<>();
+    private final TileMap<Cluster> tileToContinentMap = new TileMap<>();
 
     @Override
     public void generate(World world, Random random) {
@@ -148,7 +148,7 @@ public class ContinentGenerator implements Generator {
         final List<Cluster> newContinents = allTiles.cluster();
         for (Cluster continent : newContinents) {
             for (Tile tile : continent) {
-                tileToContinentMap.put(tile.pos(), continent);
+                tileToContinentMap.put(tile, continent);
             }
         }
 
@@ -207,7 +207,7 @@ public class ContinentGenerator implements Generator {
         // Find out if all tiles adjacent to this cluster are in the same continent
         Cluster prevAdjContinent = null;
         for (Tile adjTile : cluster.allAdjacents()) {
-            final Cluster adjContinent = tileToContinentMap.get(adjTile.pos());
+            final Cluster adjContinent = tileToContinentMap.get(adjTile);
 
             // This shouldn't happen, because if this cluster is adjacent to a non-continent tile,
             // then that tile should be in this cluster instead.
@@ -259,7 +259,7 @@ public class ContinentGenerator implements Generator {
                 // Remove the tile from the continent
                 availableTiles.add(tile);
                 continent.remove(tile);
-                tileToContinentMap.remove(tile.pos());
+                tileToContinentMap.remove(tile);
 
                 // Let a recursive call handle the rest (we can't modify the continent then
                 // continue to iterate on it)
@@ -282,7 +282,7 @@ public class ContinentGenerator implements Generator {
     private void addToContinent(Tile tile, TileSet availableTiles, Cluster continent) {
         final boolean added = continent.add(tile);
         if (added) {
-            tileToContinentMap.put(tile.pos(), continent);
+            tileToContinentMap.put(tile, continent);
             if (!availableTiles.remove(tile)) {
                 throw new IllegalStateException("Tile is not available to be added");
             }
@@ -333,13 +333,13 @@ public class ContinentGenerator implements Generator {
         unselectedTiles.removeAll(seeds); // We've already selected the seeds, so remove them
 
         // Each biome, keyed by its seed
-        final Map<TilePoint, Cluster> biomes = new HashMap<>();
+        final TileMap<Cluster> biomes = new TileMap<>();
         final Set<TilePoint> incompleteBiomes = new HashSet<>(); // Biomes with room to grow
         for (Tile seed : seeds) {
             // Pick a biome for this seed, then add it to the map
             final Cluster blotch = Cluster.fromWorld(continent);
             blotch.add(seed);
-            biomes.put(seed.pos(), blotch);
+            biomes.put(seed, blotch);
             incompleteBiomes.add(seed.pos());
         }
 

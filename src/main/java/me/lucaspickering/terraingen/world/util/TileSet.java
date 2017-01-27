@@ -39,9 +39,9 @@ public class TileSet extends AbstractSet<Tile> {
     }
 
     /**
-     * Constructs a new {@link TileSet} by copying the map in the given object. This is a shallow
-     * copy, meaning the map is copied by the objects within the map are not. You can modify the
-     * returned object freely, but not the objects (tiles, etc.) inside it.
+     * Constructs a new {@link TileSet} by copying the values in the given object. This is a shallow
+     * copy, meaning the objects are put in this collection without being copied. You can modify the
+     * returned object freely, but be careful about modifying the tiles inside it.
      *
      * @param tiles the object to copy
      */
@@ -60,7 +60,7 @@ public class TileSet extends AbstractSet<Tile> {
     }
 
     /**
-     * Initializes a {@link TileSet} collection of the given ardius. Each tile will have default
+     * Initializes a {@link TileSet} collection of the given radius. Each tile will have default
      * biome and elevation. The returned {@link TileSet} will have an origin tile and {@code
      * radius} rings of tiles around that origin.
      *
