@@ -7,7 +7,6 @@ import java.util.Map;
 
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.world.util.TilePoint;
-import me.lucaspickering.terraingen.world.tile.Tile;
 import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import static org.junit.Assert.assertEquals;

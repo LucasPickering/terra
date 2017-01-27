@@ -13,7 +13,7 @@ import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 
 /**
  * Paints biomes onto each continent. Without adjusting elevation, each tile is assigned a land

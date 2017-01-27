@@ -3,11 +3,15 @@ package me.lucaspickering.terraingen.world.util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.util.Pair;
+import me.lucaspickering.terraingen.world.Tile;
 
 /**
  * A map of {@link Tile}s to some other type. Internally, Tile:T pairs are stored in a map, keyed
@@ -16,23 +20,82 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  */
 public class TileMap<V> extends AbstractMap<Tile, V> {
 
+    private class EntrySet extends AbstractSet<Entry<Tile, V>> {
+
+        private final Set<Entry<TilePoint, Pair<Tile, V>>> backingEntrySet;
+
+        private EntrySet() {
+            this.backingEntrySet = map.entrySet();
+        }
+
+        @NotNull
+        @Override
+        public Iterator<Entry<Tile, V>> iterator() {
+            return new Iterator<Entry<Tile, V>>() {
+
+                // Internal iterator that backs this one
+                private Iterator<Entry<TilePoint, Pair<Tile, V>>> iter = backingEntrySet.iterator();
+
+                @Override
+                public boolean hasNext() {
+                    return iter.hasNext();
+                }
+
+                @Override
+                public Entry<Tile, V> next() {
+                    // Get the next value in the backing iterator
+                    final Entry<TilePoint, Pair<Tile, V>> next = iter.next();
+                    final Pair<Tile, V> pair = next.getValue();
+
+                    // Extract the values we ant from the next value and return them in an entry
+                    return new SimpleEntry<>(pair.first(), pair.second());
+                }
+            };
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            // Not supporting this because I'm lazy
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            // Not supporting this because I'm lazy
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int size() {
+            return map.size();
+        }
+
+        @Override
+        public void clear() {
+            map.clear();
+        }
+    }
+
     // Internal map
-    private final Map<TilePoint, V> map;
+    private final Map<TilePoint, Pair<Tile, V>> map;
+
+    // Cache this so we only need to make it once
+    private Set<Entry<Tile, V>> entrySet;
 
     public TileMap() {
         map = new TreeMap<>(); // Uses TilePoint's compareTo method for ordering
     }
 
-    /**
-     * Constructs a new {@link TileMap} by copying the given object. This is a shallow
-     * copy, meaning the map is copied by the objects within the map are not. You can modify the
-     * returned object freely, but not the objects (tiles, etc.) inside it.
-     *
-     * @param tiles the object to copy
-     */
-    public TileMap(Map<? extends Tile, ? extends V> tiles) {
-        this();
-        putAll(tiles);
+    private TileMap(Map<TilePoint, Pair<Tile, V>> map) {
+        this.map = map;
+    }
+
+    private V extractValue(Pair<Tile, V> pair) {
+        // If the pair isn't null, get the value out, otherwise just return null
+        if (pair != null) {
+            return pair.second();
+        }
+        return null;
     }
 
     @Override
@@ -40,14 +103,16 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
         // If the key is a Tile, try to get it from the map
         if (key instanceof Tile) {
             final Tile tile = (Tile) key;
-            return map.get(tile.pos());
+            final Pair<Tile, V> retrieved = map.get(tile.pos());
+            return extractValue(retrieved);
         }
-        return null;// Nothing was retrieved
+        return null; // Nothing was retrieved
     }
 
     @Override
     public V put(Tile tile, V value) {
-        return map.put(tile.pos(), value); // Delegation!
+        final Pair<Tile, V> evicted = map.put(tile.pos(), new Pair<>(tile, value));
+        return extractValue(evicted);
     }
 
     @Override
@@ -55,7 +120,8 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
         // If the key is a Tile, try to remove it from the map
         if (key instanceof Tile) {
             final Tile tile = (Tile) key;
-            return map.remove(tile.pos());
+            final Pair<Tile, V> removed = map.remove(tile.pos());
+            return extractValue(removed);
         }
         return null; // Nothing was removed
     }
@@ -63,7 +129,20 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
     @NotNull
     @Override
     public Set<Map.Entry<Tile, V>> entrySet() {
-        // Not supporting this because I'm lazy and it's not needed anyway
-        throw new UnsupportedOperationException();
+        // If entrySet isn't already initialized, do that now
+        if (entrySet == null) {
+            entrySet = new EntrySet();
+        }
+        return entrySet;
+    }
+
+    /**
+     * Creates a deep immutable copy of this object. Each internal tile will also be copied and
+     * made immutable.
+     *
+     * @return the immutable copy
+     */
+    public TileMap<V> immutableCopy() {
+        return new TileMap<>(Collections.unmodifiableMap(map));
     }
 }

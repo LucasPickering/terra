@@ -15,7 +15,7 @@ import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.world.WorldHandler;
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
 

@@ -1,9 +1,12 @@
 package me.lucaspickering.terraingen.world;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.world.util.Cluster;
+import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
 
 /**
@@ -25,18 +28,22 @@ public class World {
     public static final int SEA_LEVEL = 0;
 
     private final TileSet tiles;
-    private List<Cluster> continents;
+    private final List<Cluster> continents;
+    private final TileMap<Cluster> tilesToContinents;
 
     public World(int radius) {
         tiles = TileSet.initByRadius(radius);
+        continents = new ArrayList<>();
+        tilesToContinents = new TileMap<>();
     }
 
     /**
      * Copy constructor
      */
-    private World(TileSet tiles, List<Cluster> continents) {
+    private World(TileSet tiles, List<Cluster> continents, TileMap<Cluster> tilesToContinents) {
         this.tiles = tiles;
         this.continents = continents;
+        this.tilesToContinents = tilesToContinents;
     }
 
     public TileSet getTiles() {
@@ -47,12 +54,13 @@ public class World {
         return continents;
     }
 
-    public void setContinents(List<Cluster> continents) {
-        this.continents = continents;
+    public TileMap<Cluster> getTilesToContinents() {
+        return tilesToContinents;
     }
 
     public World immutableCopy() {
-        // TODO Make continents immutable in this
-        return new World(tiles.immutableCopy(), continents);
+        return new World(tiles.immutableCopy(),
+                         Collections.unmodifiableList(continents), // NO DEEP COPY
+                         tilesToContinents.immutableCopy()); // NO DEEP COPY
     }
 }

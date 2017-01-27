@@ -4,7 +4,7 @@ import java.util.Random;
 
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 
 /**
  * Randomly adjusts elevation of all land tiles to provide some small variation.

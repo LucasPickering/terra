@@ -20,8 +20,7 @@ import java.util.function.Predicate;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Pair;
-import me.lucaspickering.terraingen.world.tile.ImmutableTile;
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 
 /**
  * A set of {@link Tile}s. Internally, tiles are stored in a map, keyed by their position, but
@@ -91,9 +90,9 @@ public class TileSet extends AbstractSet<Tile> {
      */
     public TileSet immutableCopy() {
         // Turn the map of point:Tile into a map of point:ImmutableTile
-        final Map<TilePoint, ImmutableTile> tiles = new HashMap<>();
+        final Map<TilePoint, Tile> tiles = new HashMap<>();
         for (Tile tile : map.values()) {
-            tiles.put(tile.pos(), new ImmutableTile(tile));
+            tiles.put(tile.pos(), tile.immutableCopy());
         }
         return new TileSet(Collections.unmodifiableMap(tiles));
     }

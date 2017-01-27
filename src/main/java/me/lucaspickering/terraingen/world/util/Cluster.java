@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 
 /**
  * A Cluster is a {@link TileSet}, where the tiles in the collection are assumed to form one

@@ -1,4 +1,4 @@
-package me.lucaspickering.terraingen.world.tile;
+package me.lucaspickering.terraingen.world;
 
 import java.awt.Color;
 import java.util.Objects;
@@ -6,8 +6,6 @@ import java.util.Objects;
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.world.util.TilePoint;
-import me.lucaspickering.terraingen.world.Biome;
-import me.lucaspickering.terraingen.world.World;
 
 public class Tile {
 
@@ -17,12 +15,32 @@ public class Tile {
     private static final String DEBUG_INFO_STRING = "Pos: %s%nColor: %s";
 
     /**
+     * An immutable version of a tile. Should be created externally via {@link #immutableCopy()}.
+     */
+    private static class ImmutableTile extends Tile {
+
+        private ImmutableTile(Tile tile) {
+            super(tile.pos(), tile.biome(), tile.elevation());
+        }
+
+        @Override
+        public void setBiome(Biome biome) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void setElevation(int elevation) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
      * The position of this tile within the world. Non-null.
      */
     private final TilePoint pos;
-
     // Terrain features
     private Biome biome = Biome.NONE;
+
     private int elevation;
 
     public Tile(TilePoint pos) {
@@ -84,6 +102,10 @@ public class Tile {
                                  biome.displayName(), elevation, pos, bgColor);
         }
         return String.format(INFO_STRING, biome, elevation);
+    }
+
+    public Tile immutableCopy() {
+        return new ImmutableTile(this);
     }
 
     @Override

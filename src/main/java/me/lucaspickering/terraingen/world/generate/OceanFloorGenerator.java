@@ -4,7 +4,7 @@ import java.util.Random;
 
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 
 /**
  * Generates low land that will eventually become coast/ocean.

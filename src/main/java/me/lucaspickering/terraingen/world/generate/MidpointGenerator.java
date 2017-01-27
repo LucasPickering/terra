@@ -10,7 +10,7 @@ import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 
 public class MidpointGenerator implements Generator {
 

@@ -5,7 +5,7 @@ import java.util.Random;
 
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 
 /**
  * Represents one stage in the world generation process. A {@link Generator} is given a

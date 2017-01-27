@@ -15,7 +15,6 @@ import me.lucaspickering.terraingen.world.generate.BeachGenerator;
 import me.lucaspickering.terraingen.world.generate.ContinentGenerator;
 import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
-import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
  * A class with fields and methods that can entirely encapsulate a {@link World} and

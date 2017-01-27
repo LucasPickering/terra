@@ -6,7 +6,7 @@ import java.util.Random;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 
 /**
  * Paint tiles to be oceans and lakes. All tiles with negative elevation become candidates for

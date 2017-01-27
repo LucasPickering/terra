@@ -9,7 +9,7 @@ import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 
 /**
  * Generates peaks on land/sea, which stick up above other land around.

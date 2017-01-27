@@ -7,7 +7,7 @@ import java.util.Set;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.Tile;
 
 /**
  * Turns all land tiles that border ocean/coast and that are below some elevation threshold into

@@ -2,21 +2,18 @@ package me.lucaspickering.terraingen.world.generate;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.world.Biome;
+import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.tile.Tile;
 import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.util.TileMap;
-import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
 
 public class ContinentGenerator implements Generator {
@@ -48,64 +45,56 @@ public class ContinentGenerator implements Generator {
         }
     }
 
-    private final TileMap<Cluster> tileToContinentMap = new TileMap<>();
+    private World world; // The world being operated on
+    private TileSet unassignedTiles; // All tiles that aren't currently assigned to a continent
 
     @Override
     public void generate(World world, Random random) {
+        this.world = world;
         final TileSet worldTiles = world.getTiles();
-        final TileSet
-            availableTiles =
-            new TileSet(worldTiles); // Copy this because we'll be modifying it
+        // Copy this because we'll be modifying it
+        final TileSet availableTiles = new TileSet(worldTiles);
         // Cluster tiles to make the continents
-        final List<Cluster> continents = generateContinents(worldTiles, availableTiles, random);
+        generateContinents(availableTiles, random);
 
         // Adjust elevation to create oceans/coasts
-        generateOceanFloor(availableTiles, continents, random);
+        generateOceanFloor(availableTiles, world.getContinents(), random);
 
         // Paint biomes onto each continent
-        continents.forEach(c -> paintContinent(c, random));
+        world.getContinents().forEach(c -> paintContinent(c, random));
     }
 
     /**
-     * Clusters together tiles to create a random number of continents. The given {@link TileSet}
-     * instance will be modified so that all tiles that are put into a continent or adjacent to
-     * a continent are removed. In other words, everything left in the {@link TileSet} object after
-     * this function is called will be exactly the tiles that are not part of or adjacent to a
-     * continent.
+     * Clusters together tiles to create a random number of continents. The generated continents
+     * will be added to {@link #world}.
      *
-     * @param world          the tiles that make up the world (will NOT be modified)
      * @param availableTiles the tiles that make up the world (to be modified)
      * @param random         the {@link Random} instance to use
-     * @return the continents created
      */
-    private List<Cluster> generateContinents(TileSet world, TileSet availableTiles, Random random) {
+    private void generateContinents(TileSet availableTiles, Random random) {
         final int numToGenerate = CONTINENT_COUNT_RANGE.randomIn(random);
-        List<Cluster> continents = new ArrayList<>(numToGenerate);
 
         // While we haven't hit our target number and there are enough tiles left,
         // generate a new continent
-        while (continents.size() < numToGenerate
+        while (world.getContinents().size() < numToGenerate
                && availableTiles.size() >= CONTINENT_SIZE_RANGE.min()) {
-            final Cluster continent = generateContinent(world, availableTiles, random);
+            final Cluster continent = generateContinent(world.getTiles(), availableTiles, random);
             // If the continent is null, that means that it was generated, but merged into
             // another continent that is already in the list.
             if (continent != null) {
-                continents.add(continent);
+                world.getContinents().add(continent);
             }
         }
 
         // Re-cluster the continents to join any continents that connected to each other
-        continents = reclusterContinents(continents);
+        reclusterContinents();
 
-        cleanupContinents(world, availableTiles, continents);
-
-        return continents;
+        cleanupContinents(availableTiles);
     }
 
     /**
      * Generates a single continent from the given collection of available tiles.
      *
-     * @param world          the tiles that make up the world (will NOT be modified)
      * @param availableTiles the tiles that aren't not yet in a continent (to be modified)
      * @param random         the {@link Random} instance to use
      * @return the generated continent
@@ -139,16 +128,16 @@ public class ContinentGenerator implements Generator {
         return continent;
     }
 
-    private List<Cluster> reclusterContinents(List<Cluster> continents) {
+    private List<Cluster> reclusterContinents() {
         final TileSet allTiles = new TileSet();
-        for (Cluster continent : continents) {
+        for (Cluster continent : world.getContinents()) {
             allTiles.addAll(continent);
         }
 
         final List<Cluster> newContinents = allTiles.cluster();
         for (Cluster continent : newContinents) {
             for (Tile tile : continent) {
-                tileToContinentMap.put(tile, continent);
+                world.getTilesToContinents().put(tile, continent);
             }
         }
 
@@ -156,14 +145,12 @@ public class ContinentGenerator implements Generator {
     }
 
     /**
-     * "Cleans up" all the given continents. This fixes errors/imperfections  such as unassigned
+     * "Cleans up" all continents in the world. This fixes errors/imperfections such as unassigned
      * tiles inside of continents and long strings of land that look strange.
      *
-     * @param world          the world (will NOT be modified)
      * @param availableTiles tiles that are not yet in a continent (will most likely be modified)
-     * @param continents     all the continents to clean up
      */
-    private void cleanupContinents(TileSet world, TileSet availableTiles, List<Cluster> continents) {
+    private void cleanupContinents(TileSet availableTiles) {
         // Cluster the negative tilesK
         final List<Cluster> nonContinentClusters = availableTiles.cluster();
 
@@ -176,7 +163,8 @@ public class ContinentGenerator implements Generator {
             if (nonContinentCluster.size() < WaterPainter.MIN_OCEAN_SIZE) {
                 // Copy the cluster so that it exists in the context of the entire world, then
                 // check if it is entirely within one continent.
-                final Cluster copiedCluster = Cluster.copyToWorld(world, nonContinentCluster);
+                final Cluster copiedCluster = Cluster.copyToWorld(world.getTiles(),
+                                                                  nonContinentCluster);
                 final Cluster surroundingContinent = getSurroundingContinent(copiedCluster);
                 if (surroundingContinent != null) {
                     // Add the cluster to the continent that completely surrounds it
@@ -188,7 +176,7 @@ public class ContinentGenerator implements Generator {
         }
 
         // Smooth each continent
-        for (Cluster continent : continents) {
+        for (Cluster continent : world.getContinents()) {
             smoothCoast(availableTiles, continent);
         }
     }
@@ -207,7 +195,7 @@ public class ContinentGenerator implements Generator {
         // Find out if all tiles adjacent to this cluster are in the same continent
         Cluster prevAdjContinent = null;
         for (Tile adjTile : cluster.allAdjacents()) {
-            final Cluster adjContinent = tileToContinentMap.get(adjTile);
+            final Cluster adjContinent = world.getTilesToContinents().get(adjTile);
 
             // This shouldn't happen, because if this cluster is adjacent to a non-continent tile,
             // then that tile should be in this cluster instead.
@@ -259,7 +247,7 @@ public class ContinentGenerator implements Generator {
                 // Remove the tile from the continent
                 availableTiles.add(tile);
                 continent.remove(tile);
-                tileToContinentMap.remove(tile);
+                world.getTilesToContinents().remove(tile);
 
                 // Let a recursive call handle the rest (we can't modify the continent then
                 // continue to iterate on it)
@@ -272,7 +260,7 @@ public class ContinentGenerator implements Generator {
     /**
      * Adds the given tile to the given continent and removes the tile from the collection of
      * available tiles. Available tiles are ones that are not yet in a continent. If the tile is
-     * added to the continent, then {@link #tileToContinentMap} will be updated.
+     * added to the continent, then {@link World#getTilesToContinents()} will be updated.
      *
      * @param tile           the tile to be added to the continent
      * @param availableTiles the collection of tiles that are available to be added, i.e. the tiles
@@ -282,7 +270,7 @@ public class ContinentGenerator implements Generator {
     private void addToContinent(Tile tile, TileSet availableTiles, Cluster continent) {
         final boolean added = continent.add(tile);
         if (added) {
-            tileToContinentMap.put(tile, continent);
+            world.getTilesToContinents().put(tile, continent);
             if (!availableTiles.remove(tile)) {
                 throw new IllegalStateException("Tile is not available to be added");
             }
@@ -329,25 +317,25 @@ public class ContinentGenerator implements Generator {
 
         // Step 2
         final TileSet seeds = continent.selectTiles(random, numSeeds, 0);
-        final TileSet unselectedTiles = new TileSet(continent); // We need a copy so we can modify it
+        final TileSet unselectedTiles = new TileSet(continent); // Make a copy so we can modify it
         unselectedTiles.removeAll(seeds); // We've already selected the seeds, so remove them
 
         // Each biome, keyed by its seed
         final TileMap<Cluster> biomes = new TileMap<>();
-        final Set<TilePoint> incompleteBiomes = new HashSet<>(); // Biomes with room to grow
+        final TileSet incompleteBiomes = new TileSet(); // Biomes with room to grow
         for (Tile seed : seeds) {
             // Pick a biome for this seed, then add it to the map
             final Cluster blotch = Cluster.fromWorld(continent);
             blotch.add(seed);
             biomes.put(seed, blotch);
-            incompleteBiomes.add(seed.pos());
+            incompleteBiomes.add(seed);
         }
 
         // Step 3 (the hard part)
         // While there are tiles left to assign...
         while (!unselectedTiles.isEmpty() && !incompleteBiomes.isEmpty()) {
             // Pick a seed that still has openings to work from
-            final TilePoint seed = Funcs.randomFromCollection(random, incompleteBiomes);
+            final Tile seed = Funcs.randomFromCollection(random, incompleteBiomes);
             final Cluster biome = biomes.get(seed); // The biome grown from that seed
 
             final TileSet adjTiles = biome.allAdjacents(); // All tiles adjacent to this biome
