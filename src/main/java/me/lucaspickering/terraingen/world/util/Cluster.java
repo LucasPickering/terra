@@ -36,18 +36,6 @@ public class Cluster extends TileSet {
     }
 
     /**
-     * Copies the given {@link Cluster}.
-     *
-     * @param cluster the {@link Cluster} to copy
-     */
-    public Cluster(Cluster cluster) {
-        // Copy everything
-        this.world = cluster.world;
-        this.adjacentTiles = new TileSet(cluster.adjacentTiles);
-        addAll(cluster);
-    }
-
-    /**
      * Copies the given {@link Cluster}, but uses a new {@link TileSet} as the world.
      *
      * @param cluster the cluster to copy
