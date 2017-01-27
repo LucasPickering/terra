@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import me.lucaspickering.terraingen.util.IntRange;
-import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
 
@@ -28,8 +27,8 @@ public class World {
     public static final int SEA_LEVEL = 0;
 
     private final TileSet tiles;
-    private final List<Cluster> continents;
-    private final TileMap<Cluster> tilesToContinents;
+    private final List<Continent> continents;
+    private final TileMap<Continent> tilesToContinents;
 
     public World(int radius) {
         tiles = TileSet.initByRadius(radius);
@@ -38,9 +37,9 @@ public class World {
     }
 
     /**
-     * Copy constructor
+     * Copy constructor.
      */
-    private World(TileSet tiles, List<Cluster> continents, TileMap<Cluster> tilesToContinents) {
+    private World(TileSet tiles, List<Continent> continents, TileMap<Continent> tilesToContinents) {
         this.tiles = tiles;
         this.continents = continents;
         this.tilesToContinents = tilesToContinents;
@@ -50,11 +49,11 @@ public class World {
         return tiles;
     }
 
-    public List<Cluster> getContinents() {
+    public List<Continent> getContinents() {
         return continents;
     }
 
-    public TileMap<Cluster> getTilesToContinents() {
+    public TileMap<Continent> getTilesToContinents() {
         return tilesToContinents;
     }
 

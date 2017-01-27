@@ -26,47 +26,36 @@ public class Cluster extends TileSet {
     // Tiles that border, but are not in, this cluster
     private TileSet adjacentTiles = new TileSet();
 
-    private Cluster(TileSet world) {
-        this.world = world;
-    }
-
-    private Cluster(Cluster cluster) {
-        // Copy everything
-        this.world = cluster.world;
-        this.adjacentTiles = new TileSet(cluster.adjacentTiles);
-    }
-
     /**
      * Creates a new {@link Cluster} that exists as a subset of the given world.
      *
      * @param world the world of tiles that is the superset of the returned {@link Cluster}
-     * @return the created {@link Cluster}
      */
-    public static Cluster fromWorld(TileSet world) {
-        return new Cluster(world);
+    public Cluster(TileSet world) {
+        this.world = world;
     }
 
     /**
      * Copies the given {@link Cluster}.
      *
      * @param cluster the {@link Cluster} to copy
-     * @return the created {@link Cluster}
      */
-    public static Cluster copy(Cluster cluster) {
-        return new Cluster(cluster);
+    public Cluster(Cluster cluster) {
+        // Copy everything
+        this.world = cluster.world;
+        this.adjacentTiles = new TileSet(cluster.adjacentTiles);
+        addAll(cluster);
     }
 
     /**
      * Copies the given {@link Cluster}, but uses a new {@link TileSet} as the world.
      *
-     * @param world   the new world for the cluster to exist in
      * @param cluster the cluster to copy
-     * @return the copied cluster, in the new world
+     * @param world   the new world for the cluster to exist in
      */
-    public static Cluster copyToWorld(TileSet world, Cluster cluster) {
-        final Cluster copy = new Cluster(world);
-        copy.addAll(cluster);
-        return copy;
+    public Cluster(Cluster cluster, TileSet world) {
+        this(world);
+        addAll(cluster);
     }
 
     @Override

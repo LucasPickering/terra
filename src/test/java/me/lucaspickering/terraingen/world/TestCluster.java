@@ -13,7 +13,7 @@ public class TestCluster {
     @Test
     public void testAllAdjacents() throws Exception {
         final TileSet tiles = TileSet.initByRadius(5);
-        final Cluster cluster = Cluster.fromWorld(tiles);
+        final Cluster cluster = new Cluster(tiles);
         TileSet adjacents;
 
         adjacents = cluster.allAdjacents();
@@ -31,7 +31,7 @@ public class TestCluster {
         adjacents = cluster.allAdjacents();
         assertEquals(6, adjacents.size());
 
-        final Cluster clone = Cluster.copy(cluster);
+        final Cluster clone = new Cluster(cluster);
         assertEquals(cluster.allAdjacents(), clone.allAdjacents());
     }
 }

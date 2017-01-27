@@ -3,7 +3,6 @@ package me.lucaspickering.terraingen.render.screen;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.Color;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -16,9 +15,9 @@ import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Point;
+import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.WorldHandler;
-import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
 
@@ -136,27 +135,6 @@ public class WorldScreen extends Screen {
     }
 
     /**
-     * Generates a color to represent the given continent. This will always return the same
-     * result for the same given continent.
-     *
-     * @param continent the continent to be represent
-     * @return a semi-unique color to represent the given continent
-     */
-    private Color getColorForContinent(Cluster continent) {
-        // Continents sizes are generally 200-1000, or 8-10 bits. Round that up to 12 bits.
-        final int size = continent.size(); // Consider this a 12-bit number
-
-        final int lower = size & 0x00f; // Lower 4 bits
-        final int middle = size & 0x0f0; // Middle 4 bits
-        final int upper = size & 0xf00; // upper 4 bits
-
-        final int red = middle | lower; // Lower 8 bits
-        final int green = (upper >> 4) | lower; // Upper 4 bits and lower 4 bits
-        final int blue = (upper | middle) >> 4; // Upper 8 bits
-        return new Color(red, green, blue, 200);
-    }
-
-    /**
      * Draw the appropriate overlays for the given tile.
      *
      * @param tile      the tile to draw
@@ -173,12 +151,11 @@ public class WorldScreen extends Screen {
 
         // If debug mode is enabled, display a color unique(ish) to this tile's continent
         if (getTerrainGen().getDebug()) {
-            final Cluster continent = worldHandler.getWorld().getTilesToContinents().get(tile);
+            final Continent continent = worldHandler.getWorld().getTilesToContinents().get(tile);
             if (continent != null) {
-                // Pick a color to represent this continent then draw an overlay in that color
-                final Color continentColor = getColorForContinent(continent);
+                // Draw an overlay in the continent's debug color
                 renderer().drawTexture(Constants.TILE_BG_NAME, 0, 0, tileWidth, tileHeight,
-                                       continentColor);
+                                       continent.getDebugColor());
             }
         }
 
