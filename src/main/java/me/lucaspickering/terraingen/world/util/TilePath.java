@@ -1,4 +1,4 @@
-package me.lucaspickering.terraingen.util;
+package me.lucaspickering.terraingen.world.util;
 
 import java.util.Iterator;
 import java.util.LinkedList;

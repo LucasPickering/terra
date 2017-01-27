@@ -1,5 +1,7 @@
 package me.lucaspickering.terraingen.util;
 
+import me.lucaspickering.terraingen.world.util.TilePoint;
+
 public enum Direction {
 
     NORTH(0, 1, -1), NORTHEAST(1, 0, -1), SOUTHEAST(1, -1, 0),

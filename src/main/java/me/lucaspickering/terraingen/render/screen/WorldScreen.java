@@ -14,10 +14,10 @@ import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Point;
-import me.lucaspickering.terraingen.util.TilePoint;
-import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.WorldHandler;
 import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.TileSet;
 
 public class WorldScreen extends Screen {
 
@@ -59,7 +59,7 @@ public class WorldScreen extends Screen {
             lastMouseDragPos = mousePos; // Update the mouse pos
         }
 
-        final Tiles tiles = worldHandler.getTiles();
+        final TileSet tiles = worldHandler.getWorld().getTiles();
 
         // Get all the tiles that are on-screen (those are the ones that will be drawn)
         final List<Tile> onScreenTiles = tiles.stream()
@@ -144,10 +144,18 @@ public class WorldScreen extends Screen {
         final Point tileTopLeft = worldHandler.getTileTopLeft(worldHandler.getTileCenter(tile));
         GL11.glTranslated(tileTopLeft.x(), tileTopLeft.y(), 0f);
 
+        final int tileWidth = (int) worldHandler.getTileWidth();
+        final int tileHeight = (int) worldHandler.getTileHeight();
+
+        // If debug mode is enabled, display a color unique(ish) to this tile's continent
+        // TODO implement this
+        if (getTerrainGen().getDebug()) {
+
+        }
+
         // If the mouse is over this tile, draw the mouse-over overlay
         if (mouseOver) {
-            ColorTexture.mouseOver.draw(0, 0,
-                                        (int) worldHandler.getTileWidth(), (int) worldHandler.getTileHeight());
+            ColorTexture.mouseOver.draw(0, 0, tileWidth, tileHeight);
         }
 
         GL11.glPopMatrix();

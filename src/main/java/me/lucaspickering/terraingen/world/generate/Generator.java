@@ -3,7 +3,7 @@ package me.lucaspickering.terraingen.world.generate;
 import java.util.Map;
 import java.util.Random;
 
-import me.lucaspickering.terraingen.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 

@@ -1,4 +1,4 @@
-package me.lucaspickering.terraingen.util;
+package me.lucaspickering.terraingen.world.util;
 
 import org.jetbrains.annotations.NotNull;
 

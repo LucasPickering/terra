@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.Set;
 
 import me.lucaspickering.terraingen.world.Biome;
-import me.lucaspickering.terraingen.world.Tiles;
+import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -23,7 +23,7 @@ public class BeachGenerator implements Generator {
 
     @Override
     public void generate(World world, Random random) {
-        final Tiles worldTiles = world.getTiles();
+        final TileSet worldTiles = world.getTiles();
         for (Tile tile : worldTiles) {
             // If this tile is land and within our elevation bound, check the adjacent tiles, and
             // if there is an ocean (or similar) tile adjacent, make a beach.

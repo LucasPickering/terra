@@ -1,14 +1,13 @@
-package me.lucaspickering.terraingen.world;
+package me.lucaspickering.terraingen.world.util;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
- * A Cluster is a {@link Tiles}, where the tiles in the collection are assumed to form one
+ * A Cluster is a {@link TileSet}, where the tiles in the collection are assumed to form one
  * contiguous shape. With this assumption, this class can provide additional operations unique to
  * sets of tiles that are contiguous.
  *
@@ -20,21 +19,21 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  * This is never enforced by the structure, for efficiency purposes, but all operations of this
  * class are undefined if you add a tile to the cluster that is not in its world.
  */
-public class Cluster extends Tiles {
+public class Cluster extends TileSet {
 
-    private Tiles world;
+    private TileSet world;
 
     // Tiles that border, but are not in, this cluster
-    private Tiles adjacentTiles = new Tiles();
+    private TileSet adjacentTiles = new TileSet();
 
-    private Cluster(Tiles world) {
+    private Cluster(TileSet world) {
         this.world = world;
     }
 
     private Cluster(Cluster cluster) {
         // Copy everything
         this.world = cluster.world;
-        this.adjacentTiles = new Tiles(cluster.adjacentTiles);
+        this.adjacentTiles = new TileSet(cluster.adjacentTiles);
     }
 
     /**
@@ -43,7 +42,7 @@ public class Cluster extends Tiles {
      * @param world the world of tiles that is the superset of the returned {@link Cluster}
      * @return the created {@link Cluster}
      */
-    public static Cluster fromWorld(Tiles world) {
+    public static Cluster fromWorld(TileSet world) {
         return new Cluster(world);
     }
 
@@ -58,13 +57,13 @@ public class Cluster extends Tiles {
     }
 
     /**
-     * Copies the given {@link Cluster}, but uses a new {@link Tiles} as the world.
+     * Copies the given {@link Cluster}, but uses a new {@link TileSet} as the world.
      *
      * @param world   the new world for the cluster to exist in
      * @param cluster the cluster to copy
      * @return the copied cluster, in the new world
      */
-    public static Cluster copyToWorld(Tiles world, Cluster cluster) {
+    public static Cluster copyToWorld(TileSet world, Cluster cluster) {
         final Cluster copy = new Cluster(world);
         copy.addAll(cluster);
         return copy;
@@ -123,8 +122,8 @@ public class Cluster extends Tiles {
      * @return the tiles that are adjacent to, but not in, this cluster
      */
     @NotNull
-    public Tiles allAdjacents() {
+    public TileSet allAdjacents() {
         // Potential optimization?
-        return new Tiles(adjacentTiles);
+        return new TileSet(adjacentTiles);
     }
 }

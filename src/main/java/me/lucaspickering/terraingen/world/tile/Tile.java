@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Direction;
-import me.lucaspickering.terraingen.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.World;
 

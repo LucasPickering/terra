@@ -1,4 +1,4 @@
-package me.lucaspickering.terraingen.world;
+package me.lucaspickering.terraingen.world.util;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +20,6 @@ import java.util.function.Predicate;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Pair;
-import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.ImmutableTile;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -30,47 +29,47 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  * position. Some additional map-like operations are provided, such as accessing tiles by their
  * {@link TilePoint}.
  */
-public class Tiles extends AbstractSet<Tile> {
+public class TileSet extends AbstractSet<Tile> {
 
     // Internal map
     private final Map<TilePoint, Tile> map;
 
-    public Tiles() {
+    public TileSet() {
         map = new TreeMap<>(); // Uses TilePoint's compareTo method for ordering
     }
 
     /**
-     * Constructs a new {@code Tiles} by copying the map in the given object. This is a shallow
+     * Constructs a new {@link TileSet} by copying the map in the given object. This is a shallow
      * copy, meaning the map is copied by the objects within the map are not. You can modify the
      * returned object freely, but not the objects (tiles, etc.) inside it.
      *
      * @param tiles the object to copy
      */
-    public Tiles(Collection<? extends Tile> tiles) {
+    public TileSet(Collection<? extends Tile> tiles) {
         this();
         addAll(tiles);
     }
 
     /**
-     * Constructs a new {@code Tiles} backed by the given map. No copying is done.
+     * Constructs a new {@link TileSet} backed by the given map. No copying is done.
      *
      * @param map the map to back this object
      */
-    private Tiles(Map<TilePoint, Tile> map) {
+    private TileSet(Map<TilePoint, Tile> map) {
         this.map = map;
     }
 
     /**
-     * Initializes a {@link Tiles} collection of the given ardius. Each tile will have default
-     * biome and elevation. The returned {@link Tiles} will have an origin tile and {@code
+     * Initializes a {@link TileSet} collection of the given ardius. Each tile will have default
+     * biome and elevation. The returned {@link TileSet} will have an origin tile and {@code
      * radius} rings of tiles around that origin.
      *
      * @param radius the radius of the collection of tiles
-     * @return the initialized {@link Tiles}
+     * @return the initialized {@link TileSet}
      */
     @NotNull
-    public static Tiles initByRadius(int radius) {
-        final Tiles tiles = new Tiles();
+    public static TileSet initByRadius(int radius) {
+        final TileSet tiles = new TileSet();
         // Fill out the set with a bunch of points
         for (int x = -radius; x <= radius; x++) {
             for (int y = -radius; y <= radius; y++) {
@@ -90,13 +89,13 @@ public class Tiles extends AbstractSet<Tile> {
      *
      * @return the immutable copy
      */
-    public Tiles immutableCopy() {
+    public TileSet immutableCopy() {
         // Turn the map of point:Tile into a map of point:ImmutableTile
         final Map<TilePoint, ImmutableTile> tiles = new HashMap<>();
         for (Tile tile : map.values()) {
             tiles.put(tile.pos(), new ImmutableTile(tile));
         }
-        return new Tiles(Collections.unmodifiableMap(tiles));
+        return new TileSet(Collections.unmodifiableMap(tiles));
     }
 
     public Tile getByPoint(TilePoint point) {
@@ -193,21 +192,21 @@ public class Tiles extends AbstractSet<Tile> {
      * @throws IllegalArgumentException if range is negative
      */
     @NotNull
-    public Tiles getTilesInRange(@NotNull Tile tile, int range) {
+    public TileSet getTilesInRange(@NotNull Tile tile, int range) {
         Objects.requireNonNull(tile);
         if (range < 0) {
             throw new IllegalArgumentException(String.format("Range must be positive, was [%d]",
                                                              range));
         }
 
-        final Tiles result = new Tiles();
+        final TileSet result = new TileSet();
         result.add(tile); // The result always has the tile in it
 
         // Add everything other than the tile
-        Tiles lastAdjacents = new Tiles(result);
+        TileSet lastAdjacents = new TileSet(result);
         for (int i = 1; i <= range; i++) {
             // Start with tiles directly adjacent to this one
-            final Tiles adjacents = new Tiles();
+            final TileSet adjacents = new TileSet();
             for (Tile adjacent : lastAdjacents) {
                 adjacents.addAll(getAdjacentTiles(adjacent).values());
             }
@@ -235,10 +234,10 @@ public class Tiles extends AbstractSet<Tile> {
      * @return the randomly-selected tiles
      */
     @NotNull
-    public Tiles selectTiles(Random random, int numToPick, int minSpacing) {
+    public TileSet selectTiles(Random random, int numToPick, int minSpacing) {
         // Copy the tiles because we're going to be modifying it
-        final Tiles candidates = new Tiles(this);
-        final Tiles result = new Tiles(); // The tiles that will be returnec
+        final TileSet candidates = new TileSet(this);
+        final TileSet result = new TileSet(); // The tiles that will be returnec
 
         // While we haven't hit our target number and there are tiles left to pick...
         while (result.size() < numToPick && !candidates.isEmpty()) {
@@ -250,7 +249,7 @@ public class Tiles extends AbstractSet<Tile> {
             if (minSpacing > 0) {
                 // Get all the tiles that are too close to this one to be selected themselves,
                 // and remove them from the set of candidates
-                final Tiles tooClose = getTilesInRange(tile, minSpacing);
+                final TileSet tooClose = getTilesInRange(tile, minSpacing);
                 tooClose.forEach(candidates::remove); // Remove each tile
             }
         }
@@ -298,7 +297,7 @@ public class Tiles extends AbstractSet<Tile> {
         // begin joining clusters that have the same state (postive or negative) and have
         // adjacent tiles.
 
-        final Tiles unclusteredTiles = new Tiles(this); // Copy the input structure
+        final TileSet unclusteredTiles = new TileSet(this); // Copy the input structure
         final List<Cluster> posClusters = new LinkedList<>(); // These satisfy the predicate
         final List<Cluster> negClusters = new LinkedList<>(); // These DON'T satisfy the predicate
 
@@ -311,7 +310,7 @@ public class Tiles extends AbstractSet<Tile> {
             // Start building a cluster around this tile
             final Cluster cluster = Cluster.fromWorld(this);
             // Keep track of the tiles whose adjacent tiles haven't been checked yet
-            final Tiles uncheckedTiles = new Tiles();
+            final TileSet uncheckedTiles = new TileSet();
 
             // Add the first tile to the cluster
             addToCluster(firstTile, cluster, uncheckedTiles, unclusteredTiles);
@@ -344,8 +343,8 @@ public class Tiles extends AbstractSet<Tile> {
         return new Pair<>(posClusters, negClusters);
     }
 
-    private void addToCluster(Tile tile, Cluster cluster, Tiles uncheckedTiles,
-                              Tiles unclusteredTiles) {
+    private void addToCluster(Tile tile, Cluster cluster, TileSet uncheckedTiles,
+                              TileSet unclusteredTiles) {
         cluster.add(tile);
         uncheckedTiles.add(tile);
         unclusteredTiles.remove(tile);

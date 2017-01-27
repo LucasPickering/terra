@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Random;
 
 import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.terraingen.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
-import me.lucaspickering.terraingen.world.Cluster;
-import me.lucaspickering.terraingen.world.Tiles;
+import me.lucaspickering.terraingen.world.util.Cluster;
+import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -42,7 +42,7 @@ public class BiomePainter implements Generator {
 
     @Override
     public void generate(World world, Random random) {
-        final Tiles worldTiles = world.getTiles();
+        final TileSet worldTiles = world.getTiles();
 
         // Step 1 - calculate n
         // Figure out how many biome blotches we want
@@ -64,8 +64,8 @@ public class BiomePainter implements Generator {
         final int numSeeds = worldTiles.size() / AVERAGE_BLOTCH_SIZE;
 
         // Step 2
-        final Tiles seeds = worldTiles.selectTiles(random, numSeeds, MIN_SEED_SPACING);
-        final Tiles unselectedTiles = new Tiles(worldTiles); // We need a copy so we can modify it
+        final TileSet seeds = worldTiles.selectTiles(random, numSeeds, MIN_SEED_SPACING);
+        final TileSet unselectedTiles = new TileSet(worldTiles); // We need a copy so we can modify it
         unselectedTiles.removeAll(seeds); // We've already selected the seeds, so remove them
 
         // Each biome blotch, keyed by its seed
@@ -102,7 +102,7 @@ public class BiomePainter implements Generator {
             final TilePoint seed = smallestBlotch.getKey();
             final Cluster blotch = smallestBlotch.getValue();
 
-            final Tiles adjTiles = blotch.allAdjacents(); // All tiles adjacent to this blotch
+            final TileSet adjTiles = blotch.allAdjacents(); // All tiles adjacent to this blotch
             adjTiles.retainAll(unselectedTiles); // Remove tiles that are already in a blotch
 
             if (adjTiles.isEmpty()) {

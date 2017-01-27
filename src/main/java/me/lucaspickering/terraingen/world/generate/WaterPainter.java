@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import me.lucaspickering.terraingen.world.Biome;
-import me.lucaspickering.terraingen.world.Cluster;
+import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 

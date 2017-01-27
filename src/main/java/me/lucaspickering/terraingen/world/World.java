@@ -3,10 +3,12 @@ package me.lucaspickering.terraingen.world;
 import java.util.List;
 
 import me.lucaspickering.terraingen.util.IntRange;
+import me.lucaspickering.terraingen.world.util.Cluster;
+import me.lucaspickering.terraingen.world.util.TileSet;
 
 /**
  * A simple container for holding information about a world. The main portion of this class is
- * the {@link Tiles} instance that stores all tiles in the world, but it also holds
+ * the {@link TileSet} instance that stores all tiles in the world, but it also holds
  * useful information such as continents, constants for world-related values, etc.
  */
 public class World {
@@ -22,22 +24,22 @@ public class World {
      */
     public static final int SEA_LEVEL = 0;
 
-    private final Tiles tiles;
+    private final TileSet tiles;
     private List<Cluster> continents;
 
     public World(int radius) {
-        tiles = Tiles.initByRadius(radius);
+        tiles = TileSet.initByRadius(radius);
     }
 
     /**
      * Copy constructor
      */
-    private World(Tiles tiles, List<Cluster> continents) {
+    private World(TileSet tiles, List<Cluster> continents) {
         this.tiles = tiles;
         this.continents = continents;
     }
 
-    public Tiles getTiles() {
+    public TileSet getTiles() {
         return tiles;
     }
 

@@ -3,6 +3,7 @@ package me.lucaspickering.terraingen.util;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
+import me.lucaspickering.terraingen.world.util.TilePoint;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 

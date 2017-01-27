@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import me.lucaspickering.terraingen.util.Direction;
-import me.lucaspickering.terraingen.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.util.Cluster;
+import me.lucaspickering.terraingen.world.util.TileSet;
 import static org.junit.Assert.assertEquals;
 
 public class TestTiles {
@@ -26,7 +28,7 @@ public class TestTiles {
 
     private void testInitByRadius(int start, int end, int step) {
         for (int size = start; size <= end; size += step) {
-            final Tiles tiles = Tiles.initByRadius(size);
+            final TileSet tiles = TileSet.initByRadius(size);
             final int expectedSize = 3 * size * (size + 1) + 1; // Mathematically sound
             assertEquals(expectedSize, tiles.size());
         }
@@ -36,7 +38,7 @@ public class TestTiles {
     public void testAdjacentTiles() throws Exception {
         // Populate a world of tiles for testing
         final int radius = 2;
-        final Tiles tiles = new Tiles();
+        final TileSet tiles = new TileSet();
         for (int x = -radius; x <= radius; x++) {
             for (int y = -radius; y <= radius; y++) {
                 for (int z = -radius; z <= radius; z++) {
@@ -66,7 +68,7 @@ public class TestTiles {
     public void testTilesInRange() throws Exception {
         // Populate a world of tiles for testing
         final int radius = 2;
-        final Tiles tiles = new Tiles();
+        final TileSet tiles = new TileSet();
         for (int x = -radius; x <= radius; x++) {
             for (int y = -radius; y <= radius; y++) {
                 for (int z = -radius; z <= radius; z++) {
@@ -78,7 +80,7 @@ public class TestTiles {
         }
 
         final TilePoint origin = new TilePoint(0, 0, 0);
-        Tiles result;
+        TileSet result;
 
         // Range of 0 returns just the 1 tile
         result = tiles.getTilesInRange(tiles.getByPoint(origin), 0);
@@ -96,7 +98,7 @@ public class TestTiles {
     @Test
     public void testCluster() throws Exception {
         final int size = 2;
-        final Tiles world = Tiles.initByRadius(size);
+        final TileSet world = TileSet.initByRadius(size);
 
         List<Cluster> clusters;
 
@@ -105,7 +107,7 @@ public class TestTiles {
         assertEquals(1, clusters.size());
         assertEquals(world.size(), clusters.get(0).size());
 
-        final Tiles shiftedWorld = new Tiles(world);
+        final TileSet shiftedWorld = new TileSet(world);
         final int shift = size * 3;
         for (Tile tile : world) {
             shiftedWorld.add(new Tile(tile.pos().plus(shift, -shift, 0)));

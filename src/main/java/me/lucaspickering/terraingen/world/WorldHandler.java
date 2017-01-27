@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.util.DoubleRange;
 import me.lucaspickering.terraingen.util.Point;
-import me.lucaspickering.terraingen.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
 import me.lucaspickering.terraingen.world.generate.ContinentGenerator;
 import me.lucaspickering.terraingen.world.generate.Generator;
@@ -108,13 +108,13 @@ public class WorldHandler {
     }
 
     /**
-     * Gets the world's tiles. No copy is made, but the returned object is immutable. Its
-     * internal objects (tiles, etc.) may be mutable though, so do not change them!
+     * Gets the current world for this handler. No copy is made, but the returned object is
+     * immutable.
      *
-     * @return the world's tiles
+     * @return the world
      */
-    public Tiles getTiles() {
-        return world.getTiles();
+    public World getWorld() {
+        return world;
     }
 
     public Point getWorldCenter() {

@@ -6,9 +6,9 @@ import java.util.Random;
 
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.terraingen.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
-import me.lucaspickering.terraingen.world.Tiles;
+import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -43,7 +43,7 @@ public class MidpointGenerator implements Generator {
      * @param tiles the tiles to get the corners of
      * @return the corner in each direction
      */
-    private Map<Direction, Tile> getCorners(Tiles tiles) {
+    private Map<Direction, Tile> getCorners(TileSet tiles) {
         final Map<Direction, Tile> result = new EnumMap<>(Direction.class);
 
         final int radius = 50;
@@ -55,7 +55,7 @@ public class MidpointGenerator implements Generator {
         return result;
     }
 
-    private void gradeBetween(Tiles tiles, Random random, Tile tile1, Tile tile2) {
+    private void gradeBetween(TileSet tiles, Random random, Tile tile1, Tile tile2) {
         // Get the tile between the two givens by averaging the two points in each axis
         final TilePoint midPoint = TilePoint.roundPoint((tile1.pos().x() + tile2.pos().x()) / 2f,
                                                         (tile1.pos().y() + tile2.pos().y()) / 2f,

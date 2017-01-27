@@ -2,7 +2,9 @@ package me.lucaspickering.terraingen.world;
 
 import org.junit.Test;
 
-import me.lucaspickering.terraingen.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.Cluster;
+import me.lucaspickering.terraingen.world.util.TileSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -10,9 +12,9 @@ public class TestCluster {
 
     @Test
     public void testAllAdjacents() throws Exception {
-        final Tiles tiles = Tiles.initByRadius(5);
+        final TileSet tiles = TileSet.initByRadius(5);
         final Cluster cluster = Cluster.fromWorld(tiles);
-        Tiles adjacents;
+        TileSet adjacents;
 
         adjacents = cluster.allAdjacents();
         assertTrue("Adjacents should be empty", adjacents.isEmpty());

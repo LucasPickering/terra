@@ -12,12 +12,12 @@ import java.util.Set;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.IntRange;
-import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
-import me.lucaspickering.terraingen.world.Cluster;
-import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
+import me.lucaspickering.terraingen.world.util.Cluster;
+import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.TileSet;
 
 public class ContinentGenerator implements Generator {
 
@@ -52,8 +52,10 @@ public class ContinentGenerator implements Generator {
 
     @Override
     public void generate(World world, Random random) {
-        final Tiles worldTiles = world.getTiles();
-        final Tiles availableTiles = new Tiles(worldTiles); // Copy this because we'll be modifying it
+        final TileSet worldTiles = world.getTiles();
+        final TileSet
+            availableTiles =
+            new TileSet(worldTiles); // Copy this because we'll be modifying it
         // Cluster tiles to make the continents
         final List<Cluster> continents = generateContinents(worldTiles, availableTiles, random);
 
@@ -65,17 +67,18 @@ public class ContinentGenerator implements Generator {
     }
 
     /**
-     * Clusters together tiles to create a random number of continents. The given {@link Tiles}
+     * Clusters together tiles to create a random number of continents. The given {@link TileSet}
      * instance will be modified so that all tiles that are put into a continent or adjacent to
-     * a continent are removed. In other words, everything left in the Tiles object after this
-     * function is called will be exactly the tiles that are not part of or adjacent to a continent.
+     * a continent are removed. In other words, everything left in the {@link TileSet} object after
+     * this function is called will be exactly the tiles that are not part of or adjacent to a
+     * continent.
      *
      * @param world          the tiles that make up the world (will NOT be modified)
      * @param availableTiles the tiles that make up the world (to be modified)
      * @param random         the {@link Random} instance to use
      * @return the continents created
      */
-    private List<Cluster> generateContinents(Tiles world, Tiles availableTiles, Random random) {
+    private List<Cluster> generateContinents(TileSet world, TileSet availableTiles, Random random) {
         final int numToGenerate = CONTINENT_COUNT_RANGE.randomIn(random);
         List<Cluster> continents = new ArrayList<>(numToGenerate);
 
@@ -107,7 +110,7 @@ public class ContinentGenerator implements Generator {
      * @param random         the {@link Random} instance to use
      * @return the generated continent
      */
-    private Cluster generateContinent(Tiles world, Tiles availableTiles, Random random) {
+    private Cluster generateContinent(TileSet world, TileSet availableTiles, Random random) {
         final Cluster continent = Cluster.fromWorld(world); // The continent
         final int targetSize = CONTINENT_SIZE_RANGE.randomIn(random); // Pick a target size
 
@@ -118,7 +121,7 @@ public class ContinentGenerator implements Generator {
         // Keep adding until we hit our target size
         while (continent.size() < targetSize) {
             // If a tile is adjacent to any tile in the continent, it becomes a candidate
-            final Tiles candidates = continent.allAdjacents();
+            final TileSet candidates = continent.allAdjacents();
             candidates.retainAll(availableTiles); // Filter out tiles that aren't available
 
             // No candidates, done with this continent
@@ -137,7 +140,7 @@ public class ContinentGenerator implements Generator {
     }
 
     private List<Cluster> reclusterContinents(List<Cluster> continents) {
-        final Tiles allTiles = new Tiles();
+        final TileSet allTiles = new TileSet();
         for (Cluster continent : continents) {
             allTiles.addAll(continent);
         }
@@ -160,7 +163,7 @@ public class ContinentGenerator implements Generator {
      * @param availableTiles tiles that are not yet in a continent (will most likely be modified)
      * @param continents     all the continents to clean up
      */
-    private void cleanupContinents(Tiles world, Tiles availableTiles, List<Cluster> continents) {
+    private void cleanupContinents(TileSet world, TileSet availableTiles, List<Cluster> continents) {
         // Cluster the negative tilesK
         final List<Cluster> nonContinentClusters = availableTiles.cluster();
 
@@ -234,7 +237,7 @@ public class ContinentGenerator implements Generator {
      *                       added back to this)
      * @param continent      the continent to be smoothed
      */
-    private void smoothCoast(Tiles availableTiles, Cluster continent) {
+    private void smoothCoast(TileSet availableTiles, Cluster continent) {
         for (Tile tile : continent) {
             final Map<Direction, Tile> adjTiles = continent.getAdjacentTiles(tile);
 
@@ -276,7 +279,7 @@ public class ContinentGenerator implements Generator {
      *                       that are not yet in any continent
      * @param continent      the continent receiving the tile
      */
-    private void addToContinent(Tile tile, Tiles availableTiles, Cluster continent) {
+    private void addToContinent(Tile tile, TileSet availableTiles, Cluster continent) {
         final boolean added = continent.add(tile);
         if (added) {
             tileToContinentMap.put(tile.pos(), continent);
@@ -286,7 +289,7 @@ public class ContinentGenerator implements Generator {
         }
     }
 
-    private void generateOceanFloor(Tiles nonContinentTiles, List<Cluster> continents,
+    private void generateOceanFloor(TileSet nonContinentTiles, List<Cluster> continents,
                                     Random random) {
         nonContinentTiles.forEach(tile -> tile.setElevation(-20));
 
@@ -325,8 +328,8 @@ public class ContinentGenerator implements Generator {
         final int numSeeds = continent.size() / AVERAGE_BIOME_SIZE;
 
         // Step 2
-        final Tiles seeds = continent.selectTiles(random, numSeeds, 0);
-        final Tiles unselectedTiles = new Tiles(continent); // We need a copy so we can modify it
+        final TileSet seeds = continent.selectTiles(random, numSeeds, 0);
+        final TileSet unselectedTiles = new TileSet(continent); // We need a copy so we can modify it
         unselectedTiles.removeAll(seeds); // We've already selected the seeds, so remove them
 
         // Each biome, keyed by its seed
@@ -347,7 +350,7 @@ public class ContinentGenerator implements Generator {
             final TilePoint seed = Funcs.randomFromCollection(random, incompleteBiomes);
             final Cluster biome = biomes.get(seed); // The biome grown from that seed
 
-            final Tiles adjTiles = biome.allAdjacents(); // All tiles adjacent to this biome
+            final TileSet adjTiles = biome.allAdjacents(); // All tiles adjacent to this biome
             adjTiles.retainAll(unselectedTiles); // Remove tiles that are already in a biome
 
             if (adjTiles.isEmpty()) {
