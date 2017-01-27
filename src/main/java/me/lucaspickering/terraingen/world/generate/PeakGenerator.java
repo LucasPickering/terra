@@ -8,7 +8,6 @@ import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
-import me.lucaspickering.terraingen.world.WorldHandler;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -19,7 +18,7 @@ public class PeakGenerator implements Generator {
 
     private static final IntRange PEAK_COUNT_RANGE = new IntRange(7, 10);
     private static final IntRange PEAK_ELEVATION_RANGE =
-        new IntRange(15, WorldHandler.ELEVATION_RANGE.max());
+        new IntRange(15, World.ELEVATION_RANGE.max());
     private static final int MIN_PEAK_SEPARATION = 3; // Min distance between two peaks
     private static final int SMOOTHING_SLOP = 4; // Variation in each direction for smoothing elev
 

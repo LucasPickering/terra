@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.util.DoubleRange;
-import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
@@ -27,16 +26,10 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  */
 public class WorldHandler {
 
-    // Every tile's elevation must be in this range
-    public static final IntRange ELEVATION_RANGE = new IntRange(-25, 25);
-
-    public static final DoubleRange VALID_TILE_RADII = new DoubleRange(10, 200);
-
     /**
-     * Any tile below, but not equal to, this elevation can feasibly become ocean tiles. Most
-     * land tiles will be at or above this elevation.
+     * A tile's radius (in pixels) must be in this range (this is essentially a zoom limit)
      */
-    public static final int SEA_LEVEL = 0;
+    public static final DoubleRange VALID_TILE_RADII = new DoubleRange(10, 200);
 
     // World size
     private static final int DEFAULT_SIZE = 100;

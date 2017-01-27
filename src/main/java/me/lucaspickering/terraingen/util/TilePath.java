@@ -14,7 +14,7 @@ import me.lucaspickering.terraingen.world.tile.Tile;
  * Object#equals}, so two paths must have references to the same origin and destination {@link Tile}
  * objects to be considered equal.
  */
-public class Path {
+public class TilePath {
 
     private final Tile origin;
     private final List<Tile> tiles = new LinkedList<>();
@@ -25,7 +25,7 @@ public class Path {
      * @param origin the tile to start at (non-null)
      * @throws NullPointerException if {@code origin == null}
      */
-    public Path(Tile origin) {
+    public TilePath(Tile origin) {
         this.origin = origin;
     }
 
@@ -74,8 +74,8 @@ public class Path {
         return tiles.get(tiles.size() - 2);
     }
 
-    public Path copy() {
-        Path copy = new Path(origin);
+    public TilePath copy() {
+        TilePath copy = new TilePath(origin);
         tiles.forEach(copy::addTile);
         return copy;
     }
@@ -85,12 +85,12 @@ public class Path {
         if (this == o) {
             return true;
         }
-        if (o == null || !(o instanceof Path)) {
+        if (o == null || !(o instanceof TilePath)) {
             return false;
         }
 
         // Two paths are equal if they have the same origin and destination. Yay for O(1)!
-        Path path = (Path) o;
+        TilePath path = (TilePath) o;
         return getOrigin() == path.getOrigin() && getDestination() == path.getDestination();
     }
 

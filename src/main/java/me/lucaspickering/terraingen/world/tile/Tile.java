@@ -7,7 +7,7 @@ import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
-import me.lucaspickering.terraingen.world.WorldHandler;
+import me.lucaspickering.terraingen.world.World;
 
 public class Tile {
 
@@ -69,7 +69,7 @@ public class Tile {
 
     public void setElevation(int elevation) {
         // Coerce the elevation to be a valid value
-        this.elevation = WorldHandler.ELEVATION_RANGE.coerce(elevation);
+        this.elevation = World.ELEVATION_RANGE.coerce(elevation);
     }
 
     public final Color backgroundColor() {

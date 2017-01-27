@@ -5,7 +5,6 @@ import java.util.Random;
 
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Cluster;
-import me.lucaspickering.terraingen.world.WorldHandler;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -26,7 +25,7 @@ public class WaterPainter implements Generator {
     public void generate(World world, Random random) {
         // Get clusters of tiles that are at or below sea level
         final List<Cluster> clusters = world.getTiles()
-            .cluster(t -> t.elevation() < WorldHandler.SEA_LEVEL).first();
+            .cluster(t -> t.elevation() < World.SEA_LEVEL).first();
 
         for (Cluster cluster : clusters) {
             final int size = cluster.size();

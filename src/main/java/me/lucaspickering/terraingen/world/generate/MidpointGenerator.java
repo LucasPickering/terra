@@ -9,7 +9,6 @@ import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
-import me.lucaspickering.terraingen.world.WorldHandler;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
@@ -23,7 +22,7 @@ public class MidpointGenerator implements Generator {
 
         // Set the elevation for each corner
         for (Tile tile : corners.values()) {
-            final int elev = WorldHandler.ELEVATION_RANGE.randomIn(random);
+            final int elev = World.ELEVATION_RANGE.randomIn(random);
             tile.setElevation(elev);
         }
 
