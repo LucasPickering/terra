@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Random;
 
 import me.lucaspickering.terraingen.util.TilePoint;
-import me.lucaspickering.terraingen.world.WorldContainer;
+import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -21,6 +21,6 @@ public interface Generator {
      * @param world  the world to modify
      * @param random the source of random for generation
      */
-    void generate(WorldContainer world, Random random);
+    void generate(World world, Random random);
 
 }

@@ -3,7 +3,7 @@ package me.lucaspickering.terraingen.world.generate;
 import java.util.Random;
 
 import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.terraingen.world.WorldContainer;
+import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -15,7 +15,7 @@ public class LandRougher implements Generator {
     private static final int WEIGHT = 2; // Tendency to shift up (positive) vs down (negative)
 
     @Override
-    public void generate(WorldContainer world, Random random) {
+    public void generate(World world, Random random) {
         for (Tile tile : world.getTiles()) {
             // If the tile is land, adjust its elevation a bit
             final int elev = Funcs.randomSlop(random, tile.elevation(), SLOP) + WEIGHT;

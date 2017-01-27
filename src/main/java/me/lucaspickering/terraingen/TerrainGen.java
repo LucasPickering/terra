@@ -24,7 +24,7 @@ import me.lucaspickering.terraingen.render.screen.Screen;
 import me.lucaspickering.terraingen.render.screen.WorldScreen;
 import me.lucaspickering.terraingen.util.Colors;
 import me.lucaspickering.terraingen.util.Point;
-import me.lucaspickering.terraingen.world.World;
+import me.lucaspickering.terraingen.world.WorldHandler;
 
 public class TerrainGen {
 
@@ -191,9 +191,9 @@ public class TerrainGen {
         GLFW.glfwSetFramebufferSizeCallback(window, windowResizeHandler);
 
         renderer = new Renderer();
-        final World world = new World(getSeed());
-        world.generate(); // Generate a world
-        currentScreen = new WorldScreen(world); // Initialize the current screen
+        final WorldHandler worldHandler = new WorldHandler(getSeed());
+        worldHandler.generate(); // Generate a world
+        currentScreen = new WorldScreen(worldHandler); // Initialize the current screen
         lastFpsUpdate = GLFW.glfwGetTime(); // Set this for FPS calculation
     }
 

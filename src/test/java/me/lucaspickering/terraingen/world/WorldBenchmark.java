@@ -28,7 +28,7 @@ public class WorldBenchmark {
 
     @Benchmark
     public void measureGenerate() {
-        final World world = new World(seed, size);
-        world.generateParallel();
+        final WorldHandler worldHandler = new WorldHandler(seed, size);
+        worldHandler.generateParallel();
     }
 }

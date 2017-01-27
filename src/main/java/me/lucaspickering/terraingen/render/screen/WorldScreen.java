@@ -16,7 +16,7 @@ import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Tiles;
-import me.lucaspickering.terraingen.world.World;
+import me.lucaspickering.terraingen.world.WorldHandler;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class WorldScreen extends Screen {
@@ -27,7 +27,7 @@ public class WorldScreen extends Screen {
     // Change of tile size in pixels with each zoom level
     private static final double ZOOM_STEP = 5;
 
-    private final World world;
+    private final WorldHandler worldHandler;
     private final MouseTextBox mouseOverTileInfo;
 
     // The last position of the mouse while dragging. Null if not dragging.
@@ -36,9 +36,9 @@ public class WorldScreen extends Screen {
     // The time at which the user pressed the mouse button down
     private long mouseDownTime;
 
-    public WorldScreen(World world) {
-        Objects.requireNonNull(world);
-        this.world = world;
+    public WorldScreen(WorldHandler worldHandler) {
+        Objects.requireNonNull(worldHandler);
+        this.worldHandler = worldHandler;
         mouseOverTileInfo = new MouseTextBox();
         mouseOverTileInfo.setVisible(false); // Hide this for now
         addGuiElement(mouseOverTileInfo);
@@ -55,11 +55,11 @@ public class WorldScreen extends Screen {
         if (lastMouseDragPos != null) {
             // Shift the world
             final Point diff = mousePos.minus(lastMouseDragPos);
-            world.setWorldCenter(world.getWorldCenter().plus(diff));
+            worldHandler.setWorldCenter(worldHandler.getWorldCenter().plus(diff));
             lastMouseDragPos = mousePos; // Update the mouse pos
         }
 
-        final Tiles tiles = world.getTiles();
+        final Tiles tiles = worldHandler.getTiles();
 
         // Get all the tiles that are on-screen (those are the ones that will be drawn)
         final List<Tile> onScreenTiles = tiles.stream()
@@ -69,7 +69,7 @@ public class WorldScreen extends Screen {
         // If there is a mouse position, check which tile it's over
         final TilePoint mouseOverPos;
         if (mousePos != null) {
-            mouseOverPos = world.pixelToTile(mousePos);
+            mouseOverPos = worldHandler.pixelToTile(mousePos);
         } else {
             mouseOverPos = null;
         }
@@ -101,11 +101,11 @@ public class WorldScreen extends Screen {
 
     private boolean containsTile(Tile tile) {
         // If any of the 4 corners of the tile are on-screen, the tile is on-screen
-        final Point tileCenter = world.getTileCenter(tile);
-        return contains(world.getTileTopLeft(tileCenter))
-               || contains(world.getTileTopRight(tileCenter))
-               || contains(world.getTileBottomRight(tileCenter))
-               || contains(world.getTileBottomLeft(tileCenter));
+        final Point tileCenter = worldHandler.getTileCenter(tile);
+        return contains(worldHandler.getTileTopLeft(tileCenter))
+               || contains(worldHandler.getTileTopRight(tileCenter))
+               || contains(worldHandler.getTileBottomRight(tileCenter))
+               || contains(worldHandler.getTileBottomLeft(tileCenter));
     }
 
     /**
@@ -116,7 +116,7 @@ public class WorldScreen extends Screen {
     private void drawTile(Tile tile) {
         // Shift to the tile and draw the background
         GL11.glPushMatrix();
-        final Point tileCenter = world.getTileCenter(tile);
+        final Point tileCenter = worldHandler.getTileCenter(tile);
         GL11.glTranslated(tileCenter.x(), tileCenter.y(), 0f);
         drawTileBackground(tile);
         GL11.glPopMatrix();
@@ -126,7 +126,7 @@ public class WorldScreen extends Screen {
         // Set the color then draw a hexagon
         Funcs.setGlColor(tile.backgroundColor());
         GL11.glBegin(GL11.GL_POLYGON);
-        for (Point vertex : world.getTileVertices()) {
+        for (Point vertex : worldHandler.getTileVertices()) {
             GL11.glVertex2d(vertex.x(), vertex.y());
         }
         GL11.glEnd();
@@ -141,13 +141,13 @@ public class WorldScreen extends Screen {
     private void drawTileOverlays(Tile tile, boolean mouseOver) {
         // Translate to this tile
         GL11.glPushMatrix();
-        final Point tileTopLeft = world.getTileTopLeft(world.getTileCenter(tile));
+        final Point tileTopLeft = worldHandler.getTileTopLeft(worldHandler.getTileCenter(tile));
         GL11.glTranslated(tileTopLeft.x(), tileTopLeft.y(), 0f);
 
         // If the mouse is over this tile, draw the mouse-over overlay
         if (mouseOver) {
             ColorTexture.mouseOver.draw(0, 0,
-                                        (int) world.getTileWidth(), (int) world.getTileHeight());
+                                        (int) worldHandler.getTileWidth(), (int) worldHandler.getTileHeight());
         }
 
         GL11.glPopMatrix();
@@ -162,7 +162,7 @@ public class WorldScreen extends Screen {
                     break;
                 case GLFW.GLFW_KEY_R:
                     // Re-generate the world
-                    world.generateParallel();
+                    worldHandler.generateParallel();
                     break;
             }
         }
@@ -191,10 +191,10 @@ public class WorldScreen extends Screen {
     public void onScroll(ScrollEvent event) {
         if (event.yOffset < 0) {
             // Zoom out
-            world.setTileRadius(world.getTileRadius() - ZOOM_STEP);
+            worldHandler.setTileRadius(worldHandler.getTileRadius() - ZOOM_STEP);
         } else if (event.yOffset > 0) {
             // Zoom in
-            world.setTileRadius(world.getTileRadius() + ZOOM_STEP);
+            worldHandler.setTileRadius(worldHandler.getTileRadius() + ZOOM_STEP);
         }
     }
 }
