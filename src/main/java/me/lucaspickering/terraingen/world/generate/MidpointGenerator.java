@@ -10,6 +10,7 @@ import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.World;
+import me.lucaspickering.terraingen.world.WorldContainer;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class MidpointGenerator implements Generator {
@@ -17,8 +18,8 @@ public class MidpointGenerator implements Generator {
     private final static float SLOP_FACTOR = 0.2f;
 
     @Override
-    public void generate(Tiles world, Random random) {
-        final Map<Direction, Tile> corners = getCorners(world);
+    public void generate(WorldContainer world, Random random) {
+        final Map<Direction, Tile> corners = getCorners(world.getTiles());
 
         // Set the elevation for each corner
         for (Tile tile : corners.values()) {
@@ -29,12 +30,12 @@ public class MidpointGenerator implements Generator {
         for (Tile tile1 : corners.values()) {
             for (Tile tile2 : corners.values()) {
                 if (!tile1.pos().equals(tile2.pos())) {
-                    gradeBetween(world, random, tile1, tile2);
+                    gradeBetween(world.getTiles(), random, tile1, tile2);
                 }
             }
         }
 
-        world.forEach(tile -> tile.setBiome(Biome.FOREST));
+        world.getTiles().forEach(tile -> tile.setBiome(Biome.FOREST));
     }
 
     /**

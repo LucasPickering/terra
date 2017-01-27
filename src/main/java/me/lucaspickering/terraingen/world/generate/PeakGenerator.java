@@ -9,6 +9,7 @@ import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
 import me.lucaspickering.terraingen.world.World;
+import me.lucaspickering.terraingen.world.WorldContainer;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -23,9 +24,10 @@ public class PeakGenerator implements Generator {
     private static final int SMOOTHING_SLOP = 4; // Variation in each direction for smoothing elev
 
     @Override
-    public void generate(Tiles world, Random random) {
+    public void generate(WorldContainer world, Random random) {
+        final Tiles worldTiles = world.getTiles();
         final int peaksToGen = PEAK_COUNT_RANGE.randomIn(random);
-        final Tiles peaks = world.selectTiles(random, peaksToGen, MIN_PEAK_SEPARATION);
+        final Tiles peaks = worldTiles.selectTiles(random, peaksToGen, MIN_PEAK_SEPARATION);
 
         for (Tile peak : peaks) {
             final int peakElev = peak.elevation() + PEAK_ELEVATION_RANGE.randomIn(random);
@@ -33,12 +35,12 @@ public class PeakGenerator implements Generator {
             setElev(peak, peakElev);
 
             // Adjust the elevation of the adjacent tiles
-            for (Map.Entry<Direction, Tile> entry : world.getAdjacentTiles(peak).entrySet()) {
+            for (Map.Entry<Direction, Tile> entry : worldTiles.getAdjacentTiles(peak).entrySet()) {
                 final Direction dir = entry.getKey();
                 final Tile adjTile = entry.getValue();
 
                 // The tile on the opposite side of adjTile from the peak
-                final Tile oppTile = world.getByPoint(dir.shift(adjTile.pos()));
+                final Tile oppTile = worldTiles.getByPoint(dir.shift(adjTile.pos()));
                 final int oppElev = oppTile != null ? oppTile.elevation() : 0;
 
                 // Average peakElev and oppElev, then apply a small random slop

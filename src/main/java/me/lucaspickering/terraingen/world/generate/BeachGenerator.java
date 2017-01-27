@@ -6,6 +6,7 @@ import java.util.Set;
 
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Tiles;
+import me.lucaspickering.terraingen.world.WorldContainer;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -21,12 +22,13 @@ public class BeachGenerator implements Generator {
     public static final Set<Biome> BEACHABLE_BIOMES = EnumSet.of(Biome.OCEAN, Biome.COAST);
 
     @Override
-    public void generate(Tiles world, Random random) {
-        for (Tile tile : world) {
+    public void generate(WorldContainer world, Random random) {
+        final Tiles worldTiles = world.getTiles();
+        for (Tile tile : worldTiles) {
             // If this tile is land and within our elevation bound, check the adjacent tiles, and
             // if there is an ocean (or similar) tile adjacent, make a beach.
             if (tile.biome().isLand() && tile.elevation() <= MAX_BEACH_ELEV) {
-                for (Tile adj : world.getAdjacentTiles(tile).values()) {
+                for (Tile adj : worldTiles.getAdjacentTiles(tile).values()) {
                     if (BEACHABLE_BIOMES.contains(adj.biome())) {
                         tile.setBiome(Biome.BEACH);
                         break; // Done with this tile

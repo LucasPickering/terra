@@ -34,7 +34,7 @@ public class World {
     // World size
     private static final int DEFAULT_SIZE = 100;
 
-    private final Generator[] generators = new Generator[]{
+    private static final Generator[] GENERATORS = new Generator[]{
         new ContinentGenerator(),
 //        new LandRougher(),
 //        new PeakGenerator(),
@@ -45,10 +45,11 @@ public class World {
     private final Logger logger;
     private final long seed;
     private final int size; // Radius of the world
-    private Tiles tiles;
 
-    // The pixel location of the center of the world
-    private Point worldCenter;
+    // Properties of the world
+    private WorldContainer world;
+
+    private Point worldCenter; // The pixel location of the center of the world
 
     // Tile pixel dimensions
     private double tileRadius;
@@ -87,20 +88,20 @@ public class World {
      */
     public void generate() {
         final long startTime = System.currentTimeMillis(); // We're timing this
-        final Tiles tiles = Tiles.initByRadius(size);
+        final WorldContainer world = new WorldContainer(size);
 
         // Apply each generator in sequence (this is the heavy lifting)
-        Arrays.stream(generators).forEach(gen -> runGenerator(gen, tiles));
+        Arrays.stream(GENERATORS).forEach(gen -> runGenerator(gen, world));
 
-        this.tiles = tiles.immutableCopy(); // Make an immutable copy and save it for the class
+        this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
         logger.log(Level.FINE, String.format("World generation took %d ms",
                                              System.currentTimeMillis() - startTime));
     }
 
-    private void runGenerator(Generator generator, Tiles tiles) {
+    private void runGenerator(Generator generator, WorldContainer world) {
         final long startTime = System.currentTimeMillis();
         final Random random = new Random(seed);
-        generator.generate(tiles, random);
+        generator.generate(world, random);
         final long runTime = System.currentTimeMillis() - startTime;
         logger.log(Level.FINER, String.format("Generator stage %s took %d ms",
                                               generator.getClass().getSimpleName(), runTime));
@@ -113,7 +114,7 @@ public class World {
      * @return the world's tiles
      */
     public Tiles getTiles() {
-        return tiles;
+        return world.getTiles();
     }
 
     public Point getWorldCenter() {

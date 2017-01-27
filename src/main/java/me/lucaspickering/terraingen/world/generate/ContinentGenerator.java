@@ -16,6 +16,7 @@ import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Cluster;
 import me.lucaspickering.terraingen.world.Tiles;
+import me.lucaspickering.terraingen.world.WorldContainer;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 public class ContinentGenerator implements Generator {
@@ -50,10 +51,11 @@ public class ContinentGenerator implements Generator {
     private final Map<TilePoint, Cluster> tileToContinentMap = new HashMap<>();
 
     @Override
-    public void generate(Tiles world, Random random) {
-        final Tiles availableTiles = new Tiles(world); // Copy this because we'll be modifying it
+    public void generate(WorldContainer world, Random random) {
+        final Tiles worldTiles = world.getTiles();
+        final Tiles availableTiles = new Tiles(worldTiles); // Copy this because we'll be modifying it
         // Cluster tiles to make the continents
-        final List<Cluster> continents = generateContinents(world, availableTiles, random);
+        final List<Cluster> continents = generateContinents(worldTiles, availableTiles, random);
 
         // Adjust elevation to create oceans/coasts
         generateOceanFloor(availableTiles, continents, random);

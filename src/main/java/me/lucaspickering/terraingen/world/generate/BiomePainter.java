@@ -12,6 +12,7 @@ import me.lucaspickering.terraingen.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Cluster;
 import me.lucaspickering.terraingen.world.Tiles;
+import me.lucaspickering.terraingen.world.WorldContainer;
 import me.lucaspickering.terraingen.world.tile.Tile;
 
 /**
@@ -40,7 +41,9 @@ public class BiomePainter implements Generator {
     }
 
     @Override
-    public void generate(Tiles world, Random random) {
+    public void generate(WorldContainer world, Random random) {
+        final Tiles worldTiles = world.getTiles();
+
         // Step 1 - calculate n
         // Figure out how many biome blotches we want
         // n = number of tiles / average size of blotch
@@ -58,11 +61,11 @@ public class BiomePainter implements Generator {
         // each tile in that blotch.
 
         // Step 1
-        final int numSeeds = world.size() / AVERAGE_BLOTCH_SIZE;
+        final int numSeeds = worldTiles.size() / AVERAGE_BLOTCH_SIZE;
 
         // Step 2
-        final Tiles seeds = world.selectTiles(random, numSeeds, MIN_SEED_SPACING);
-        final Tiles unselectedTiles = new Tiles(world); // We need a copy so we can modify it
+        final Tiles seeds = worldTiles.selectTiles(random, numSeeds, MIN_SEED_SPACING);
+        final Tiles unselectedTiles = new Tiles(worldTiles); // We need a copy so we can modify it
         unselectedTiles.removeAll(seeds); // We've already selected the seeds, so remove them
 
         // Each biome blotch, keyed by its seed
@@ -73,7 +76,7 @@ public class BiomePainter implements Generator {
 
         for (Tile seed : seeds) {
             // Add each seed to its cluster, and each cluster to the maps
-            final Cluster blotch = Cluster.fromWorld(world);
+            final Cluster blotch = Cluster.fromWorld(worldTiles);
             blotch.add(seed);
             blotches.put(seed.pos(), blotch);
             incompleteBlotches.put(seed.pos(), blotch);
