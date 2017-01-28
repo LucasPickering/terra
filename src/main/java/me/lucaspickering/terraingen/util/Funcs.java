@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -21,7 +21,6 @@ import java.util.Random;
 import java.util.function.Function;
 
 import me.lucaspickering.terraingen.TerrainGen;
-
 import static org.lwjgl.BufferUtils.createByteBuffer;
 
 public class Funcs {
@@ -107,6 +106,22 @@ public class Funcs {
 
         // Select an element from the weighted list
         return randomFromCollection(random, weightedList);
+    }
+
+    /**
+     * Returns a random boolean, with the given chance of being true. If the given weight is 0,
+     * there is a 0% chance of getting true, 1 is 100%, 0.5 is 50%, etc.
+     *
+     * @param weight the weight towards true, with 0.5 being a 50/50 chance
+     * @param random the {@link Random} instance to use
+     * @return a random boolean with the given weight towards true
+     * @throws IllegalArgumentException if {@code weight < 0 or weight > 1}
+     */
+    public static boolean weightedChance(Random random, float weight) {
+        if (weight < 0f || weight > 1f) {
+            throw new IllegalArgumentException("Weight must be in range [0, 1], was " + weight);
+        }
+        return random.nextFloat() < weight;
     }
 
     public static String getResource(String path, String fileName) {
