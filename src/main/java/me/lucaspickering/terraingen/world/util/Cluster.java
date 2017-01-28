@@ -70,7 +70,7 @@ public class Cluster extends TileSet {
         final boolean removed = super.removePoint(point);
 
         if (removed) {
-            final Tile tile = world.getByPoint(point); // super.remove asserts that o is a Tile
+            final Tile tile = world.getByPoint(point);
             // For each tile adjacent to the removed one...
             for (Tile adjTile : adjacentTiles.getAdjacentTiles(tile).values()) {
                 // If there are no more tiles in the cluster adjacent to this one, then it is no

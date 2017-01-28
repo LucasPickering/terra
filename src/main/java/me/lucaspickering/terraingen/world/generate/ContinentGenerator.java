@@ -1,7 +1,9 @@
 package me.lucaspickering.terraingen.world.generate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -79,10 +81,9 @@ public class ContinentGenerator implements Generator {
             }
         }
 
-        // Re-cluster the continents to join any continents that connected to each other
         fillContinentHoles(); // Fill holes in the continents
-        reclusterContinents();
-//        smoothContinents(); // Smooth the coast of each continent
+        reclusterContinents(); // Join continents that grew to meet each other
+        smoothContinents(); // Smooth the coast of each continent
     }
 
     /**
@@ -184,34 +185,57 @@ public class ContinentGenerator implements Generator {
      */
     private void smoothContinent(Continent continent) {
         final Cluster cluster = continent.getTiles();
-        for (Tile tile : cluster) {
-            final Map<Direction, Tile> adjTiles = cluster.getAdjacentTiles(tile);
 
-            // If the tile borders only 1 other tile in the continent (or none), mark it for
-            // removal
-            boolean remove = adjTiles.size() <= 1;
+        // Keep two queues: one of tiles that need to be checked for removal and one of tiles that
+        // need to be removed.
+        final List<Tile> toCheck = new LinkedList<>(cluster);
+        final List<Tile> toRemove = new LinkedList<>();
 
-            // If it isn't already marked for removal, check if it borders only two tiles
-            // that aren't adjacent to each other (i.e. check if this tile is a "bridge")
-            if (!remove && adjTiles.size() == 2) {
-                final List<Direction> dir = new ArrayList<>(adjTiles.keySet());
-                // Check that the two directions aren't adjacent to each otherK
-                if (!dir.get(0).isAdjacentTo(dir.get(1))) {
-                    remove = true;
+        // 1. Check all queued tiles for removal
+        // 2. Remove tiles that were marked as such
+        // 3. Any tile adjacent to a removed tile gets queued to be checked again
+        // 4. Repeat until there are no more tiles to check
+        while (!toCheck.isEmpty()) {
+            // Check all queued tiles
+            for (Tile tile : toCheck) {
+                // Check if this tile should be removed
+                if (smoothingShouldRemove(tile, continent)) {
+                    toRemove.add(tile); // Queue it for removal
                 }
             }
+            toCheck.clear(); // We checked them all, clear the queue
 
-            // If we decided to, remove the tile from the continent
-            if (remove) {
-                removeFromContinent(tile, continent);
+            // Remove all queued tiles
+            for (Tile tile : toRemove) {
+                // We'll need to check all tiles adjacent to this one for removal later
+                final Collection<Tile> adjTiles = cluster.getAdjacentTiles(tile).values();
+                toCheck.addAll(adjTiles);
 
-                // Let a recursive call handle the rest (we can't modify the continent then
-                // continue to iterate on it)
-                // Potential optimization? Maybe we can modify it with the iterator?
-                smoothContinent(continent);
-                return;
+                removeFromContinent(tile, continent); // Remove the tile
+            }
+            toRemove.clear(); // We removed them all, clear the queue
+        }
+    }
+
+    private boolean smoothingShouldRemove(Tile tile, Continent continent) {
+        final Map<Direction, Tile> adjTiles = continent.getTiles().getAdjacentTiles(tile);
+
+        // If the tile borders only 1 other tile in the continent, it should be removed
+        if (adjTiles.size() <= 1) {
+            return true;
+        }
+
+        // Check if it borders only two tiles that aren't adjacent to each other (i.e. check if
+        // this tile is a "bridge")
+        if (adjTiles.size() == 2) {
+            final List<Direction> dir = new ArrayList<>(adjTiles.keySet());
+            // Check that the two directions aren't adjacent to each other
+            if (!dir.get(0).isAdjacentTo(dir.get(1))) {
+                return true;
             }
         }
+
+        return false;
     }
 
     /**
