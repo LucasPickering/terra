@@ -10,12 +10,13 @@ import java.util.logging.Logger;
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.util.DoubleRange;
 import me.lucaspickering.terraingen.util.Point;
-import me.lucaspickering.terraingen.world.generate.BiomePainter;
-import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
+import me.lucaspickering.terraingen.world.generate.BiomePainter;
 import me.lucaspickering.terraingen.world.generate.ContinentGenerator;
 import me.lucaspickering.terraingen.world.generate.Generator;
+import me.lucaspickering.terraingen.world.generate.LandRougher;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
+import me.lucaspickering.terraingen.world.util.TilePoint;
 
 /**
  * A class with fields and methods that can entirely encapsulate a {@link World} and
@@ -37,8 +38,7 @@ public class WorldHandler {
     private static final Generator[] GENERATORS = new Generator[]{
         new ContinentGenerator(),
         new BiomePainter(),
-//        new LandRougher(),
-//        new PeakGenerator(),
+        new LandRougher(),
         new WaterPainter(),
         new BeachGenerator()
     };
