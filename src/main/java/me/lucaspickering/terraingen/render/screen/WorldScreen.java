@@ -119,7 +119,7 @@ public class WorldScreen extends Screen {
         // Shift to the tile and draw the background
         GL11.glPushMatrix();
         final Point tileCenter = worldHandler.getTileCenter(tile);
-        GL11.glTranslated(tileCenter.x(), tileCenter.y(), 0f);
+        GL11.glTranslated(tileCenter.x(), tileCenter.y(), 0.0);
         drawTileBackground(tile);
         GL11.glPopMatrix();
     }

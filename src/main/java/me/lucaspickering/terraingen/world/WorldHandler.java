@@ -133,7 +133,7 @@ public class WorldHandler {
     public void setTileRadius(double radius) {
         tileRadius = VALID_TILE_RADII.coerce(radius);
         tileWidth = tileRadius * 2;
-        tileHeight = (int) (Math.sqrt(3) * tileRadius);
+        tileHeight = Math.sqrt(3) * tileRadius;
         tileVertices = new Point[]{
             new Point(-tileWidth / 4, -tileHeight / 2),
             new Point(tileWidth / 4, -tileHeight / 2),
@@ -187,7 +187,7 @@ public class WorldHandler {
     public Point tileToPixel(@NotNull TilePoint tile) {
         final double x = getTileWidth() * tile.x() * 0.75f;
         final double y = -getTileHeight() * (tile.x() / 2.0f + tile.y());
-        return getWorldCenter().plus((int) x, (int) y);
+        return getWorldCenter().plus(x, y);
     }
 
     /**
