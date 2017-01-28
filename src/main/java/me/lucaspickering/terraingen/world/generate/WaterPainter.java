@@ -3,6 +3,7 @@ package me.lucaspickering.terraingen.world.generate;
 import java.util.List;
 import java.util.Random;
 
+import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.World;
@@ -41,7 +42,7 @@ public class WaterPainter implements Generator {
                 // Otherwise, give it a chance to become a lake, proportional to its size
                 // 1 tile has 0 chance, 2 tiles have 1/x chance, 3 tiles have 2/x chance, etc.
                 final float chance = (float) (size - 1) / (MIN_OCEAN_SIZE - 2);
-                if (random.nextFloat() < chance) {
+                if (Funcs.weightedChance(random, chance)) {
                     // If we chose to make it a lake, change all the tiles to lake
                     cluster.forEach(tile -> tile.setBiome(Biome.LAKE));
                 }

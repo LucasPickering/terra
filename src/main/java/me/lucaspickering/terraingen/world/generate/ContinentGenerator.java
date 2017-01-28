@@ -2,7 +2,6 @@ package me.lucaspickering.terraingen.world.generate;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import java.util.Random;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.IntRange;
-import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
@@ -27,23 +25,6 @@ public class ContinentGenerator implements Generator {
     // the range that a continent's target size can be in. Note that continents may end up being
     // smaller than the minimum of this range, if there aren't enough tiles to make them bigger.
     private static final IntRange CONTINENT_SIZE_RANGE = new IntRange(100, 1000);
-
-    // The biomes that we can paint in this routine, and the relative chance that each one will
-    // be selected
-    public static Map<Biome, Integer> BIOME_WEIGHTS;
-
-    // Initialize all the weights
-    static {
-        try {
-            BIOME_WEIGHTS = new EnumMap<>(Biome.class);
-            BIOME_WEIGHTS.put(Biome.PLAINS, 10);
-            BIOME_WEIGHTS.put(Biome.FOREST, 10);
-            BIOME_WEIGHTS.put(Biome.DESERT, 2);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
 
     private World world; // The world being operated on
     private Random random;
