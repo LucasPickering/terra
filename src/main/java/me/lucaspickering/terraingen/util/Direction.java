@@ -19,6 +19,7 @@ public enum Direction {
 
     /**
      * Shifts the given point 1 step in this direction.
+     *
      * @see #shift(TilePoint, int)
      */
     public TilePoint shift(TilePoint point) {
@@ -27,13 +28,15 @@ public enum Direction {
 
     /**
      * Shifts the given point the given distance in this direction.
-     * @param point the point to shift
+     *
+     * @param point    the point to shift
      * @param distance the number of steps to shift it (positive)
      * @return the shifted point
      */
     public TilePoint shift(TilePoint point, int distance) {
         if (distance <= 0) {
-            throw new IllegalArgumentException("Distance must be positive, was: " + distance);
+            throw new IllegalArgumentException(String.format("Distance must be positive, was [%d]",
+                                                             distance));
         }
         return point.plus(delta.times(distance));
     }

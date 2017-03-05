@@ -37,16 +37,7 @@ public class TestTileSet {
     public void testAdjacentTiles() throws Exception {
         // Populate a world of tiles for testing
         final int radius = 2;
-        final TileSet tiles = new TileSet();
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -radius; y <= radius; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    if (x + y + z == 0) {
-                        tiles.add(new Tile(new TilePoint(x, y, z)));
-                    }
-                }
-            }
-        }
+        final TileSet tiles = TileSet.initByRadius(radius);
 
         Map<Direction, Tile> result;
 

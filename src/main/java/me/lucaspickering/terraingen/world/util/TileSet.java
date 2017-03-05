@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import me.lucaspickering.terraingen.util.Direction;
@@ -69,17 +70,42 @@ public class TileSet extends AbstractSet<Tile> {
     @NotNull
     public static TileSet initByRadius(int radius) {
         final TileSet tiles = new TileSet();
-        // Fill out the set with a bunch of points
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -radius; y <= radius; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    if (x + y + z == 0) {
-                        tiles.add(new Tile(new TilePoint(x, y, z)));
-                    }
-                }
+
+        // Add all tiles in the given radius to the set
+        tiles.applyInRange(point -> tiles.add(new Tile(point)), TilePoint.ZERO, radius);
+
+        return tiles;
+    }
+
+    /**
+     * Applies the given {@link Consumer} to all points in the given range of the given tile.
+     * A point does not have to be in this collection in order to have to consumer applied to it.
+     *
+     * @param consumer the function to apply to each point
+     * @param origin   the center of all tiles to be iterated over
+     * @param range    the range to apply across (non-negative)
+     */
+    private void applyInRange(Consumer<TilePoint> consumer, TilePoint origin, int range) {
+        if (range < 0) {
+            throw new IllegalArgumentException(String.format("Range cannot be negative, was [%d]",
+                                                             range));
+        }
+
+        // Implementation from http://www.redblobgames.com/grids/hexagons/#range
+        // For all possible x values in the range...
+        for (int x = -range; x <= range; x++) {
+
+            // Calculate the min and max y values that a tile in this range can have
+            final int minY = Math.max(-range, -x - range);
+            final int maxY = Math.min(range, -x + range);
+            for (int y = minY; y <= maxY; y++) {
+                final int z = -x - y; // We know the z value now
+
+                // Get the tile at this point and pass it to the consumer
+                final TilePoint point = origin.plus(x, y, z);
+                consumer.accept(point);
             }
         }
-        return tiles;
     }
 
     /**
@@ -200,24 +226,15 @@ public class TileSet extends AbstractSet<Tile> {
 
         final TileSet result = new TileSet();
 
-        // Implementation from http://www.redblobgames.com/grids/hexagons/#range
-        // For all possible x values in the range...
-        for (int x = -range; x <= range; x++) {
-
-            // Calculate the min and max y values that a tile in this range can have
-            final int minY = Math.max(-range, -x - range);
-            final int maxY = Math.min(range, -x + range);
-            for (int y = minY; y <= maxY; y++) {
-                final int z = -x - y; // We know the z value now
-
-                // Get the tile at this point and if it's in the collection, add to the result
-                final TilePoint point = tile.pos().plus(x, y, z);
-                final Tile otherTile = getByPoint(point);
-                if (otherTile != null) {
-                    result.add(otherTile);
-                }
+        // Create a function that, given a point, if that point is in this set, add the tile at
+        // the point to the result
+        final Consumer<TilePoint> adder = point -> {
+            final Tile otherTile = getByPoint(point);
+            if (otherTile != null) {
+                result.add(otherTile);
             }
-        }
+        };
+        applyInRange(adder, tile.pos(), range); // Apply that function to all tiles in the range
 
         return result;
     }
@@ -234,7 +251,8 @@ public class TileSet extends AbstractSet<Tile> {
     @NotNull
     public TileSet getTilesAtDistance(@NotNull Tile tile, int distance) {
         if (distance <= 0) {
-            throw new IllegalArgumentException("Distance must be positive, was: " + distance);
+            throw new IllegalArgumentException(String.format("Distance must be positive, was [%d]",
+                                                             distance));
         }
 
         // See http://www.redblobgames.com/grids/hexagons/#rings for info on this implementation
