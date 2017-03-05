@@ -1,4 +1,4 @@
-package me.lucaspickering.terraingen.world;
+package me.lucaspickering.terraingen.world.util;
 
 import org.junit.Test;
 

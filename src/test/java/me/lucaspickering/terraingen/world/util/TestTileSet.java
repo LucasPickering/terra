@@ -1,4 +1,4 @@
-package me.lucaspickering.terraingen.world;
+package me.lucaspickering.terraingen.world.util;
 
 import org.junit.Test;
 
@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import me.lucaspickering.terraingen.util.Direction;
-import me.lucaspickering.terraingen.world.util.TilePoint;
-import me.lucaspickering.terraingen.world.util.Cluster;
-import me.lucaspickering.terraingen.world.util.TileSet;
-import static org.junit.Assert.assertEquals;
+import me.lucaspickering.terraingen.world.Tile;
 
-public class TestTiles {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class TestTileSet {
 
     @Test
     public void testInitByRadius() throws Exception {
@@ -66,19 +66,9 @@ public class TestTiles {
     @Test
     public void testTilesInRange() throws Exception {
         // Populate a world of tiles for testing
-        final int radius = 2;
-        final TileSet tiles = new TileSet();
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -radius; y <= radius; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    if (x + y + z == 0) {
-                        tiles.add(new Tile(new TilePoint(x, y, z)));
-                    }
-                }
-            }
-        }
+        final TileSet tiles = TileSet.initByRadius(10);
 
-        final TilePoint origin = new TilePoint(0, 0, 0);
+        final TilePoint origin = TilePoint.ZERO;
         TileSet result;
 
         // Range of 0 returns just the 1 tile
@@ -92,6 +82,37 @@ public class TestTiles {
         // Range of 2 returns every tile in the world
         result = tiles.getTilesInRange(tiles.getByPoint(origin), 2);
         assertEquals("Should return the entire world", tiles.size(), result.size());
+    }
+
+    @Test
+    public void testTilesAtDistance() throws Exception {
+        final int radius = 10;
+        final TileSet tiles = TileSet.initByRadius(radius);
+
+        Tile origin = tiles.getByPoint(TilePoint.ZERO);
+        TileSet result;
+
+        // Test each distance in [1, radius]
+        for (int r = 1; r < radius; r++) {
+            // Run the method we're testing
+            result = tiles.getTilesAtDistance(origin, r);
+
+            // Calculate how many tiles we expect (the math checks out)
+            final int expectedSize = Tile.NUM_SIDES * r;
+            assertEquals("Bad size at radius " + r, expectedSize, result.size());
+
+            // Check that the distance to each tile in the result is correct
+            for (Tile tile : result) {
+                final int distance = origin.pos().distanceTo(tile.pos());
+                assertEquals(String.format("Bad distance between origin and %s at radius %d",
+                                           tile, r),
+                             r, distance);
+            }
+        }
+
+        // Make sure a ring outside the collection is empty
+        result = tiles.getTilesAtDistance(origin, radius + 1);
+        assertTrue(result.isEmpty());
     }
 
     @Test

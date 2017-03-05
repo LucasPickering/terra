@@ -218,6 +218,44 @@ public class TileSet extends AbstractSet<Tile> {
     }
 
     /**
+     * Gets the set of all tiles that are in this collection and exactly the given distance from
+     * the given tile.
+     *
+     * @param tile     the epicenter of the ring
+     * @param distance the distance of the ring from the epicenter (positive)
+     * @return a new {@link TileSet} of all tiles in this collection that are the given distance
+     * from the given tile
+     */
+    @NotNull
+    public TileSet getTilesAtDistance(@NotNull Tile tile, int distance) {
+        if (distance <= 0) {
+            throw new IllegalArgumentException("Distance must be positive, was: " + distance);
+        }
+
+        // See http://www.redblobgames.com/grids/hexagons/#rings for info on this implementation
+
+        final TileSet result = new TileSet();
+
+        // Step <distance> tiles southwest to get the first tile on the ring
+        TilePoint point = Direction.SOUTHWEST.shift(tile.pos(), distance);
+
+        // For each direction, step <distance> tiles in that direction to get one side of the ring
+        for (Direction dir : Direction.values()) {
+            // Get the next tile on this side of the ring
+            for (int d = 0; d < distance; d++) {
+                // Get the point
+                final Tile otherTile = getByPoint(point);
+                if (otherTile != null) {
+                    result.add(otherTile);
+                }
+                point = dir.shift(point);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Randomly selects the specified number of tiles from this collection. If necessary,
      * this ensures a minimum spacing between selections. If that spacing is 0, nothing in
      * enforced. If it is 1, it makes sure that no two selections are adjacent, and so on.
