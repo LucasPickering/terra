@@ -21,8 +21,8 @@ public class TestTileSet {
         // Test every 10th size 20-100
         testInitByRadius(20, 100, 10);
 
-        // Test every 50th size 150-500
-        testInitByRadius(150, 1000, 50);
+        // Test every 50th size 150-300
+        testInitByRadius(150, 300, 50);
     }
 
     private void testInitByRadius(int start, int end, int step) {
@@ -66,6 +66,7 @@ public class TestTileSet {
     @Test
     public void testTilesInRange() throws Exception {
         // Populate a world of tiles for testing
+        final int radius = 10;
         final TileSet tiles = TileSet.initByRadius(10);
 
         final TilePoint origin = TilePoint.ZERO;
@@ -80,7 +81,7 @@ public class TestTileSet {
         assertEquals("Should return 7 tiles", 7, result.size());
 
         // Range of 2 returns every tile in the world
-        result = tiles.getTilesInRange(tiles.getByPoint(origin), 2);
+        result = tiles.getTilesInRange(tiles.getByPoint(origin), radius);
         assertEquals("Should return the entire world", tiles.size(), result.size());
     }
 
