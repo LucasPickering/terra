@@ -199,19 +199,24 @@ public class TileSet extends AbstractSet<Tile> {
         }
 
         final TileSet result = new TileSet();
-        result.add(tile); // The result always has the tile in it
 
-        // Add everything other than the tile
-        TileSet lastAdjacents = new TileSet(result);
-        for (int i = 1; i <= range; i++) {
-            // Start with tiles directly adjacent to this one
-            final TileSet adjacents = new TileSet();
-            for (Tile adjacent : lastAdjacents) {
-                adjacents.addAll(getAdjacentTiles(adjacent).values());
+        // Implementation from http://www.redblobgames.com/grids/hexagons/#range
+        // For all possible x values in the range...
+        for (int x = -range; x <= range; x++) {
+
+            // Calculate the min and max y values that a tile in this range can have
+            final int minY = Math.max(-range, -x - range);
+            final int maxY = Math.min(range, -x + range);
+            for (int y = minY; y <= maxY; y++) {
+                final int z = -x - y; // We know the z value now
+
+                // Get the tile at this point and if it's in the collection, add to the result
+                final TilePoint point = tile.pos().plus(x, y, z);
+                final Tile otherTile = getByPoint(point);
+                if (otherTile != null) {
+                    result.add(otherTile);
+                }
             }
-
-            result.addAll(adjacents);
-            lastAdjacents = adjacents;
         }
 
         return result;
