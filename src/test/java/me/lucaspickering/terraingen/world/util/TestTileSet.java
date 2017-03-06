@@ -85,7 +85,7 @@ public class TestTileSet {
         TileSet result;
 
         // Test each distance in [1, radius]
-        for (int r = 1; r < radius; r++) {
+        for (int r = 0; r < radius; r++) {
             // Run the method we're testing
             result = tiles.getTilesAtDistance(origin, r);
 

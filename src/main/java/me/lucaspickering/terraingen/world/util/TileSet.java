@@ -244,20 +244,26 @@ public class TileSet extends AbstractSet<Tile> {
      * the given tile.
      *
      * @param tile     the epicenter of the ring
-     * @param distance the distance of the ring from the epicenter (positive)
+     * @param distance the distance of the ring from the epicenter (non-negative)
      * @return a new {@link TileSet} of all tiles in this collection that are the given distance
      * from the given tile
      */
     @NotNull
     public TileSet getTilesAtDistance(@NotNull Tile tile, int distance) {
-        if (distance <= 0) {
-            throw new IllegalArgumentException(String.format("Distance must be positive, was [%d]",
-                                                             distance));
+        if (distance < 0) {
+            throw new IllegalArgumentException(String.format(
+                "Distance must be non-negative, was [%d]", distance));
         }
 
         // See http://www.redblobgames.com/grids/hexagons/#rings for info on this implementation
 
         final TileSet result = new TileSet();
+
+        // Special case for distance 0
+        if (distance == 0 && contains(tile.pos())) {
+            result.add(tile);
+            return result;
+        }
 
         // Step <distance> tiles southwest to get the first tile on the ring
         TilePoint point = Direction.SOUTHWEST.shift(tile.pos(), distance);

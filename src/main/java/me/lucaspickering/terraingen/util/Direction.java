@@ -30,13 +30,13 @@ public enum Direction {
      * Shifts the given point the given distance in this direction.
      *
      * @param point    the point to shift
-     * @param distance the number of steps to shift it (positive)
+     * @param distance the number of steps to shift it (non-negative)
      * @return the shifted point
      */
     public TilePoint shift(TilePoint point, int distance) {
-        if (distance <= 0) {
-            throw new IllegalArgumentException(String.format("Distance must be positive, was [%d]",
-                                                             distance));
+        if (distance < 0) {
+            throw new IllegalArgumentException(String.format(
+                "Distance must be non-negative, was [%d]", distance));
         }
         return point.plus(delta.times(distance));
     }
