@@ -59,7 +59,7 @@ public class PeakGenerator implements Generator {
      * @param elevation the elevation that the tile should get
      */
     private void addElev(Tile tile, int elevation) {
-        System.out.printf("Setting elev to %d%n", elevation);
+//        System.out.printf("Setting elev to %d%n", elevation);
         tile.setElevation(tile.elevation() + elevation);
         if (elevation >= PEAK_ELEVATION_RANGE.min()) {
             tile.setBiome(Biome.MOUNTAIN);

@@ -103,8 +103,7 @@ public class TerrainGen {
         windowResizeHandler = new GLFWFramebufferSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
-                windowWidth = width;
-                windowHeight = height;
+                setWindowSize(width, height);
                 GL11.glViewport(0, 0, windowWidth, windowHeight);
             }
         };
@@ -158,11 +157,11 @@ public class TerrainGen {
         // Configure the window
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW.GLFW_FALSE);
 
         // Set default size to half the monitor resolution
         final GLFWVidMode vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
-        windowWidth = vidmode.width() / 2;
-        windowHeight = vidmode.height() / 2;
+        setWindowSize(vidmode.width(), vidmode.height() / 2);
 
         // Create the window
         window = GLFW.glfwCreateWindow(windowWidth, windowHeight, "Terrain Gen", MemoryUtil.NULL,
@@ -242,6 +241,11 @@ public class TerrainGen {
      */
     private void exitGame() {
         GLFW.glfwSetWindowShouldClose(window, true);
+    }
+
+    private void setWindowSize(int width, int height) {
+        windowWidth = width;
+        windowHeight = height;
     }
 
     private void updateFPS() {
