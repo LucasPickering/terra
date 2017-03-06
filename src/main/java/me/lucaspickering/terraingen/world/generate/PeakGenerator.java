@@ -17,30 +17,32 @@ import me.lucaspickering.terraingen.world.util.TileSet;
  */
 public class PeakGenerator implements Generator {
 
-    private static final IntRange PEAK_COUNT_RANGE = new IntRange(7, 10);
+    private static final int TILES_PER_PEAK = 20;
     private static final IntRange PEAK_ELEVATION_RANGE =
-        new IntRange(15, World.ELEVATION_RANGE.max());
+        new IntRange(25, 40);
     private static final int MIN_PEAK_SEPARATION = 3; // Min distance between two peaks
-    private static final int SMOOTHING_SLOP = 4; // Variation in each direction for smoothing elev
-    private static final int PROPAGATION_RANGE = 5;
+    private static final int ELEV_SLOP = 0; // Variation in each direction for each elev
+    private static final int PROPAGATION_RANGE = 30;
+    private static final float PEAK_SLOPE = 0.7f; // Smaller values make elev drop off more quickly
 
     @Override
     public void generate(World world, Random random) {
         final TileSet worldTiles = world.getTiles();
-        final int peaksToGen = PEAK_COUNT_RANGE.randomIn(random);
+        final int peaksToGen = worldTiles.size() / TILES_PER_PEAK + 1;
         final TileSet peaks = worldTiles.selectTiles(random, peaksToGen, MIN_PEAK_SEPARATION);
 
         for (Tile peak : peaks) {
-            int elev = PEAK_ELEVATION_RANGE.randomIn(random);
+            int nominalElev = PEAK_ELEVATION_RANGE.randomIn(random);
 
             for (int dist = 0; dist <= PROPAGATION_RANGE; dist++) {
                 final TileSet tilesAtRange = worldTiles.getTilesAtDistance(peak, dist);
                 for (Tile tile : tilesAtRange) {
-                    final int sloppedElev = Funcs.randomSlop(random, elev, SMOOTHING_SLOP);
-                    addElev(tile, sloppedElev);
+                    final int sloppedElev = Funcs.randomSlop(random, nominalElev, ELEV_SLOP);
+                    setElev(tile, sloppedElev);
                 }
 
-                elev /= 2;
+                // Reduce the nominal elevation for the next distance step by a factor
+                nominalElev *= PEAK_SLOPE;
             }
         }
 
@@ -52,15 +54,15 @@ public class PeakGenerator implements Generator {
     }
 
     /**
-     * Sets the elevation of the given tile to the given value, then sets the tile to be
+     * Adds the given elevation to the tile's existing elevation, then sets the tile to be
      * {@link Biome#MOUNTAIN} if appropriate.
      *
      * @param tile      the tile to set
-     * @param elevation the elevation that the tile should get
+     * @param elevDelta the elevation to add
      */
-    private void addElev(Tile tile, int elevation) {
-//        System.out.printf("Setting elev to %d%n", elevation);
-        tile.setElevation(tile.elevation() + elevation);
+    private void setElev(Tile tile, int elevDelta) {
+        final int elevation = tile.elevation() + elevDelta;
+        tile.setElevation(elevation);
         if (elevation >= PEAK_ELEVATION_RANGE.min()) {
             tile.setBiome(Biome.MOUNTAIN);
         }

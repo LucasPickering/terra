@@ -260,8 +260,10 @@ public class TileSet extends AbstractSet<Tile> {
         final TileSet result = new TileSet();
 
         // Special case for distance 0
-        if (distance == 0 && contains(tile.pos())) {
-            result.add(tile);
+        if (distance == 0) {
+            if (contains(tile)) {
+                result.add(tile);
+            }
             return result;
         }
 
