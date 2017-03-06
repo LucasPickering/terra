@@ -36,6 +36,7 @@ public enum Biome {
         }
 
         private float map(float x) {
+            x = Math.max(fromMin, Math.min(x, fromMax));
             final float halfMapped = (x - fromMin) / (fromMax - fromMin); // Map to [0, 1]
             return halfMapped * (toMax - toMin) + toMin; // Now map to [toMin, toMax]
         }

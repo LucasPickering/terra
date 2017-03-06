@@ -11,6 +11,7 @@ import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.util.DoubleRange;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.world.generate.BiomePainter;
+import me.lucaspickering.terraingen.world.generate.ContinentClusterer;
 import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.generate.LandRougher;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
@@ -37,6 +38,7 @@ public class WorldHandler {
     private static final Generator[] GENERATORS = new Generator[]{
         new PeakGenerator(),
         new LandRougher(),
+        new ContinentClusterer(),
         new BiomePainter(),
         new WaterPainter()
 //        new BeachGenerator()

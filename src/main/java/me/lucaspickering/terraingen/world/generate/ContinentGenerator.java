@@ -17,6 +17,9 @@ import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
 
+/**
+ * Generates continents by clustering tiles together.
+ */
 public class ContinentGenerator implements Generator {
 
     // Range of number of continents to generate

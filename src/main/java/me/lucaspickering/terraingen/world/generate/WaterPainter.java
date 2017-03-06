@@ -48,12 +48,5 @@ public class WaterPainter implements Generator {
                 }
             }
         }
-
-        // TODO remove this
-        for (Tile tile : world.getTiles()) {
-            if (tile.biome() == Biome.NONE) {
-                tile.setBiome(Biome.LAKE);
-            }
-        }
     }
 }

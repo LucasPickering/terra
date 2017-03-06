@@ -31,9 +31,9 @@ public class BiomePainter implements Generator {
 
     // Initialize all the weights
     static {
-//        BIOME_WEIGHTS.put(Biome.PLAINS, 10);
+        BIOME_WEIGHTS.put(Biome.PLAINS, 10);
         BIOME_WEIGHTS.put(Biome.FOREST, 10);
-//        BIOME_WEIGHTS.put(Biome.DESERT, 2);
+        BIOME_WEIGHTS.put(Biome.DESERT, 2);
     }
 
     @Override
