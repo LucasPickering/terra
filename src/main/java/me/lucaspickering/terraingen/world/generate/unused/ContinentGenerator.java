@@ -1,4 +1,4 @@
-package me.lucaspickering.terraingen.world.generate;
+package me.lucaspickering.terraingen.world.generate.unused;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,6 +13,8 @@ import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
+import me.lucaspickering.terraingen.world.generate.Generator;
+import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;

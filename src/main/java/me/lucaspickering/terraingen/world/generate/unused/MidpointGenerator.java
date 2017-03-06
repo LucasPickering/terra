@@ -1,4 +1,4 @@
-package me.lucaspickering.terraingen.world.generate;
+package me.lucaspickering.terraingen.world.generate.unused;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -6,6 +6,7 @@ import java.util.Random;
 
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
+import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.util.TileSet;
