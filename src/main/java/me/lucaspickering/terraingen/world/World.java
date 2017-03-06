@@ -18,7 +18,7 @@ public class World {
     /**
      * Every tile's elevation must be in this range
      */
-    public static final IntRange ELEVATION_RANGE = new IntRange(-50, 50);
+    public static final IntRange ELEVATION_RANGE = new IntRange(-25, 50);
 
     /**
      * Any tile below, but not equal to, this elevation can feasibly become ocean tiles. Most

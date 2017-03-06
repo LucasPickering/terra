@@ -23,6 +23,7 @@ public class BiomePainter implements Generator {
 
     // Average size of each biome blotch
     private static final int AVERAGE_BLOTCH_SIZE = 10;
+    private static final int MIN_MOUNTAIN_ELEV = 30;
 
     // The biomes that we can paint in this routine, and the relative chance that each one will
     // be selected
@@ -30,8 +31,8 @@ public class BiomePainter implements Generator {
 
     // Initialize all the weights
     static {
-        BIOME_WEIGHTS.put(Biome.PLAINS, 10);
-//        BIOME_WEIGHTS.put(Biome.FOREST, 10);
+//        BIOME_WEIGHTS.put(Biome.PLAINS, 10);
+        BIOME_WEIGHTS.put(Biome.FOREST, 10);
 //        BIOME_WEIGHTS.put(Biome.DESERT, 2);
     }
 
@@ -115,7 +116,18 @@ public class BiomePainter implements Generator {
             final Biome biome = Funcs.randomFromCollectionWeighted(random,
                                                                    BIOME_WEIGHTS.keySet(),
                                                                    BIOME_WEIGHTS::get);
-            blotch.forEach(tile -> tile.setBiome(biome)); // Set the biome for each tile
+
+            // Set the biome for each tile in the cluster, if it doesnt have a biome already
+            for (Tile tile : blotch) {
+                if (tile.biome() == Biome.NONE) {
+                    // If the tile is at high elevation, make it mountain, otherwise normal biome
+                    if (tile.elevation() >= MIN_MOUNTAIN_ELEV) {
+                        tile.setBiome(Biome.MOUNTAIN);
+                    } else {
+                        tile.setBiome(biome);
+                    }
+                }
+            }
         }
     }
 }
