@@ -157,11 +157,13 @@ public class TerrainGen {
         // Configure the window
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
+
+        // Disable using high DPI on retina displays. TODO remove this and support retina
         GLFW.glfwWindowHint(GLFW.GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW.GLFW_FALSE);
 
         // Set default size to half the monitor resolution
         final GLFWVidMode vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
-        setWindowSize(vidmode.width(), vidmode.height() / 2);
+        setWindowSize(vidmode.width() / 2, vidmode.height() / 2);
 
         // Create the window
         window = GLFW.glfwCreateWindow(windowWidth, windowHeight, "Terrain Gen", MemoryUtil.NULL,
