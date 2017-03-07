@@ -17,8 +17,29 @@ public class PeakGenerator implements Generator {
                                                                       World.ELEVATION_RANGE.max());
     private static final int MIN_PEAK_SEPARATION = 3; // Min distance between two peaks
     private static final int PROPAGATION_RANGE = 30; // Radius of tiles that each peak raises
-    private static final float PEAK_SLOPE = 2f; // Larger values make elev drop off more quickly
+    private static final float PEAK_SLOPE = 0.25f; // Larger values make elev drop off more quickly
     private static final int FLOOR_ELEV = World.ELEVATION_RANGE.min() / 2;
+
+    /**
+     * Represents one mathematical function that, given distance from the peak, returns the
+     * elevation for a tile at the distance. The equation is configured with the elevation of the
+     * peak and a slope factor, to allow for the equation to vary from peak to peak.
+     */
+    private static class ElevationCalculator {
+
+        private final int peakElev;
+        private final float factor;
+
+        private ElevationCalculator(int peakElev, float factor) {
+            this.peakElev = peakElev;
+            this.factor = factor;
+        }
+
+        private int getElev(int distance) {
+            final int elev = peakElev / ((int) (factor * distance) + 1);
+            return Math.max(elev, FLOOR_ELEV); // Make sure nothing less than the floor is returned
+        }
+    }
 
     @Override
     public void generate(World world, Random random) {
@@ -32,11 +53,12 @@ public class PeakGenerator implements Generator {
 
         for (Tile peak : peaks) {
             final int peakElev = PEAK_ELEVATION_RANGE.randomIn(random);
+            final ElevationCalculator eq = new ElevationCalculator(peakElev, PEAK_SLOPE);
 
             for (int dist = 0; dist <= PROPAGATION_RANGE; dist++) {
-                // Get all tiles dist away from the peak, then calculate the desired elev for them
+                // Get all tiles <dist> away from the peak, then calculate the desired elev for them
                 final TileSet tilesAtRange = worldTiles.getTilesAtDistance(peak, dist);
-                final int elev = getElevFromDistance(dist, peakElev);
+                final int elev = eq.getElev(dist);
 
                 // Set the elev of each tile, but only if it would go up
                 for (Tile tile : tilesAtRange) {
@@ -46,9 +68,5 @@ public class PeakGenerator implements Generator {
                 }
             }
         }
-    }
-
-    private int getElevFromDistance(int distance, int peakElev) {
-        return Math.max(peakElev - (int) (distance * PEAK_SLOPE), FLOOR_ELEV);
     }
 }
