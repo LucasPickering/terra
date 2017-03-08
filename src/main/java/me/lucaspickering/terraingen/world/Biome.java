@@ -13,53 +13,35 @@ public enum Biome {
     // You can adjust how much the value of the tile color changes in relation to the elevation.
     // For more value change, use a larger range. You can have the range extend outside [0, 1],
     // and it will be coerced if necessary.
-    OCEAN("Ocean", 0x1653b7, new Mapping(-25, -10, 0.4f, 0.7f)),
-    COAST("Coast", 0x1887b2, new Mapping(-15, 0, 0.5f, 1f)),
-    LAKE("Lake", 0x09729b, new Mapping(-10, 0, 0.5f, 1f)),
-    BEACH("Beach", 0xf2ef59, new Mapping(0, 5, 0.75f, 0.95f)),
-    PLAINS("Plains", 0xb9f442, new Mapping(0, 40, 0.5f, 1f)),
-    FOREST("Forest", 0x249b09, new Mapping(0, 40, 0.3f, 0.8f)),
-    DESERT("Desert", 0xe2c909, new Mapping(0, 40, 0.65f, 0.95f)),
-    MOUNTAIN("Mountain", 0xbbbbbb, new Mapping(25, 50, 0.7f, 1f)),
-    NONE("None", Color.BLACK, new Mapping(0, 0, 0f, 0f));
+    OCEAN("Ocean", 0x1653b7, new DoubleRange(-25.0, -10.0), new DoubleRange(0.4, 0.7)),
+    COAST("Coast", 0x1887b2, new DoubleRange(-15.0, 0.0), new DoubleRange(0.5, 1.0)),
+    LAKE("Lake", 0x09729b, new DoubleRange(-10.0, 0.0), new DoubleRange(0.5, 1.0)),
+    BEACH("Beach", 0xf2ef59, new DoubleRange(0.0, 5.0), new DoubleRange(0.75, 0.95)),
+    PLAINS("Plains", 0xb9f442, new DoubleRange(0.0, 40.0), new DoubleRange(0.5, 1.0)),
+    FOREST("Forest", 0x249b09, new DoubleRange(0.0, 40.0), new DoubleRange(0.3, 0.8)),
+    DESERT("Desert", 0xe2c909, new DoubleRange(0.0, 40.0), new DoubleRange(0.65, 0.95)),
+    MOUNTAIN("Mountain", 0xbbbbbb, new DoubleRange(25.0, 50.0), new DoubleRange(0.7, 1.0)),
+    NONE("None", Color.BLACK, new DoubleRange(0.0, 0.0), new DoubleRange(0.0, 0.0));
 
-    private static class Mapping {
-
-        private final float fromMin;
-        private final float fromMax;
-        private final float toMin;
-        private final float toMax;
-
-        private Mapping(float fromMin, float fromMax, float toMin, float toMax) {
-            this.fromMin = fromMin;
-            this.fromMax = fromMax;
-            this.toMin = toMin;
-            this.toMax = toMax;
-        }
-
-        private float map(float x) {
-            x = Math.max(fromMin, Math.min(x, fromMax));
-            final float halfMapped = (x - fromMin) / (fromMax - fromMin); // Map to [0, 1]
-            return halfMapped * (toMax - toMin) + toMin; // Now map to [toMin, toMax]
-        }
-    }
-
-    private static final Range<Double> ZERO_TO_ONE = new DoubleRange(0.0, 1.0);
     public static final Set<Biome> LAND_BIOMES = EnumSet.of(BEACH, PLAINS, FOREST, DESERT,
                                                             MOUNTAIN);
 
     private final String displayName;
     private final Color baseColor;
-    private final Mapping colorValueMapping; // Mapping for calculating value of tile color
+    private final Range<Double> elevationRange;
+    private final Range<Double> valueRange;
 
-    Biome(String displayName, int baseColor, Mapping colorValueMapping) {
-        this(displayName, Funcs.colorFromRgb(baseColor), colorValueMapping);
+    Biome(String displayName, int baseColor, Range<Double> elevationRange,
+          Range<Double> valueRange) {
+        this(displayName, Funcs.colorFromRgb(baseColor), elevationRange, valueRange);
     }
 
-    Biome(String displayName, Color baseColor, Mapping colorValueMapping) {
+    Biome(String displayName, Color baseColor, Range<Double> elevationRange,
+          Range<Double> valueRange) {
         this.displayName = displayName;
         this.baseColor = baseColor;
-        this.colorValueMapping = colorValueMapping;
+        this.elevationRange = elevationRange;
+        this.valueRange = valueRange;
     }
 
     public boolean isLand() {
@@ -81,8 +63,7 @@ public enum Biome {
     public Color color(int elevation) {
         final float[] hsv = Funcs.toHSV(baseColor());
         // Change the value based on the elevation
-        final float value = colorValueMapping.map(elevation);
-        hsv[2] = ZERO_TO_ONE.coerce((double) value).floatValue(); // Coerce value to [0, 1]
+        hsv[2] = elevationRange.mapTo((double) elevation, valueRange).floatValue();
         return Funcs.toRGB(hsv);
     }
 }
