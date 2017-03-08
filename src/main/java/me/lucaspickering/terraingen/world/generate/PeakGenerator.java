@@ -2,10 +2,11 @@ package me.lucaspickering.terraingen.world.generate;
 
 import java.util.Random;
 
-import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.util.TileSet;
+import me.lucaspickering.utils.IntRange;
+import me.lucaspickering.utils.Range;
 
 /**
  * Generates peaks and raises the tiles around them,
@@ -13,12 +14,12 @@ import me.lucaspickering.terraingen.world.util.TileSet;
 public class PeakGenerator implements Generator {
 
     private static final int TILES_PER_PEAK = 2000;
-    private static final IntRange PEAK_ELEVATION_RANGE = new IntRange(15,
-                                                                      World.ELEVATION_RANGE.max());
+    private static final Range<Integer> PEAK_ELEVATION_RANGE =
+        new IntRange(15, World.ELEVATION_RANGE.upper());
     private static final int MIN_PEAK_SEPARATION = 3; // Min distance between two peaks
     private static final int PROPAGATION_RANGE = 30; // Radius of tiles that each peak raises
     private static final float PEAK_SLOPE = 0.25f; // Larger values make elev drop off more quickly
-    private static final int FLOOR_ELEV = World.ELEVATION_RANGE.min() / 2;
+    private static final int FLOOR_ELEV = World.ELEVATION_RANGE.lower() / 2;
 
     /**
      * Represents one mathematical function that, given distance from the peak, returns the

@@ -1,6 +1,6 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>terraingen</groupId>
+    <groupId>me.lucaspickering</groupId>
     <artifactId>Terrain-Gen</artifactId>
     <version>1.0.0</version>
     <properties>
@@ -163,6 +163,11 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
             <version>1.17.3</version>
+        </dependency>
+        <dependency>
+            <groupId>me.lucaspickering</groupId>
+            <artifactId>LP-utils</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 </project>

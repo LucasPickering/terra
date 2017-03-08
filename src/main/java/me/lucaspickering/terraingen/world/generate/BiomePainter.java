@@ -4,7 +4,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
 
-import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
@@ -12,6 +11,7 @@ import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
+import me.lucaspickering.utils.GeneralFuncs;
 
 /**
  * Paints biomes onto each continent. Without adjusting elevation, each tile is assigned a land
@@ -92,7 +92,7 @@ public class BiomePainter implements Generator {
         // While there are tiles left to assign...
         while (!unselectedTiles.isEmpty() && !incompleteBiomes.isEmpty()) {
             // Pick a seed that still has openings to work from
-            final Tile seed = Funcs.randomFromCollection(random, incompleteBiomes);
+            final Tile seed = GeneralFuncs.randomFromCollection(random, incompleteBiomes);
             final Cluster biome = biomes.get(seed); // The biome grown from that seed
 
             final TileSet adjTiles = biome.allAdjacents(); // All tiles adjacent to this biome
@@ -105,7 +105,7 @@ public class BiomePainter implements Generator {
             }
 
             // Pick one of those unassigned adjacent tiles, and add it to this biome
-            final Tile tile = Funcs.randomFromCollection(random, adjTiles);
+            final Tile tile = GeneralFuncs.randomFromCollection(random, adjTiles);
             biome.add(tile);
             unselectedTiles.remove(tile);
         }
@@ -113,9 +113,9 @@ public class BiomePainter implements Generator {
         // Step 4
         // Pick a biome for each cluster, using weighted chance as defined in BIOME_WEIGHTS
         for (Cluster blotch : biomes.values()) {
-            final Biome biome = Funcs.randomFromCollectionWeighted(random,
-                                                                   BIOME_WEIGHTS.keySet(),
-                                                                   BIOME_WEIGHTS::get);
+            final Biome biome = GeneralFuncs.randomFromCollectionWeighted(random,
+                                                                          BIOME_WEIGHTS.keySet(),
+                                                                          BIOME_WEIGHTS::get);
 
             // Set the biome for each tile in the cluster, if it doesnt have a biome already
             for (Tile tile : blotch) {

@@ -1,10 +1,12 @@
 package me.lucaspickering.terraingen.world;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.EnumSet;
 import java.util.Set;
 
 import me.lucaspickering.terraingen.util.Funcs;
+import me.lucaspickering.utils.DoubleRange;
+import me.lucaspickering.utils.Range;
 
 public enum Biome {
 
@@ -42,6 +44,7 @@ public enum Biome {
         }
     }
 
+    private static final Range<Double> ZERO_TO_ONE = new DoubleRange(0.0, 1.0);
     public static final Set<Biome> LAND_BIOMES = EnumSet.of(BEACH, PLAINS, FOREST, DESERT,
                                                             MOUNTAIN);
 
@@ -79,7 +82,7 @@ public enum Biome {
         final float[] hsv = Funcs.toHSV(baseColor());
         // Change the value based on the elevation
         final float value = colorValueMapping.map(elevation);
-        hsv[2] = (float) Funcs.coerce(0, value, 1); // Coerce value to [0, 1]
+        hsv[2] = ZERO_TO_ONE.coerce((double) value).floatValue(); // Coerce value to [0, 1]
         return Funcs.toRGB(hsv);
     }
 }

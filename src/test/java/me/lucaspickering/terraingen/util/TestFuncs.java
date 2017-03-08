@@ -2,27 +2,11 @@ package me.lucaspickering.terraingen.util;
 
 import org.junit.Test;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Random;
+import java.awt.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class TestFuncs {
-
-    @Test
-    public void testRandomFromCollection() throws Exception {
-        final int size = 10;
-        final Collection<Integer> coll = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            coll.add(i);
-        }
-
-        final int randomInt = Funcs.randomFromCollection(new Random(), coll);
-        assertTrue("Should be in range [0, 9]", 0 <= randomInt && randomInt < size);
-    }
 
     @Test
     public void testColorFromArgb() throws Exception {

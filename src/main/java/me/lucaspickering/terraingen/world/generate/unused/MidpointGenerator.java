@@ -5,13 +5,13 @@ import java.util.Map;
 import java.util.Random;
 
 import me.lucaspickering.terraingen.util.Direction;
-import me.lucaspickering.terraingen.util.Funcs;
+import me.lucaspickering.terraingen.world.Biome;
+import me.lucaspickering.terraingen.world.Tile;
+import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.util.TilePoint;
-import me.lucaspickering.terraingen.world.Biome;
 import me.lucaspickering.terraingen.world.util.TileSet;
-import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.Tile;
+import me.lucaspickering.utils.GeneralFuncs;
 
 public class MidpointGenerator implements Generator {
 
@@ -65,7 +65,7 @@ public class MidpointGenerator implements Generator {
         final int elevDiff = Math.abs(tile1.elevation() - tile2.elevation());
         final int slop = (int) (elevDiff * SLOP_FACTOR) + 1;
         final int avgElev = (tile1.elevation() + tile2.elevation()) / 2;
-        midTile.setElevation(Funcs.randomSlop(random, avgElev, slop));
+        midTile.setElevation(GeneralFuncs.randomSlop(random, avgElev, slop));
 
         // If there is space between each tile and the midpoint, recursively smooth between them
         if (!tile1.isAdjacentTo(midTile)) {

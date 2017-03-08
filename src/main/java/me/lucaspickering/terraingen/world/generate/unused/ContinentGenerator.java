@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Random;
 
 import me.lucaspickering.terraingen.util.Direction;
-import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
@@ -18,6 +16,9 @@ import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
+import me.lucaspickering.utils.GeneralFuncs;
+import me.lucaspickering.utils.IntRange;
+import me.lucaspickering.utils.Range;
 
 /**
  * Generates continents by clustering tiles together.
@@ -25,11 +26,11 @@ import me.lucaspickering.terraingen.world.util.TileSet;
 public class ContinentGenerator implements Generator {
 
     // Range of number of continents to generate
-    private static final IntRange CONTINENT_COUNT_RANGE = new IntRange(10, 20);
+    private static final Range<Integer> CONTINENT_COUNT_RANGE = new IntRange(10, 20);
 
     // the range that a continent's target size can be in. Note that continents may end up being
     // smaller than the minimum of this range, if there aren't enough tiles to make them bigger.
-    private static final IntRange CONTINENT_SIZE_RANGE = new IntRange(100, 1000);
+    private static final Range<Integer> CONTINENT_SIZE_RANGE = new IntRange(100, 1000);
 
     private World world; // The world being operated on
     private Random random;
@@ -58,7 +59,7 @@ public class ContinentGenerator implements Generator {
         // While we haven't hit our target number and there are enough tiles left,
         // generate a new continent
         while (world.getContinents().size() < numToGenerate
-               && unassignedTiles.size() >= CONTINENT_SIZE_RANGE.min()) {
+               && unassignedTiles.size() >= CONTINENT_SIZE_RANGE.lower()) {
             final Continent continent = generateContinent();
             // If the continent is null, that means that it was generated, but merged into
             // another continent that is already in the list.
@@ -83,7 +84,7 @@ public class ContinentGenerator implements Generator {
         final int targetSize = CONTINENT_SIZE_RANGE.randomIn(random); // Pick a target size
 
         // Pick a random seed, add it to the continent, and remove it from the pool
-        final Tile seed = Funcs.randomFromCollection(random, unassignedTiles);
+        final Tile seed = GeneralFuncs.randomFromCollection(random, unassignedTiles);
         addToContinent(seed, continent);
 
         // Keep adding until we hit our target size
@@ -98,7 +99,7 @@ public class ContinentGenerator implements Generator {
             }
 
             // Pick a random tile adjacent to the continent and add it in
-            final Tile nextTile = Funcs.randomFromCollection(random, candidates);
+            final Tile nextTile = GeneralFuncs.randomFromCollection(random, candidates);
             addToContinent(nextTile, continent);
         }
 
@@ -148,7 +149,7 @@ public class ContinentGenerator implements Generator {
                 final Cluster copiedCluster = new Cluster(nonContinentCluster, world.getTiles());
 
                 // Pick any tile adjacent to this cluster, and figure out what continent it's in
-                final Tile adjTile = Funcs.firstFromCollection(copiedCluster.allAdjacents());
+                final Tile adjTile = GeneralFuncs.firstFromCollection(copiedCluster.allAdjacents());
                 final Continent surroundingContinent = world.getTilesToContinents().get(adjTile);
 
                 // Add the cluster to the adjacent continent

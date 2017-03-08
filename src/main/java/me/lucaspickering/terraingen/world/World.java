@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import me.lucaspickering.terraingen.util.IntRange;
 import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
+import me.lucaspickering.utils.IntRange;
+import me.lucaspickering.utils.Range;
 
 /**
  * A simple container for holding information about a world. The main portion of this class is
@@ -18,7 +19,7 @@ public class World {
     /**
      * Every tile's elevation must be in this range
      */
-    public static final IntRange ELEVATION_RANGE = new IntRange(-50, 50);
+    public static final Range<Integer> ELEVATION_RANGE = new IntRange(-50, 50);
 
     /**
      * Any tile below, but not equal to, this elevation can feasibly become ocean tiles. Most

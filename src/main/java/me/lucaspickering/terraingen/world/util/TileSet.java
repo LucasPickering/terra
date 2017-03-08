@@ -19,9 +19,9 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import me.lucaspickering.terraingen.util.Direction;
-import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.util.Pair;
 import me.lucaspickering.terraingen.world.Tile;
+import me.lucaspickering.utils.GeneralFuncs;
 
 /**
  * A set of {@link Tile}s. Internally, tiles are stored in a map, keyed by their position, but
@@ -310,7 +310,7 @@ public class TileSet extends AbstractSet<Tile> {
         // While we haven't hit our target number and there are tiles left to pick...
         while (result.size() < numToPick && !candidates.isEmpty()) {
             // Pick a random peak from the set of potential peaks
-            final Tile tile = Funcs.randomFromCollection(random, candidates);
+            final Tile tile = GeneralFuncs.randomFromCollection(random, candidates);
             result.add(tile); // Add it to the collection
 
             // If we need spacing, remove nearby tiles
@@ -372,7 +372,7 @@ public class TileSet extends AbstractSet<Tile> {
         // Each iteration of this loop creates a new cluster
         while (!unclusteredTiles.isEmpty()) {
             // Grab a tile to work with
-            final Tile firstTile = Funcs.firstFromCollection(unclusteredTiles);
+            final Tile firstTile = GeneralFuncs.firstFromCollection(unclusteredTiles);
             final boolean isPositive = predicate.test(firstTile); // Get its state (pos/neg)
 
             // Start building a cluster around this tile
@@ -386,7 +386,7 @@ public class TileSet extends AbstractSet<Tile> {
             // If there is still at least one tile whose adjacents haven't been checked yet...
             while (!uncheckedTiles.isEmpty()) {
                 // Grab one of those unchecked tiles
-                final Tile tile = Funcs.firstFromCollection(uncheckedTiles);
+                final Tile tile = GeneralFuncs.firstFromCollection(uncheckedTiles);
 
                 // For each tile adjacent to that one...
                 for (final Tile adjTile : getAdjacentTiles(tile).values()) {

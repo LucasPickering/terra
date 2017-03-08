@@ -8,7 +8,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import me.lucaspickering.terraingen.render.Renderer;
-import me.lucaspickering.terraingen.util.DoubleRange;
 import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.world.generate.BiomePainter;
 import me.lucaspickering.terraingen.world.generate.ContinentClusterer;
@@ -17,6 +16,8 @@ import me.lucaspickering.terraingen.world.generate.LandRougher;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.utils.DoubleRange;
+import me.lucaspickering.utils.Range;
 
 /**
  * A class with fields and methods that can entirely encapsulate a {@link World} and
@@ -30,7 +31,7 @@ public class WorldHandler {
     /**
      * A tile's radius (in pixels) must be in this range (this is essentially a zoom limit)
      */
-    public static final DoubleRange VALID_TILE_RADII = new DoubleRange(10, 200);
+    public static final Range<Double> VALID_TILE_RADII = new DoubleRange(10.0, 200.0);
 
     // World size
     private static final int DEFAULT_SIZE = 100;
@@ -71,7 +72,7 @@ public class WorldHandler {
 
         logger.log(Level.FINE, String.format("Using seed '%d'", seed));
         worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
-        setTileRadius(VALID_TILE_RADII.min());
+        setTileRadius(VALID_TILE_RADII.lower());
     }
 
     /**
