@@ -9,6 +9,8 @@ import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
+import me.lucaspickering.utils.range.DoubleRange;
+import me.lucaspickering.utils.range.Range;
 
 /**
  * Uses a noise function (Perlin) to generate terrain
@@ -16,6 +18,7 @@ import me.lucaspickering.terraingen.world.util.TileSet;
 public class NoiseGenerator implements Generator {
 
     private static final double RADIUS = 100;
+    private static final Range<Double> NOISE_RANGE = new DoubleRange(0.9, 1.1);
 
     private Perlin noiseGenerator;
 
@@ -35,7 +38,8 @@ public class NoiseGenerator implements Generator {
             final double nz = Math.abs(pos.z()) / RADIUS - 0.5;
 
             final double noise = noiseGenerator.getValue(nx, ny, nz);
-            final int elevation = World.ELEVATION_RANGE.denormalize(noise);
+            System.out.println(noise);
+            final int elevation = NOISE_RANGE.mapTo(noise, World.ELEVATION_RANGE);
             tile.setElevation(elevation);
         }
     }
