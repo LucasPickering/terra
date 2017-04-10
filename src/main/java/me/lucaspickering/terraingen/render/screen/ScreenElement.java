@@ -2,7 +2,7 @@ package me.lucaspickering.terraingen.render.screen;
 
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.render.Renderer;
-import me.lucaspickering.terraingen.util.Point;
+import me.lucaspickering.utils.Point;
 
 /**
  * A {@code ScreenElement} is anything that be drawn into the game window. A {@code ScreenElement}

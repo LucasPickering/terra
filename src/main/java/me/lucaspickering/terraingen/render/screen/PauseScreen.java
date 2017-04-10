@@ -9,7 +9,7 @@ import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.screen.gui.Button;
 import me.lucaspickering.terraingen.render.screen.gui.GuiElement;
 import me.lucaspickering.terraingen.util.Colors;
-import me.lucaspickering.terraingen.util.Point;
+import me.lucaspickering.utils.Point;
 
 public class PauseScreen extends Screen {
 

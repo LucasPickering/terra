@@ -10,13 +10,13 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import me.lucaspickering.terraingen.render.Renderer;
-import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.world.generate.BiomePainter;
 import me.lucaspickering.terraingen.world.generate.ContinentClusterer;
 import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.generate.NoiseGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.utils.Point;
 import me.lucaspickering.utils.range.DoubleRange;
 import me.lucaspickering.utils.range.Range;
 

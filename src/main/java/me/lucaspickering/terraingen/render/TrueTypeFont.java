@@ -18,7 +18,7 @@ import java.util.Objects;
 
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.terraingen.util.Pair;
+import me.lucaspickering.utils.Pair;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 public class TrueTypeFont {

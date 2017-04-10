@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import me.lucaspickering.terraingen.util.Pair;
 import me.lucaspickering.terraingen.world.Tile;
+import me.lucaspickering.utils.Pair;
 
 /**
  * A map of {@link Tile}s to some other type. Internally, Tile:T pairs are stored in a map, keyed

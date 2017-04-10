@@ -9,8 +9,8 @@ import me.lucaspickering.terraingen.render.Font;
 import me.lucaspickering.terraingen.render.HorizAlignment;
 import me.lucaspickering.terraingen.render.VertAlignment;
 import me.lucaspickering.terraingen.util.Colors;
-import me.lucaspickering.terraingen.util.Pair;
-import me.lucaspickering.terraingen.util.Point;
+import me.lucaspickering.utils.Pair;
+import me.lucaspickering.utils.Point;
 
 public class TextBox extends GuiElement {
 

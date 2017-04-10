@@ -18,7 +18,7 @@ import javax.imageio.ImageIO;
 
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.terraingen.util.Pair;
+import me.lucaspickering.utils.Pair;
 
 public class Renderer {
 

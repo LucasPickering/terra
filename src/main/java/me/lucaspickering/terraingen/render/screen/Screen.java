@@ -15,7 +15,7 @@ import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.GuiElement;
-import me.lucaspickering.terraingen.util.Point;
+import me.lucaspickering.utils.Point;
 
 /**
  * A {@code Screen} is a type of {@link ScreenElement} that is meant to be a top-level element.

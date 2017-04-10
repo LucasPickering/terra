@@ -19,9 +19,9 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import me.lucaspickering.terraingen.util.Direction;
-import me.lucaspickering.terraingen.util.Pair;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.utils.GeneralFuncs;
+import me.lucaspickering.utils.Pair;
 
 /**
  * A set of {@link Tile}s. Internally, tiles are stored in a map, keyed by their position, but

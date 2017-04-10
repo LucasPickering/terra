@@ -1,6 +1,6 @@
 package me.lucaspickering.terraingen.render.event;
 
-import me.lucaspickering.terraingen.util.Point;
+import me.lucaspickering.utils.Point;
 
 public class ScrollEvent extends Event {
 

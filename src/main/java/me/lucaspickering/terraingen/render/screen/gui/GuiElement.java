@@ -5,7 +5,7 @@ import java.util.Objects;
 import me.lucaspickering.terraingen.render.HorizAlignment;
 import me.lucaspickering.terraingen.render.VertAlignment;
 import me.lucaspickering.terraingen.render.screen.ScreenElement;
-import me.lucaspickering.terraingen.util.Point;
+import me.lucaspickering.utils.Point;
 
 public abstract class GuiElement implements ScreenElement {
 
@@ -144,6 +144,8 @@ public abstract class GuiElement implements ScreenElement {
     }
 
     private void updateAdjustedPos() {
-        adjustedPos = pos.adjustForAlignment(horizAlign, vertAlign, width, height);
+        final double xShift = horizAlign.leftAdjustment(width);
+        final double yShift = vertAlign.topAdjustment(height);
+        adjustedPos = pos.plus(xShift, yShift);
     }
 }

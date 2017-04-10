@@ -10,11 +10,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import me.lucaspickering.terraingen.TerrainGen;
-import me.lucaspickering.terraingen.util.Pair;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
+import me.lucaspickering.utils.Pair;
 import me.lucaspickering.utils.range.DoubleRange;
 import me.lucaspickering.utils.range.IntRange;
 import me.lucaspickering.utils.range.Range;

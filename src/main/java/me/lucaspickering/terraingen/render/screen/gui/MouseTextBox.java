@@ -3,7 +3,7 @@ package me.lucaspickering.terraingen.render.screen.gui;
 import me.lucaspickering.terraingen.render.HorizAlignment;
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.render.VertAlignment;
-import me.lucaspickering.terraingen.util.Point;
+import me.lucaspickering.utils.Point;
 
 public class MouseTextBox extends TextBox {
 

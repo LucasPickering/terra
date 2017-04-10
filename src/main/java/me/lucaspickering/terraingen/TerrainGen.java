@@ -23,8 +23,8 @@ import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.Screen;
 import me.lucaspickering.terraingen.render.screen.WorldScreen;
 import me.lucaspickering.terraingen.util.Colors;
-import me.lucaspickering.terraingen.util.Point;
 import me.lucaspickering.terraingen.world.WorldHandler;
+import me.lucaspickering.utils.Point;
 
 public class TerrainGen {
 
