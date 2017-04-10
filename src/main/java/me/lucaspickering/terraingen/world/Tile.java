@@ -11,8 +11,8 @@ public class Tile {
 
     public static final int NUM_SIDES = Direction.values().length;
 
-    private static final String INFO_STRING = "Biome: %s%nElevation: %d";
-    private static final String DEBUG_INFO_STRING = "Pos: %s";
+    private static final String INFO_STRING = "Biome: %s%nElevation: %d%nHumidity: %d%%";
+    private static final String DEBUG_INFO_STRING = "%nPos: %s";
 
     /**
      * An immutable version of a tile. Should be created externally via {@link #immutableCopy()}.
@@ -127,14 +127,15 @@ public class Tile {
             case ELEVATION:
                 return colorMode.interpolateColor(elevation(), World.ELEVATION_RANGE);
             case HUMIDITY:
-                if (biome().isLand()) {
-                    return colorMode.interpolateColor(humidity(), World.HUMIDITY_RANGE);
+                // Water tiles are always blue
+                if (biome().isWater()) {
+                    return Color.BLUE;
                 }
-                return Color.BLUE;
+                return colorMode.interpolateColor(humidity(), World.HUMIDITY_RANGE);
             case TEMPERATURE:
                 return colorMode.interpolateColor(temperature(), World.TEMPERATURE_RANGE);
             case BIOME:
-                return biome().color(0);
+                return biome().color();
             case COMPOSITE:
                 return Color.BLACK;
         }
@@ -143,11 +144,12 @@ public class Tile {
 
     public String info() {
         // If in debug mode, display extra debug info
+        final String info = String.format(INFO_STRING,
+                                          biome.displayName(), elevation, (int) (humidity * 100));
         if (TerrainGen.instance().getDebug()) {
-            return String.format(INFO_STRING + "%n" + DEBUG_INFO_STRING,
-                                 biome.displayName(), elevation, pos);
+            return info + String.format(DEBUG_INFO_STRING, pos);
         }
-        return String.format(INFO_STRING, biome, elevation);
+        return info;
     }
 
     public Tile immutableCopy() {

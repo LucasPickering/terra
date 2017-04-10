@@ -24,10 +24,10 @@ public class NoiseHumidityGenerator extends NoiseGenerator {
     public NoiseHumidityGenerator() {
         super(new Perlin());
         noiseGenerator.setSeed((int) TerrainGen.instance().getSeed());
-        noiseGenerator.setFrequency(3.5);
+        noiseGenerator.setFrequency(8.0);
         noiseGenerator.setLacunarity(Perlin.DEFAULT_PERLIN_LACUNARITY);
         noiseGenerator.setPersistence(Perlin.DEFAULT_PERLIN_PERSISTENCE);
-        noiseGenerator.setOctaveCount(12);
+        noiseGenerator.setOctaveCount(Perlin.DEFAULT_PERLIN_OCTAVE_COUNT);
     }
 
     @Override
