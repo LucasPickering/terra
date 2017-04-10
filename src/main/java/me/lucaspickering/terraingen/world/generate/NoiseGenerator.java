@@ -1,13 +1,13 @@
 package me.lucaspickering.terraingen.world.generate;
 
-import com.flowpowered.noise.NoiseQuality;
 import com.flowpowered.noise.module.source.Perlin;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Pair;
@@ -15,7 +15,6 @@ import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
-import me.lucaspickering.utils.MathFuncs;
 import me.lucaspickering.utils.range.DoubleRange;
 import me.lucaspickering.utils.range.IntRange;
 import me.lucaspickering.utils.range.Range;
@@ -32,44 +31,40 @@ public class NoiseGenerator implements Generator {
     public NoiseGenerator() {
         noiseGenerator = new Perlin();
         noiseGenerator.setSeed((int) TerrainGen.instance().getSeed());
-        noiseGenerator.setFrequency(1.5);
-        noiseGenerator.setNoiseQuality(NoiseQuality.BEST);
+        noiseGenerator.setFrequency(3.5);
+        noiseGenerator.setLacunarity(Perlin.DEFAULT_PERLIN_LACUNARITY);
+        noiseGenerator.setPersistence(Perlin.DEFAULT_PERLIN_PERSISTENCE);
+        noiseGenerator.setOctaveCount(12);
     }
 
     @Override
     public void generate(World world, Random random) {
         final TileSet worldTiles = world.getTiles();
 
-        // Get the min and max coordinate values among all tiles (used for generating noise)
-        int coordMin = Integer.MAX_VALUE;
-        int coordMax = Integer.MIN_VALUE;
+        // Build a range that bounds all x, y, and z values
+        final List<Integer> coords = new ArrayList<>(worldTiles.size() * 3);
         for (Tile tile : worldTiles) {
             final TilePoint pos = tile.pos();
-            coordMin = MathFuncs.min(coordMin, pos.x(), pos.y(), pos.z());
-            coordMax = MathFuncs.max(coordMax, pos.x(), pos.y(), pos.z());
+            coords.add(pos.x());
+            coords.add(pos.y());
+            coords.add(pos.z());
         }
-        final Range<Integer> coordinateRange = new IntRange(coordMin, coordMax);
+        final Range<Integer> coordinateRange = new IntRange(coords);
 
         // Compute a noise value for each tile. This can be done in parallel.
-        final List<Pair<Tile, Double>> noises = worldTiles.parallelStream()
+        final Map<Tile, Double> noises = worldTiles.parallelStream()
             .map(tile -> generateNoise(tile, coordinateRange))
-            .collect(Collectors.toList());
+            .collect(Pair.mapCollector());
 
-        // Find min and max noise values, and create a range based on them
-        double minNoise = Double.MAX_VALUE;
-        double maxNoise = Double.MIN_VALUE;
-        for (Pair<Tile, Double> pair : noises) {
-            final double noise = pair.second();
-            minNoise = Math.min(minNoise, noise);
-            maxNoise = Math.max(maxNoise, noise);
-        }
-        final Range<Double> noiseRange = new DoubleRange(minNoise, maxNoise);
+        // Create a range that bounds the noises
+        final Range<Double> noiseRange = new DoubleRange(noises.values());
 
         // Map each noise value to an elevation. This can be done in parallel.
-        noises.parallelStream().forEach(p -> setElevation(p, noiseRange));
+        noises.entrySet().parallelStream().forEach(e -> setElevation(e.getKey(),
+                                                                     e.getValue(),
+                                                                     noiseRange));
 
-        LOGGER.log(Level.FINER, String.format("Min noise: %f; Max noise: %f",
-                                              noiseRange.lower(), noiseRange.upper()));
+        LOGGER.log(Level.FINER, String.format("Noise range: %s", noiseRange));
     }
 
     private Pair<Tile, Double> generateNoise(Tile tile, Range<Integer> coordinateRange) {
@@ -81,9 +76,7 @@ public class NoiseGenerator implements Generator {
         return new Pair<>(tile, noiseGenerator.getValue(nx, ny, nz));
     }
 
-    private void setElevation(Pair<Tile, Double> tileNoise, Range<Double> noiseRange) {
-        final Tile tile = tileNoise.first();
-        final double noise = tileNoise.second();
+    private void setElevation(Tile tile, double noise, Range<Double> noiseRange) {
         final int elevation = noiseRange.mapTo(noise, World.ELEVATION_RANGE);
         tile.setElevation(elevation);
     }
