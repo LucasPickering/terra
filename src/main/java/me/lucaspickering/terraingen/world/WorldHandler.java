@@ -3,9 +3,11 @@ package me.lucaspickering.terraingen.world;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.util.Point;
@@ -102,11 +104,15 @@ public class WorldHandler {
      * the generation process is complete.
      */
     public void generate() {
+        // Initialize generators outside the timer. This may get its own timer later?
+        final List<Generator> generators = Arrays.stream(Generators.values()).map
+            (Generators::makeGenerator).collect(Collectors.toList());
+
         final long startTime = System.currentTimeMillis(); // We're timing this
         final World world = new World(size);
 
         // Apply each generator in sequence (this is the heavy lifting)
-        Arrays.stream(Generators.values()).forEach(gen -> runGenerator(gen.makeGenerator(), world));
+        generators.forEach(gen -> runGenerator(gen, world));
 
         this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
         logger.log(Level.FINE, String.format("World generation took %d ms",
