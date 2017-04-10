@@ -12,7 +12,7 @@ public class Tile {
     public static final int NUM_SIDES = Direction.values().length;
 
     private static final String INFO_STRING = "Biome: %s%nElevation: %d";
-    private static final String DEBUG_INFO_STRING = "Pos: %s%nColor: %s";
+    private static final String DEBUG_INFO_STRING = "Pos: %s";
 
     /**
      * An immutable version of a tile. Should be created externally via {@link #immutableCopy()}.
@@ -20,7 +20,7 @@ public class Tile {
     private static class ImmutableTile extends Tile {
 
         private ImmutableTile(Tile tile) {
-            super(tile.pos(), tile.biome(), tile.elevation());
+            super(tile.pos(), tile.biome(), tile.elevation(), tile.humidity(), tile.temperature());
         }
 
         @Override
@@ -37,6 +37,11 @@ public class Tile {
         public void setHumidity(double humidity) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public void setTemperature(int temperature) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     /**
@@ -49,16 +54,20 @@ public class Tile {
     private int elevation;
     private double humidity;
 
+    private int temperature;
+
     public Tile(TilePoint pos) {
         Objects.requireNonNull(pos);
         this.pos = pos;
     }
 
-    protected Tile(TilePoint pos, Biome biome, int elevation) {
+    private Tile(TilePoint pos, Biome biome, int elevation, double humidity, int temperature) {
         this(pos);
         Objects.requireNonNull(biome);
         this.biome = biome;
         this.elevation = elevation;
+        this.humidity = humidity;
+        this.temperature = temperature;
     }
 
     public final TilePoint pos() {
@@ -105,16 +114,38 @@ public class Tile {
         this.humidity = World.HUMIDITY_RANGE.coerce(humidity);
     }
 
-    public final Color backgroundColor() {
-        return biome.color(elevation);
+    public int temperature() {
+        return temperature;
+    }
+
+    public void setTemperature(int temperature) {
+        this.temperature = World.TEMPERATURE_RANGE.coerce(temperature);
+    }
+
+    public final Color getColor(TileColorMode colorMode) {
+        switch (colorMode) {
+            case ELEVATION:
+                return colorMode.interpolateColor(elevation(), World.ELEVATION_RANGE);
+            case HUMIDITY:
+                if (biome().isLand()) {
+                    return colorMode.interpolateColor(humidity(), World.HUMIDITY_RANGE);
+                }
+                return Color.BLUE;
+            case TEMPERATURE:
+                return colorMode.interpolateColor(temperature(), World.TEMPERATURE_RANGE);
+            case BIOME:
+                return biome().color(0);
+            case COMPOSITE:
+                return Color.BLACK;
+        }
+        throw new IllegalArgumentException("Unknown color mode: " + colorMode);
     }
 
     public String info() {
         // If in debug mode, display extra debug info
         if (TerrainGen.instance().getDebug()) {
-            final Color bgColor = backgroundColor();
             return String.format(INFO_STRING + "%n" + DEBUG_INFO_STRING,
-                                 biome.displayName(), elevation, pos, bgColor);
+                                 biome.displayName(), elevation, pos);
         }
         return String.format(INFO_STRING, biome, elevation);
     }

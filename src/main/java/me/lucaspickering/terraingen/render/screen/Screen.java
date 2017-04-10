@@ -132,7 +132,7 @@ public abstract class Screen implements ScreenElement {
     public void onKey(KeyEvent event) {
         if (event.action == GLFW.GLFW_RELEASE) {
             switch (event.key) {
-                case GLFW.GLFW_KEY_F3:
+                case GLFW.GLFW_KEY_F9:
                     // Toggle debug mode
                     final TerrainGen terrainGen = getTerrainGen();
                     terrainGen.setDebug(!terrainGen.getDebug());

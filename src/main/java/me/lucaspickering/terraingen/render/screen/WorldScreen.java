@@ -14,6 +14,7 @@ import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Funcs;
+import me.lucaspickering.terraingen.world.TileColorMode;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.WorldHandler;
@@ -31,6 +32,8 @@ public class WorldScreen extends Screen {
 
     private final WorldHandler worldHandler;
     private final MouseTextBox mouseOverTileInfo;
+
+    private TileColorMode tileColorMode = TileColorMode.ELEVATION;
 
     // The last position of the mouse while dragging. Null if not dragging.
     private Point lastMouseDragPos;
@@ -126,7 +129,7 @@ public class WorldScreen extends Screen {
 
     private void drawTileBackground(Tile tile) {
         // Set the color then draw a hexagon
-        Funcs.setGlColor(tile.backgroundColor());
+        Funcs.setGlColor(tile.getColor(tileColorMode));
         GL11.glBegin(GL11.GL_POLYGON);
         for (Point vertex : worldHandler.getTileVertices()) {
             GL11.glVertex2d(vertex.x(), vertex.y());
@@ -177,6 +180,21 @@ public class WorldScreen extends Screen {
                 case GLFW.GLFW_KEY_R:
                     // Re-generate the world
                     worldHandler.generateParallel();
+                    break;
+                case GLFW.GLFW_KEY_F1:
+                    tileColorMode = TileColorMode.ELEVATION;
+                    break;
+                case GLFW.GLFW_KEY_F2:
+                    tileColorMode = TileColorMode.HUMIDITY;
+                    break;
+                case GLFW.GLFW_KEY_F3:
+                    tileColorMode = TileColorMode.TEMPERATURE;
+                    break;
+                case GLFW.GLFW_KEY_F4:
+                    tileColorMode = TileColorMode.BIOME;
+                    break;
+                case GLFW.GLFW_KEY_F5:
+                    tileColorMode = TileColorMode.COMPOSITE;
                     break;
             }
         }
