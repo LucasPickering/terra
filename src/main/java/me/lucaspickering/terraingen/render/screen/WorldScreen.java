@@ -33,7 +33,7 @@ public class WorldScreen extends Screen {
     private final WorldHandler worldHandler;
     private final MouseTextBox mouseOverTileInfo;
 
-    private TileColorMode tileColorMode = TileColorMode.ELEVATION;
+    private TileColorMode tileColorMode = TileColorMode.COMPOSITE;
 
     // The last position of the mouse while dragging. Null if not dragging.
     private Point lastMouseDragPos;
