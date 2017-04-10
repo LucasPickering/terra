@@ -3,7 +3,9 @@ package me.lucaspickering.terraingen.render.screen;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -14,9 +16,9 @@ import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.terraingen.world.TileColorMode;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
+import me.lucaspickering.terraingen.world.TileColorMode;
 import me.lucaspickering.terraingen.world.WorldHandler;
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
@@ -24,16 +26,36 @@ import me.lucaspickering.utils.Point;
 
 public class WorldScreen extends Screen {
 
+    private enum TileOverlay {
+        NONE, CONTINENT
+    }
+
     // Maximum time a click can be held down to be considered a click and not a drag
     private static final int MAX_CLICK_TIME = 250;
 
     // Change of tile size in pixels with each zoom level
     private static final double ZOOM_STEP = 5;
 
+    // Bind a key to each tile color mode
+    private static final Map<Integer, TileColorMode> keyToTileColorMode =
+        new HashMap<Integer, TileColorMode>() {{
+            put(GLFW.GLFW_KEY_F1, TileColorMode.ELEVATION);
+            put(GLFW.GLFW_KEY_F2, TileColorMode.HUMIDITY);
+            put(GLFW.GLFW_KEY_F3, TileColorMode.BIOME);
+            put(GLFW.GLFW_KEY_F4, TileColorMode.COMPOSITE);
+        }};
+
+    // Assign a key to each tile overlay
+    private static final Map<Integer, TileOverlay> keyToTileOverlay =
+        new HashMap<Integer, TileOverlay>() {{
+            put(GLFW.GLFW_KEY_F5, TileOverlay.CONTINENT);
+        }};
+
     private final WorldHandler worldHandler;
     private final MouseTextBox mouseOverTileInfo;
 
     private TileColorMode tileColorMode = TileColorMode.COMPOSITE;
+    private TileOverlay tileOverlay = TileOverlay.NONE;
 
     // The last position of the mouse while dragging. Null if not dragging.
     private Point lastMouseDragPos;
@@ -153,13 +175,16 @@ public class WorldScreen extends Screen {
         final double tileHeight = worldHandler.getTileHeight();
 
         // If debug mode is enabled, display a color unique(ish) to this tile's continent
-        if (getTerrainGen().getDebug()) {
-            final Continent continent = worldHandler.getWorld().getTilesToContinents().get(tile);
-            if (continent != null) {
-                // Draw an overlay in the continent's debug color
-                renderer().drawTexture(Constants.TILE_BG_NAME, 0, 0, tileWidth, tileHeight,
-                                       continent.getDebugColor());
-            }
+        switch (tileOverlay) {
+            case CONTINENT:
+                final Continent continent =
+                    worldHandler.getWorld().getTilesToContinents().get(tile);
+                if (continent != null) {
+                    // Draw an overlay in the continent's debug color
+                    renderer().drawTexture(Constants.TILE_BG_NAME, 0, 0, tileWidth, tileHeight,
+                                           continent.getOverlayColor());
+                }
+                break;
         }
 
         // If the mouse is over this tile, draw the mouse-over overlay
@@ -173,7 +198,8 @@ public class WorldScreen extends Screen {
     @Override
     public void onKey(KeyEvent event) {
         if (event.action == GLFW.GLFW_RELEASE) {
-            switch (event.key) {
+            final int key = event.key;
+            switch (key) {
                 case GLFW.GLFW_KEY_ESCAPE:
                     setNextScreen(new PauseScreen(this)); // Open the pause menu
                     break;
@@ -181,18 +207,23 @@ public class WorldScreen extends Screen {
                     // Re-generate the world
                     worldHandler.generateParallel();
                     break;
-                case GLFW.GLFW_KEY_F1:
-                    tileColorMode = TileColorMode.ELEVATION;
-                    break;
-                case GLFW.GLFW_KEY_F2:
-                    tileColorMode = TileColorMode.HUMIDITY;
-                    break;
-                case GLFW.GLFW_KEY_F3:
-                    tileColorMode = TileColorMode.BIOME;
-                    break;
-                case GLFW.GLFW_KEY_F4:
-                    tileColorMode = TileColorMode.COMPOSITE;
-                    break;
+            }
+
+            // Check if the key is assigned to a tile color mode
+            final TileColorMode keyTileColorMode = keyToTileColorMode.get(key);
+            if (keyTileColorMode != null) {
+                tileColorMode = keyTileColorMode;
+            }
+
+            // Check if the key is assigned to a tile overlay
+            final TileOverlay keyTileOverlay = keyToTileOverlay.get(key);
+            if (keyTileOverlay != null) {
+                // If this overlay is already selected, turn it off, otherwise select it
+                if (keyTileOverlay == tileOverlay) {
+                    tileOverlay = TileOverlay.NONE;
+                } else {
+                    tileOverlay = keyTileOverlay;
+                }
             }
         }
         super.onKey(event);

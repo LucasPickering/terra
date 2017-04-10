@@ -8,7 +8,7 @@ public class Continent {
 
     private final Cluster tiles;
 
-    private Color debugColor;
+    private Color overlayColor;
 
     public Continent(Cluster tiles) {
         this.tiles = tiles;
@@ -16,7 +16,7 @@ public class Continent {
 
     public Continent(Continent continent) {
         this(continent.tiles);
-        this.debugColor = continent.getDebugColor();
+        this.overlayColor = continent.getOverlayColor();
     }
 
     public Cluster getTiles() {
@@ -44,16 +44,16 @@ public class Continent {
     }
 
     /**
-     * Gets the debug color of this continent. If the color has not yet been computed, that will
+     * Gets the overlay color of this continent. If the color has not yet been computed, that will
      * be done now, otherwise the cached color will be used. The computed color will be
      * semi-unique, dependent on the properties of this continent.
      *
-     * @return the debug color
+     * @return the overlay color
      */
-    public Color getDebugColor() {
-        if (debugColor == null) {
-            debugColor = computeColor();
+    public Color getOverlayColor() {
+        if (overlayColor == null) {
+            overlayColor = computeColor();
         }
-        return debugColor;
+        return overlayColor;
     }
 }

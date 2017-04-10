@@ -125,12 +125,14 @@ public class Tile {
                 double elevValue = Funcs.toHSV(elevColor)[2];
                 elevValue = Math.pow(elevValue, 0.75); // Make it slightly brighter
 
+                // Scale this biome color's value by the value of the elevation color
                 final float[] biomeHsv = Funcs.toHSV(getColor(TileColorMode.BIOME));
                 biomeHsv[2] *= (float) elevValue;
 
                 return Funcs.toRGB(biomeHsv);
+            default:
+                throw new IllegalArgumentException("Unknown color mode: " + colorMode);
         }
-        throw new IllegalArgumentException("Unknown color mode: " + colorMode);
     }
 
     public String info() {
