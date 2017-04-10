@@ -17,8 +17,8 @@ import me.lucaspickering.terraingen.world.util.Cluster;
 import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.utils.GeneralFuncs;
-import me.lucaspickering.utils.IntRange;
-import me.lucaspickering.utils.Range;
+import me.lucaspickering.utils.range.IntRange;
+import me.lucaspickering.utils.range.Range;
 
 /**
  * Generates continents by clustering tiles together.

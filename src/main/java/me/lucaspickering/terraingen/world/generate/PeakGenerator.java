@@ -5,8 +5,8 @@ import java.util.Random;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.util.TileSet;
-import me.lucaspickering.utils.IntRange;
-import me.lucaspickering.utils.Range;
+import me.lucaspickering.utils.range.IntRange;
+import me.lucaspickering.utils.range.Range;
 
 /**
  * Generates peaks and raises the tiles around them,

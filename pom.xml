@@ -167,7 +167,12 @@
         <dependency>
             <groupId>me.lucaspickering</groupId>
             <artifactId>LP-utils</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.flowpowered</groupId>
+            <artifactId>flow-noise</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

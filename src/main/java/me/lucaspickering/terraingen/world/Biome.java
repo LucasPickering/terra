@@ -1,12 +1,12 @@
 package me.lucaspickering.terraingen.world;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.EnumSet;
 import java.util.Set;
 
 import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.utils.DoubleRange;
-import me.lucaspickering.utils.Range;
+import me.lucaspickering.utils.range.DoubleRange;
+import me.lucaspickering.utils.range.Range;
 
 public enum Biome {
 

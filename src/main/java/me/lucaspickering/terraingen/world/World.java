@@ -6,8 +6,8 @@ import java.util.List;
 
 import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
-import me.lucaspickering.utils.IntRange;
-import me.lucaspickering.utils.Range;
+import me.lucaspickering.utils.range.IntRange;
+import me.lucaspickering.utils.range.Range;
 
 /**
  * A simple container for holding information about a world. The main portion of this class is

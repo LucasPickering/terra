@@ -16,8 +16,8 @@ import me.lucaspickering.terraingen.world.generate.LandRougher;
 import me.lucaspickering.terraingen.world.generate.PeakGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.util.TilePoint;
-import me.lucaspickering.utils.DoubleRange;
-import me.lucaspickering.utils.Range;
+import me.lucaspickering.utils.range.DoubleRange;
+import me.lucaspickering.utils.range.Range;
 
 /**
  * A class with fields and methods that can entirely encapsulate a {@link World} and
