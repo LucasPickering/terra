@@ -1,9 +1,10 @@
-package me.lucaspickering.terraingen.world.generate;
+package me.lucaspickering.terraingen.world.generate.unused;
 
 import java.util.Random;
 
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
+import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.utils.range.IntRange;
 import me.lucaspickering.utils.range.Range;
