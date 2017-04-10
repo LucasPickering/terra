@@ -12,9 +12,9 @@ import me.lucaspickering.terraingen.world.util.TilePoint;
  * {@link Map} of {@link TilePoint}s to {@link Tile}s, representing a partially-generated
  * world. It modifies the tiles in that map, and returns the same map with all the same objects.
  *
- * Given the same {@link World} and {@link Random}, a {@link Generator} must make the exact same
- * modification to the world in any two calls of its {@link #generate(World, Random)} function.
- * In other words, it must be stateless.
+ * A specific instance of this type should only be used once. If you want to generate a new
+ * world, create a new instance of each generator you want to use to ensure that no state is left
+ * over from the previous generation.
  */
 @FunctionalInterface
 public interface Generator {

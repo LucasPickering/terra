@@ -27,6 +27,28 @@ import me.lucaspickering.utils.range.Range;
  */
 public class WorldHandler {
 
+    private enum Generators {
+
+        NOISE_GENERATOR(NoiseGenerator.class),
+        CONTINENT_CLUSTERER(ContinentClusterer.class),
+        BIOME_PAINTER(BiomePainter.class),
+        WATER_PAINTER(WaterPainter.class);
+
+        private final Class<? extends Generator> clazz;
+
+        Generators(Class<? extends Generator> clazz) {
+            this.clazz = clazz;
+        }
+
+        private Generator makeGenerator() {
+            try {
+                return clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException("Error instantiating generator");
+            }
+        }
+    }
+
     /**
      * A tile's radius (in pixels) must be in this range (this is essentially a zoom limit)
      */
@@ -34,16 +56,6 @@ public class WorldHandler {
 
     // World size
     private static final int DEFAULT_SIZE = 100;
-
-    private static final Generator[] GENERATORS = new Generator[]{
-        new NoiseGenerator(),
-//        new PeakGenerator(),
-//        new LandRougher(),
-        new ContinentClusterer(),
-        new BiomePainter(),
-        new WaterPainter()
-//        new BeachGenerator()
-    };
 
     private final Logger logger;
     private final long seed;
@@ -94,7 +106,7 @@ public class WorldHandler {
         final World world = new World(size);
 
         // Apply each generator in sequence (this is the heavy lifting)
-        Arrays.stream(GENERATORS).forEach(gen -> runGenerator(gen, world));
+        Arrays.stream(Generators.values()).forEach(gen -> runGenerator(gen.makeGenerator(), world));
 
         this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
         logger.log(Level.FINE, String.format("World generation took %d ms",
