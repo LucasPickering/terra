@@ -32,6 +32,11 @@ public class Tile {
         public void setElevation(int elevation) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public void setHumidity(double humidity) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     /**
@@ -42,6 +47,7 @@ public class Tile {
     private Biome biome = Biome.NONE;
 
     private int elevation;
+    private double humidity;
 
     public Tile(TilePoint pos) {
         Objects.requireNonNull(pos);
@@ -88,6 +94,15 @@ public class Tile {
     public void setElevation(int elevation) {
         // Coerce the elevation to be a valid value
         this.elevation = World.ELEVATION_RANGE.coerce(elevation);
+    }
+
+    public final double humidity() {
+        return humidity;
+    }
+
+    public void setHumidity(double humidity) {
+        // Coerce the elevation to be a valid value
+        this.humidity = World.HUMIDITY_RANGE.coerce(humidity);
     }
 
     public final Color backgroundColor() {

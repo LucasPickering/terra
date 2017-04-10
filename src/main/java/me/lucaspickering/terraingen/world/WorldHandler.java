@@ -13,7 +13,7 @@ import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.world.generate.BiomePainter;
 import me.lucaspickering.terraingen.world.generate.ContinentClusterer;
 import me.lucaspickering.terraingen.world.generate.Generator;
-import me.lucaspickering.terraingen.world.generate.NoiseGenerator;
+import me.lucaspickering.terraingen.world.generate.NoiseElevationGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.utils.Point;
@@ -31,7 +31,7 @@ public class WorldHandler {
 
     private enum Generators {
 
-        NOISE_GENERATOR(NoiseGenerator.class),
+        NOISE_GENERATOR(NoiseElevationGenerator.class),
         CONTINENT_CLUSTERER(ContinentClusterer.class),
         BIOME_PAINTER(BiomePainter.class),
         WATER_PAINTER(WaterPainter.class);

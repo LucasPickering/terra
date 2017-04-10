@@ -6,6 +6,7 @@ import java.util.List;
 
 import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
+import me.lucaspickering.utils.range.DoubleRange;
 import me.lucaspickering.utils.range.IntRange;
 import me.lucaspickering.utils.range.Range;
 
@@ -20,6 +21,7 @@ public class World {
      * Every tile's elevation must be in this range
      */
     public static final Range<Integer> ELEVATION_RANGE = new IntRange(-50, 50);
+    public static final Range<Double> HUMIDITY_RANGE = new DoubleRange(0.0, 1.0);
 
     /**
      * Any tile below, but not equal to, this elevation can feasibly become ocean tiles. Most
