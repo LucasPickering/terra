@@ -7,7 +7,6 @@ import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.world.util.TilePoint;
-import me.lucaspickering.utils.range.DoubleRange;
 
 public class Tile {
 
@@ -124,7 +123,7 @@ public class Tile {
             case COMPOSITE:
                 final Color elevColor = getColor(TileColorMode.ELEVATION);
                 double elevValue = Funcs.toHSV(elevColor)[2];
-                elevValue = new DoubleRange(0.25, 1.0).denormalize(elevValue);
+                elevValue = Math.pow(elevValue, 0.75); // Make it slightly brighter
 
                 final float[] biomeHsv = Funcs.toHSV(getColor(TileColorMode.BIOME));
                 biomeHsv[2] *= (float) elevValue;

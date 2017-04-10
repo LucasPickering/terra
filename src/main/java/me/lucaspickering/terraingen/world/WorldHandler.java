@@ -35,8 +35,8 @@ public class WorldHandler {
 
         ELEV_GENERATOR(NoiseElevationGenerator.class),
         HUMID_GENERATOR(NoiseHumidityGenerator.class),
-        BIOME_PAINTER(BiomePainter.class),
         WATER_PAINTER(WaterPainter.class),
+        BIOME_PAINTER(BiomePainter.class),
         CONTINENT_CLUSTERER(ContinentClusterer.class),
         BEACH_GENERATOR(BeachGenerator.class);
 
@@ -61,7 +61,7 @@ public class WorldHandler {
     public static final Range<Double> VALID_TILE_RADII = new DoubleRange(10.0, 200.0);
 
     // World size
-    private static final int DEFAULT_SIZE = 100;
+    private static final int DEFAULT_SIZE = 200;
 
     private final Logger logger;
     private final long seed;

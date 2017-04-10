@@ -36,7 +36,7 @@ public class WaterPainter implements Generator {
                 // Make everything in it an coast/ocean
                 for (Tile tile : cluster) {
                     // If this tile is shallow, make it coast, otherwise make it ocean
-                    tile.setBiome(tile.elevation() >= MIN_COAST_DEPTH ? Biome.COAST : Biome.OCEAN);
+                    tile.setBiome(tile.elevation() > MIN_COAST_DEPTH ? Biome.COAST : Biome.OCEAN);
                 }
             } else {
                 // Otherwise, give it a chance to become a lake, proportional to its size

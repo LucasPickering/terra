@@ -1,44 +1,48 @@
 package me.lucaspickering.terraingen.world;
 
-import java.awt.*;
-import java.util.EnumSet;
-import java.util.Set;
+import java.awt.Color;
 
 import me.lucaspickering.terraingen.util.Funcs;
 
 public enum Biome {
 
-    OCEAN("Ocean", 0x144ba4),
-    COAST("Coast", 0x398bc6),
-    LAKE("Lake", 0x09729b),
-    BEACH("Beach", 0xf2ef59),
-    PLAINS("Plains", 0xadc974),
-    FOREST("Forest", 0x177a00),
-    DESERT("Desert", 0xd7cb6c),
-    SNOW("Snow", 0xbbbbbb),
-    NONE("None", Color.BLACK);
+    OCEAN("Ocean", 0x144ba4, Type.WATER),
+    COAST("Coast", 0x398bc6, Type.WATER),
+    LAKE("Lake", 0x09729b, Type.WATER),
 
-    public static final Set<Biome> LAND_BIOMES = EnumSet.of(BEACH, PLAINS, FOREST, DESERT,
-                                                            SNOW);
+    // The order of these matters because it determines the priority with which they are assigned
+    // to tiles.
+    SNOW("Snow", 0xbbbbbb, Type.LAND),
+    DESERT("Desert", 0xd7cb6c, Type.LAND),
+    ALPINE("Alpine", 0x637a5e, Type.LAND),
+    JUNGLE("Jungle", 0x2bb31e, Type.LAND),
+    FOREST("Forest", 0x177a00, Type.LAND),
+    PLAINS("Plains", 0xadc974, Type.LAND),
+
+    BEACH("Beach", 0xf2ef59, Type.LAND),
+
+    NONE("None", 0x000000, Type.NONE);
+
+    private enum Type {
+        LAND, WATER, NONE
+    }
 
     private final String displayName;
     private final Color color;
+    private final Type type;
 
-    Biome(String displayName, int color) {
-        this(displayName, Funcs.colorFromRgb(color));
-    }
-
-    Biome(String displayName, Color color) {
+    Biome(String displayName, int color, Type type) {
         this.displayName = displayName;
-        this.color = color;
+        this.color = Funcs.colorFromRgb(color);
+        this.type = type;
     }
 
     public boolean isLand() {
-        return LAND_BIOMES.contains(this);
+        return type == Type.LAND;
     }
 
     public boolean isWater() {
-        return !isLand();
+        return type == Type.WATER;
     }
 
     public String displayName() {
