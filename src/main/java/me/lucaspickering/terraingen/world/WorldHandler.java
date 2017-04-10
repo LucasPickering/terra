@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import me.lucaspickering.terraingen.render.Renderer;
+import me.lucaspickering.terraingen.world.generate.BeachGenerator;
 import me.lucaspickering.terraingen.world.generate.BiomePainter;
 import me.lucaspickering.terraingen.world.generate.ContinentClusterer;
 import me.lucaspickering.terraingen.world.generate.Generator;
@@ -34,9 +35,10 @@ public class WorldHandler {
 
         ELEV_GENERATOR(NoiseElevationGenerator.class),
         HUMID_GENERATOR(NoiseHumidityGenerator.class),
-        CONTINENT_CLUSTERER(ContinentClusterer.class),
         BIOME_PAINTER(BiomePainter.class),
-        WATER_PAINTER(WaterPainter.class);
+        WATER_PAINTER(WaterPainter.class),
+        CONTINENT_CLUSTERER(ContinentClusterer.class),
+        BEACH_GENERATOR(BeachGenerator.class);
 
         private final Class<? extends Generator> clazz;
 
@@ -207,8 +209,8 @@ public class WorldHandler {
      */
     @NotNull
     public Point tileToPixel(@NotNull TilePoint tile) {
-        final double x = getTileWidth() * tile.x() * 0.75f;
-        final double y = -getTileHeight() * (tile.x() / 2.0f + tile.y());
+        final double x = getTileWidth() * tile.x() * 0.75;
+        final double y = -getTileHeight() * (tile.x() / 2.0 + tile.y());
         return getWorldCenter().plus(x, y);
     }
 
@@ -226,9 +228,9 @@ public class WorldHandler {
     public TilePoint pixelToTile(@NotNull Point pos) {
         final Point shiftedPos = pos.minus(getWorldCenter());
         // Convert it to a fractional tile point
-        final double fracX = shiftedPos.x() * 4f / 3f / getTileWidth();
-        final double fracY = -(shiftedPos.x() + Math.sqrt(3) * shiftedPos.y())
-                             / (getTileRadius() * 3f);
+        final double fracX = shiftedPos.x() * 4.0 / 3.0 / getTileWidth();
+        final double fracY = -(shiftedPos.x() + Math.sqrt(3.0) * shiftedPos.y())
+                             / (getTileRadius() * 3.0);
         final double fracZ = -fracX - fracY; // We'll need this later
 
         // Return the rounded point

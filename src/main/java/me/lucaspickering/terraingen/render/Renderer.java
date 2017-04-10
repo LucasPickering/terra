@@ -153,10 +153,11 @@ public class Renderer {
      * @param y      the y-location of the top-left of the texture
      * @param width  the width of the texture
      * @param height the height of the texture
-     * @throws IllegalArgumentException if there is no texture with the given name in the texture map
-     * @see #drawTexture(String, int, int, int, int, Color)
+     * @throws IllegalArgumentException if there is no texture with the given name in the texture
+     *                                  map
+     * @see #drawTexture(String, double, double, double, double, Color)
      */
-    public void drawTexture(String name, int x, int y, int width, int height) {
+    public void drawTexture(String name, double x, double y, double width, double height) {
         drawTexture(name, x, y, width, height, Color.WHITE);
     }
 
@@ -170,7 +171,8 @@ public class Renderer {
      * @param height the height of the texture
      * @param color  the color of the texture
      */
-    public void drawTexture(String name, int x, int y, int width, int height, Color color) {
+    public void drawTexture(String name, double x, double y, double width, double height,
+                            Color color) {
         if (!textures.containsKey(name)) {
             loadTexture(name);
         }
@@ -180,34 +182,33 @@ public class Renderer {
     /**
      * Draw text in white with left alignment.
      *
-     * @see #drawString(Font, String, int, int, Color, HorizAlignment, VertAlignment)
+     * @see #drawString(Font, String, double, double, Color, HorizAlignment, VertAlignment)
      */
-    public void drawString(Font font, String text, int x, int y) {
+    public void drawString(Font font, String text, double x, double y) {
         drawString(font, text, x, y, Color.WHITE, HorizAlignment.LEFT, VertAlignment.TOP);
     }
 
     /**
      * Draw text with left alignment.
      *
-     * @see #drawString(Font, String, int, int, Color, HorizAlignment, VertAlignment)
+     * @see #drawString(Font, String, double, double, Color, HorizAlignment, VertAlignment)
      */
-    public void drawString(Font font, String text, int x, int y, Color color) {
+    public void drawString(Font font, String text, double x, double y, Color color) {
         drawString(font, text, x, y, color, HorizAlignment.LEFT, VertAlignment.TOP);
     }
 
     /**
      * Draw text in white.
      *
-     * @see #drawString(Font, String, int, int, Color, HorizAlignment, VertAlignment)
+     * @see #drawString(Font, String, double, double, Color, HorizAlignment, VertAlignment)
      */
-    public void drawString(Font font, String text, int x, int y, HorizAlignment alignment) {
+    public void drawString(Font font, String text, double x, double y, HorizAlignment alignment) {
         drawString(font, text, x, y, Color.WHITE, alignment, VertAlignment.TOP);
     }
 
     /**
      * Draw the given text in the given font, at the given position.
-     *
-     * @param font       the font/size to draw the string in
+     *  @param font       the font/size to draw the string in
      * @param text       the text to draw
      * @param x          the x position to draw at
      * @param y          the y position to draw at
@@ -215,14 +216,14 @@ public class Renderer {
      * @param horizAlign the text alignment (left, center, right)
      * @param vertAlign  the vertical text alignment (top, center, bottom)
      */
-    public void drawString(Font font, String text, int x, int y, Color color,
+    public void drawString(Font font, String text, double x, double y, Color color,
                            HorizAlignment horizAlign, VertAlignment vertAlign) {
         fonts.get(font).draw(text, x, y, color, horizAlign, vertAlign);
     }
 
     /**
-     * Get the size of the given string in pixels, when drawn in the given font. The size is given as
-     * a (width, height) pair.
+     * Get the size of the given string in pixels, when drawn in the given font. The size is given
+     * as a (width, height) pair.
      *
      * @param text the string to be drawn
      * @param font the font that the string would be drawn in

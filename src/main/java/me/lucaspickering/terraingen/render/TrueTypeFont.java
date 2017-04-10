@@ -118,9 +118,9 @@ public class TrueTypeFont {
         return FIRST_CHAR <= c && c <= 127;
     }
 
-    private float shiftY(int y) {
+    private double shiftY(double y) {
         // Magic method for correcting y position of text. Not sure why this works.
-        return y + getFontHeight() * 0.5f + 4f;
+        return y + getFontHeight() * 0.5 + 4;
     }
 
     /**
@@ -134,7 +134,7 @@ public class TrueTypeFont {
      * @param vertAlign  the {@link VertAlignment} to draw with
      * @throws NullPointerException if {@code text == null}
      */
-    public void draw(String text, int x, int y, Color color,
+    public void draw(String text, double x, double y, Color color,
                      HorizAlignment horizAlign, VertAlignment vertAlign) {
         Objects.requireNonNull(text);
 
@@ -149,8 +149,8 @@ public class TrueTypeFont {
 
         // Draw the text
         try (MemoryStack stack = stackPush()) {
-            final FloatBuffer xFloatBuffer = stack.floats(x);
-            final FloatBuffer yFloatBuffer = stack.floats(shiftY(y));
+            final FloatBuffer xFloatBuffer = stack.floats((float) x);
+            final FloatBuffer yFloatBuffer = stack.floats((float) shiftY(y));
             final STBTTAlignedQuad quad = STBTTAlignedQuad.mallocStack(stack);
             GL11.glBegin(GL11.GL_QUADS);
 
@@ -181,7 +181,7 @@ public class TrueTypeFont {
                 }
 
                 // Keep the same x, increase y by the height of the font
-                xFloatBuffer.put(0, x);
+                xFloatBuffer.put(0, (float) x);
                 yFloatBuffer.put(0, yFloatBuffer.get(0) + getFontHeight());
             }
             GL11.glEnd();

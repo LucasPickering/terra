@@ -13,9 +13,9 @@ public enum Biome {
     LAKE("Lake", 0x09729b),
     BEACH("Beach", 0xf2ef59),
     PLAINS("Plains", 0xadc974),
-    FOREST("Forest", 0x249b09),
-    DESERT("Desert", 0xd7d093),
-    SNOW("Snow", 0xeeeeee),
+    FOREST("Forest", 0x177a00),
+    DESERT("Desert", 0xd7cb6c),
+    SNOW("Snow", 0xbbbbbb),
     NONE("None", Color.BLACK);
 
     public static final Set<Biome> LAND_BIOMES = EnumSet.of(BEACH, PLAINS, FOREST, DESERT,

@@ -147,10 +147,10 @@ public class WorldScreen extends Screen {
         // Translate to this tile
         GL11.glPushMatrix();
         final Point tileTopLeft = worldHandler.getTileTopLeft(worldHandler.getTileCenter(tile));
-        GL11.glTranslated(tileTopLeft.x(), tileTopLeft.y(), 0f);
+        GL11.glTranslated(tileTopLeft.x(), tileTopLeft.y(), 0.0);
 
-        final int tileWidth = (int) worldHandler.getTileWidth();
-        final int tileHeight = (int) worldHandler.getTileHeight();
+        final double tileWidth = worldHandler.getTileWidth();
+        final double tileHeight = worldHandler.getTileHeight();
 
         // If debug mode is enabled, display a color unique(ish) to this tile's continent
         if (getTerrainGen().getDebug()) {

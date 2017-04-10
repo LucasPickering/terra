@@ -20,7 +20,7 @@ public class WaterPainter implements Generator {
     // Generation parameters
     // Minimum size of a cluster to be considered an ocean
     public static final int MIN_OCEAN_SIZE = 20;
-    private static final int MIN_COAST_DEPTH = -10; // Everything in an ocean >= this is coast
+    private static final int MIN_COAST_DEPTH = -5; // Everything in an ocean >= this is coast
 
     @Override
     public void generate(World world, Random random) {

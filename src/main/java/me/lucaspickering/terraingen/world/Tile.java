@@ -127,7 +127,7 @@ public class Tile {
                 elevValue = new DoubleRange(0.25, 1.0).denormalize(elevValue);
 
                 final float[] biomeHsv = Funcs.toHSV(getColor(TileColorMode.BIOME));
-                biomeHsv[2] = (float) elevValue;
+                biomeHsv[2] *= (float) elevValue;
 
                 return Funcs.toRGB(biomeHsv);
         }

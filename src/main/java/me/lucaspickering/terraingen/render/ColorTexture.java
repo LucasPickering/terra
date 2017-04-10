@@ -24,7 +24,7 @@ public class ColorTexture {
         this.color = color;
     }
 
-    public void draw(int x, int y, int width, int height) {
+    public void draw(int x, int y, double width, double height) {
         texture.draw(x, y, width, height, color);
     }
 }
