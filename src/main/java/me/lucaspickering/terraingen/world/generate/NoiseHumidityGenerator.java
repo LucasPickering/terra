@@ -2,8 +2,6 @@ package me.lucaspickering.terraingen.world.generate;
 
 import com.flowpowered.noise.module.source.Perlin;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
@@ -12,11 +10,8 @@ import java.util.logging.Logger;
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.util.TilePoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
-import me.lucaspickering.utils.Pair;
 import me.lucaspickering.utils.range.DoubleRange;
-import me.lucaspickering.utils.range.IntRange;
 import me.lucaspickering.utils.range.Range;
 
 /**
@@ -39,14 +34,7 @@ public class NoiseHumidityGenerator extends NoiseGenerator {
     public void generate(World world, Random random) {
         final TileSet worldTiles = world.getTiles();
 
-        final Range<Integer> coordinateRange = getCoordinateRange(worldTiles);
-
-        // Compute a noise value for each tile. This can be done in parallel.
-        final Map<Tile, Double> noises = worldTiles.parallelStream()
-            .map(tile -> generateNoise(tile, coordinateRange))
-            .collect(Pair.mapCollector());
-
-        // Create a range that bounds the noises
+        final Map<Tile, Double> noises = super.generateNoises(worldTiles);
         final Range<Double> noiseRange = new DoubleRange(noises.values());
 
         // Map each noise value to an elevation. This can be done in parallel.

@@ -4,7 +4,7 @@ import com.flowpowered.noise.module.source.Perlin;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Map;
 
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.util.TilePoint;
@@ -24,7 +24,24 @@ abstract class NoiseGenerator implements Generator {
         this.noiseGenerator = noiseGenerator;
     }
 
-    Range<Integer> getCoordinateRange(TileSet tiles) {
+    Map<Tile, Double> generateNoises(TileSet tiles) {
+        // Build a range that bounds all x, y, and z values
+        final List<Integer> coords = new ArrayList<>(tiles.size() * 3);
+        for (Tile tile : tiles) {
+            final TilePoint pos = tile.pos();
+            coords.add(pos.x());
+            coords.add(pos.y());
+            coords.add(pos.z());
+        }
+        final Range<Integer> coordinateRange = new IntRange(coords);
+
+        // Compute a noise value for each tile. This can be done in parallel.
+        return tiles.parallelStream()
+            .map(tile -> generateNoise(tile, coordinateRange))
+            .collect(Pair.mapCollector());
+    }
+
+    private Range<Integer> getCoordinateRange(TileSet tiles) {
         final List<Integer> coords = new ArrayList<>(tiles.size() * 3);
         for (Tile tile : tiles) {
             final TilePoint pos = tile.pos();
@@ -36,20 +53,11 @@ abstract class NoiseGenerator implements Generator {
     }
 
     private Pair<Tile, Double> generateNoise(Tile tile, Range<Integer> coordinateRange) {
-        return generateNoise(tile,
-                             t -> coordinateRange.normalize(t.pos().x()),
-                             t -> coordinateRange.normalize(t.pos().y()),
-                             t -> coordinateRange.normalize(t.pos().z()));
-    }
+        final TilePoint pos = tile.pos();
+        final double nx = coordinateRange.normalize(pos.x());
+        final double ny = coordinateRange.normalize(pos.y());
+        final double nz = coordinateRange.normalize(pos.z());
 
-    Pair<Tile, Double> generateNoise(Tile tile,
-                                     Function<Tile, Double> xFunc,
-                                     Function<Tile, Double> yFunc,
-                                     Function<Tile, Double> zFunc) {
-        final double x = xFunc.apply(tile);
-        final double y = yFunc.apply(tile);
-        final double z = zFunc.apply(tile);
-
-        return new Pair<>(tile, noiseGenerator.getValue(x, y, z));
+        return new Pair<>(tile, noiseGenerator.getValue(nx, ny, nz));
     }
 }
