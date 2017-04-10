@@ -29,15 +29,15 @@ public class BiomePainter implements Generator {
     private Biome computeBiome(Tile tile) {
         final int elevation = tile.elevation();
         final double humidity = tile.humidity();
-        final int temperature = tile.temperature();
 
-        if (elevation > 30) {
-            return Biome.MOUNTAIN;
+        if (elevation >= 30) {
+            return Biome.SNOW;
         }
 
         if (humidity < 0.15) {
             return Biome.DESERT;
         }
+
         if (humidity < 0.6) {
             return Biome.PLAINS;
         }

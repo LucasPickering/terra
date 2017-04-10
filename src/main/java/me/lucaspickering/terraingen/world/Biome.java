@@ -8,18 +8,18 @@ import me.lucaspickering.terraingen.util.Funcs;
 
 public enum Biome {
 
-    OCEAN("Ocean", 0x1653b7),
-    COAST("Coast", 0x1887b2),
+    OCEAN("Ocean", 0x144ba4),
+    COAST("Coast", 0x398bc6),
     LAKE("Lake", 0x09729b),
     BEACH("Beach", 0xf2ef59),
-    PLAINS("Plains", 0xb9f442),
+    PLAINS("Plains", 0xadc974),
     FOREST("Forest", 0x249b09),
-    DESERT("Desert", 0xe2c909),
-    MOUNTAIN("Mountain", 0xbbbbbb),
+    DESERT("Desert", 0xd7d093),
+    SNOW("Snow", 0xeeeeee),
     NONE("None", Color.BLACK);
 
     public static final Set<Biome> LAND_BIOMES = EnumSet.of(BEACH, PLAINS, FOREST, DESERT,
-                                                            MOUNTAIN);
+                                                            SNOW);
 
     private final String displayName;
     private final Color color;

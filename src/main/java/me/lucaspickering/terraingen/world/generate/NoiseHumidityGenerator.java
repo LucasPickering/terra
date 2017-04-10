@@ -23,7 +23,8 @@ public class NoiseHumidityGenerator extends NoiseGenerator {
 
     public NoiseHumidityGenerator() {
         super(new Perlin());
-        noiseGenerator.setSeed((int) TerrainGen.instance().getSeed());
+        final long seed = TerrainGen.instance().getSeed();
+        noiseGenerator.setSeed((int) (seed * seed)); // Square the seed to vary it
         noiseGenerator.setFrequency(8.0);
         noiseGenerator.setLacunarity(Perlin.DEFAULT_PERLIN_LACUNARITY);
         noiseGenerator.setPersistence(Perlin.DEFAULT_PERLIN_PERSISTENCE);
@@ -37,7 +38,7 @@ public class NoiseHumidityGenerator extends NoiseGenerator {
         final Map<Tile, Double> noises = super.generateNoises(worldTiles);
         final Range<Double> noiseRange = new DoubleRange(noises.values());
 
-        // Map each noise value to an elevation. This can be done in parallel.
+        // Map each noise value to a humidity. This can be done in parallel.
         noises.entrySet().parallelStream().forEach(e -> setHumidity(e.getKey(),
                                                                     e.getValue(),
                                                                     noiseRange));

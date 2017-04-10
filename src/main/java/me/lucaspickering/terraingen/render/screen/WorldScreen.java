@@ -188,12 +188,9 @@ public class WorldScreen extends Screen {
                     tileColorMode = TileColorMode.HUMIDITY;
                     break;
                 case GLFW.GLFW_KEY_F3:
-                    tileColorMode = TileColorMode.TEMPERATURE;
-                    break;
-                case GLFW.GLFW_KEY_F4:
                     tileColorMode = TileColorMode.BIOME;
                     break;
-                case GLFW.GLFW_KEY_F5:
+                case GLFW.GLFW_KEY_F4:
                     tileColorMode = TileColorMode.COMPOSITE;
                     break;
             }

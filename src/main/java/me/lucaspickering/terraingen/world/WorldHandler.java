@@ -32,8 +32,8 @@ public class WorldHandler {
 
     private enum Generators {
 
-        NOISE_ELEV_GENERATOR(NoiseElevationGenerator.class),
-        NOISE_HUMID_GENERATOR(NoiseHumidityGenerator.class),
+        ELEV_GENERATOR(NoiseElevationGenerator.class),
+        HUMID_GENERATOR(NoiseHumidityGenerator.class),
         CONTINENT_CLUSTERER(ContinentClusterer.class),
         BIOME_PAINTER(BiomePainter.class),
         WATER_PAINTER(WaterPainter.class);

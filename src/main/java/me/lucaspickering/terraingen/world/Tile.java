@@ -11,7 +11,8 @@ public class Tile {
 
     public static final int NUM_SIDES = Direction.values().length;
 
-    private static final String INFO_STRING = "Biome: %s%nElevation: %d%nHumidity: %d%%";
+    private static final String INFO_STRING =
+        "Biome: %s%nElevation: %d%nHumidity: %d%%";
     private static final String DEBUG_INFO_STRING = "%nPos: %s";
 
     /**
@@ -20,7 +21,7 @@ public class Tile {
     private static class ImmutableTile extends Tile {
 
         private ImmutableTile(Tile tile) {
-            super(tile.pos(), tile.biome(), tile.elevation(), tile.humidity(), tile.temperature());
+            super(tile.pos(), tile.biome(), tile.elevation(), tile.humidity());
         }
 
         @Override
@@ -37,11 +38,6 @@ public class Tile {
         public void setHumidity(double humidity) {
             throw new UnsupportedOperationException();
         }
-
-        @Override
-        public void setTemperature(int temperature) {
-            throw new UnsupportedOperationException();
-        }
     }
 
     /**
@@ -54,20 +50,17 @@ public class Tile {
     private int elevation;
     private double humidity;
 
-    private int temperature;
-
     public Tile(TilePoint pos) {
         Objects.requireNonNull(pos);
         this.pos = pos;
     }
 
-    private Tile(TilePoint pos, Biome biome, int elevation, double humidity, int temperature) {
+    private Tile(TilePoint pos, Biome biome, int elevation, double humidity) {
         this(pos);
         Objects.requireNonNull(biome);
         this.biome = biome;
         this.elevation = elevation;
         this.humidity = humidity;
-        this.temperature = temperature;
     }
 
     public final TilePoint pos() {
@@ -114,14 +107,6 @@ public class Tile {
         this.humidity = World.HUMIDITY_RANGE.coerce(humidity);
     }
 
-    public int temperature() {
-        return temperature;
-    }
-
-    public void setTemperature(int temperature) {
-        this.temperature = World.TEMPERATURE_RANGE.coerce(temperature);
-    }
-
     public final Color getColor(TileColorMode colorMode) {
         switch (colorMode) {
             case ELEVATION:
@@ -132,8 +117,6 @@ public class Tile {
                     return Color.BLUE;
                 }
                 return colorMode.interpolateColor(humidity(), World.HUMIDITY_RANGE);
-            case TEMPERATURE:
-                return colorMode.interpolateColor(temperature(), World.TEMPERATURE_RANGE);
             case BIOME:
                 return biome().color();
             case COMPOSITE:
@@ -144,8 +127,8 @@ public class Tile {
 
     public String info() {
         // If in debug mode, display extra debug info
-        final String info = String.format(INFO_STRING,
-                                          biome.displayName(), elevation, (int) (humidity * 100));
+        final String info = String.format(INFO_STRING, biome.displayName(), elevation(),
+                                          (int) (humidity() * 100));
         if (TerrainGen.instance().getDebug()) {
             return info + String.format(DEBUG_INFO_STRING, pos);
         }

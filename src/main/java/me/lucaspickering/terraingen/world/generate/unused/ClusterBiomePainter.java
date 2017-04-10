@@ -123,7 +123,7 @@ public class ClusterBiomePainter implements Generator {
                 if (tile.biome() == Biome.NONE) {
                     // If the tile is at high elevation, make it mountain, otherwise normal biome
                     if (tile.elevation() >= MIN_MOUNTAIN_ELEV) {
-                        tile.setBiome(Biome.MOUNTAIN);
+                        tile.setBiome(Biome.SNOW);
                     } else {
                         tile.setBiome(biome);
                     }

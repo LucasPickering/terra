@@ -22,7 +22,7 @@ public class World {
      */
     public static final Range<Integer> ELEVATION_RANGE = new IntRange(-50, 50);
     public static final Range<Double> HUMIDITY_RANGE = new DoubleRange(0.0, 1.0);
-    public static final Range<Integer> TEMPERATURE_RANGE = new IntRange(-25, 50);
+    public static final Range<Integer> TEMPERATURE_RANGE = new IntRange(-40, 40);
 
     /**
      * Any tile below, but not equal to, this elevation can feasibly become ocean tiles. Most
