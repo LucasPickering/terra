@@ -210,15 +210,15 @@ public class TileSet extends AbstractSet<Tile> {
      * tile}. For example, giving a range of 0 returns just the given tile, 1 returns the tile
      * and all adjacent tiles, etc.
      *
-     * @param tile  the tile to start counting from
+     * @param tilePoint  the tile to start counting from
      * @param range (non-negative)
      * @return all tiles in range of the given tile
      * @throws NullPointerException     if {@code tile == null}
      * @throws IllegalArgumentException if range is negative
      */
     @NotNull
-    public TileSet getTilesInRange(@NotNull Tile tile, int range) {
-        Objects.requireNonNull(tile);
+    public TileSet getTilesInRange(@NotNull TilePoint tilePoint, int range) {
+        Objects.requireNonNull(tilePoint);
         if (range < 0) {
             throw new IllegalArgumentException(String.format("Range must be positive, was [%d]",
                                                              range));
@@ -234,9 +234,27 @@ public class TileSet extends AbstractSet<Tile> {
                 result.add(otherTile);
             }
         };
-        applyInRange(adder, tile.pos(), range); // Apply that function to all tiles in the range
+        applyInRange(adder, tilePoint, range); // Apply that function to all tiles in the range
 
         return result;
+    }
+
+    /**
+     * Gets all tile points in the given range of the given tile. A tile will be included in
+     * the output if it is in this collection, and it is within {@code range} steps of {@code
+     * tile}. For example, giving a range of 0 returns just the given tile, 1 returns the tile
+     * and all adjacent tiles, etc.
+     *
+     * @param tile  the tile to start counting from
+     * @param range (non-negative)
+     * @return all tiles in range of the given tile
+     * @throws NullPointerException     if {@code tile == null}
+     * @throws IllegalArgumentException if range is negative
+     */
+    @NotNull
+    public TileSet getTilesInRange(@NotNull Tile tile, int range) {
+        Objects.requireNonNull(tile);
+        return getTilesInRange(tile.pos(), range);
     }
 
     /**

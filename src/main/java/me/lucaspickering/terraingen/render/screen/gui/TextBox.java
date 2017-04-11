@@ -53,6 +53,6 @@ public class TextBox extends GuiElement {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         renderer().drawRect(0, 0, getWidth(), getHeight(), Colors.TILE_INFO_BG);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        renderer().drawString(FONT, text, BORDER_PADDING_X, BORDER_PADDING_Y, textColor);
+        renderer().drawString(FONT, text, BORDER_PADDING_X, BORDER_PADDING_Y + 10, textColor);
     }
 }

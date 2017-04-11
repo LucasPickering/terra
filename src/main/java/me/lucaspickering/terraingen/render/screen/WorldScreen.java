@@ -3,18 +3,16 @@ package me.lucaspickering.terraingen.render.screen;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
+import java.awt.Color;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-import me.lucaspickering.terraingen.render.ColorTexture;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
-import me.lucaspickering.terraingen.util.Constants;
+import me.lucaspickering.terraingen.util.Colors;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
@@ -63,12 +61,15 @@ public class WorldScreen extends Screen {
     // The time at which the user pressed the mouse button down
     private long mouseDownTime;
 
+    private TileSet onScreenTiles;
+
     public WorldScreen(WorldHandler worldHandler) {
         Objects.requireNonNull(worldHandler);
         this.worldHandler = worldHandler;
         mouseOverTileInfo = new MouseTextBox();
         mouseOverTileInfo.setVisible(false); // Hide this for now
         addGuiElement(mouseOverTileInfo);
+        updateOnScreenTiles();
     }
 
     @Override
@@ -78,61 +79,44 @@ public class WorldScreen extends Screen {
             lastMouseDragPos = null; // No longer dragging
         }
 
+        updateScreenCenter(mousePos);
+
+        onScreenTiles.forEach(this::drawTile); // Draw each tile
+
+        // Draw the overlay for the tile that the mouse is over, then draw the text box with info
+        // for that tile.
+        final Tile mouseOverTile = getMouseOverTile(mousePos);
+        mouseOverTileInfo.setVisible(mouseOverTile != null);
+        if (mouseOverTile != null) {
+            // Draw the overlay then set text for the info box
+            drawMouseOverlay(mouseOverTile);
+            mouseOverTileInfo.setText(mouseOverTile.info());
+        }
+
+        super.draw(mousePos); // Draw GUI elements
+    }
+
+    private void updateScreenCenter(Point mousePos) {
         // If the mouse is being dragged, shift the world center based on it
         if (lastMouseDragPos != null) {
             // Shift the world
             final Point diff = mousePos.minus(lastMouseDragPos);
             worldHandler.setWorldCenter(worldHandler.getWorldCenter().plus(diff));
             lastMouseDragPos = mousePos; // Update the mouse pos
+            updateOnScreenTiles(); // Refresh the set of tiles that are on screen
         }
-
-        final TileSet tiles = worldHandler.getWorld().getTiles();
-
-        // Get all the tiles that are on-screen (those are the ones that will be drawn)
-        final List<Tile> onScreenTiles = tiles.stream()
-            .filter(this::containsTile)
-            .collect(Collectors.toList());
-
-        // If there is a mouse position, check which tile it's over
-        final TilePoint mouseOverPos;
-        if (mousePos != null) {
-            mouseOverPos = worldHandler.pixelToTile(mousePos);
-        } else {
-            mouseOverPos = null;
-        }
-
-        // Draw each tile
-        {
-            // Draw the tiles themselves
-            onScreenTiles.forEach(this::drawTile);
-
-            // Draw the overlays
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            onScreenTiles.forEach(tile -> drawTileOverlays(tile, tile.pos().equals(mouseOverPos)));
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            GL11.glDisable(GL11.GL_BLEND);
-        }
-
-        // Update mouseOverTileInfo for the tile that the mouse is over. This HAS to be done
-        // after all the tiles are drawn, otherwise it would be underneath some of them.
-        final Tile mouseOverTile = tiles.getByPoint(mouseOverPos);
-        if (mouseOverTile != null) {
-            // Set the text and show the element
-            mouseOverTileInfo.setText(mouseOverTile.info()).setVisible(true);
-        }
-
-        super.draw(mousePos); // Draw GUI elements
-        mouseOverTileInfo.setVisible(false); // Hide the tile info, to be updated on the next frame
     }
 
-    private boolean containsTile(Tile tile) {
-        // If any of the 4 corners of the tile are on-screen, the tile is on-screen
-        final Point tileCenter = worldHandler.getTileCenter(tile);
-        return contains(worldHandler.getTileTopLeft(tileCenter))
-               || contains(worldHandler.getTileTopRight(tileCenter))
-               || contains(worldHandler.getTileBottomRight(tileCenter))
-               || contains(worldHandler.getTileBottomLeft(tileCenter));
+    private void updateOnScreenTiles() {
+        // This is a silly way. Gets the furthest tile from the center that is still on screen,
+        // then renders all tiles in that range. Could definitely be more efficient.
+        final TilePoint topLeftTilePos = worldHandler.pixelToTile(Point.ZERO);
+        final TilePoint centerTilePos = worldHandler.pixelToTile(center);
+        final int screenRadius = topLeftTilePos.distanceTo(centerTilePos);
+
+        onScreenTiles = worldHandler.getWorld().getTiles().getTilesInRange(centerTilePos,
+                                                                           screenRadius);
+        System.out.println("Updating on-screen tiles");
     }
 
     /**
@@ -141,17 +125,54 @@ public class WorldScreen extends Screen {
      * @param tile the tile to draw
      */
     private void drawTile(Tile tile) {
-        // Shift to the tile and draw the background
-        GL11.glPushMatrix();
+        // Shift to the tile's center
         final Point tileCenter = worldHandler.getTileCenter(tile);
+        GL11.glPushMatrix();
         GL11.glTranslated(tileCenter.x(), tileCenter.y(), 0.0);
-        drawTileBackground(tile);
+
+        // Draw the background of the tile
+        drawHex(tile.getColor(tileColorMode));
+        drawTileOverlays(tile);
+
         GL11.glPopMatrix();
     }
 
-    private void drawTileBackground(Tile tile) {
-        // Set the color then draw a hexagon
-        Funcs.setGlColor(tile.getColor(tileColorMode));
+    /**
+     * Draw the appropriate overlays for the given tile.
+     *
+     * @param tile the tile to draw
+     */
+    private void drawTileOverlays(Tile tile) {
+        // If debug mode is enabled, display a color unique(ish) to this tile's continent
+        switch (tileOverlay) {
+            case CONTINENT:
+                final Continent continent =
+                    worldHandler.getWorld().getTilesToContinents().get(tile);
+                if (continent != null) {
+                    // Draw an overlay in the continent's color
+                    drawHex(continent.getOverlayColor());
+                }
+                break;
+        }
+    }
+
+    private void drawMouseOverlay(Tile tile) {
+        final Point tileCenter = worldHandler.getTileCenter(tile);
+        GL11.glPushMatrix();
+        GL11.glTranslated(tileCenter.x(), tileCenter.y(), 0.0);
+
+        drawHex(Colors.MOUSE_OVER);
+
+        GL11.glPopMatrix();
+    }
+
+    /**
+     * Draws a hexagon centered at the current GL position, with the given color.
+     *
+     * @param color the color for the hexagon
+     */
+    private void drawHex(Color color) {
+        Funcs.setGlColor(color);
         GL11.glBegin(GL11.GL_POLYGON);
         for (Point vertex : worldHandler.getTileVertices()) {
             GL11.glVertex2d(vertex.x(), vertex.y());
@@ -159,40 +180,19 @@ public class WorldScreen extends Screen {
         GL11.glEnd();
     }
 
-    /**
-     * Draw the appropriate overlays for the given tile.
-     *
-     * @param tile      the tile to draw
-     * @param mouseOver is the mouse currently over this tile?
-     */
-    private void drawTileOverlays(Tile tile, boolean mouseOver) {
-        // Translate to this tile
-        GL11.glPushMatrix();
-        final Point tileTopLeft = worldHandler.getTileTopLeft(worldHandler.getTileCenter(tile));
-        GL11.glTranslated(tileTopLeft.x(), tileTopLeft.y(), 0.0);
-
-        final double tileWidth = worldHandler.getTileWidth();
-        final double tileHeight = worldHandler.getTileHeight();
-
-        // If debug mode is enabled, display a color unique(ish) to this tile's continent
-        switch (tileOverlay) {
-            case CONTINENT:
-                final Continent continent =
-                    worldHandler.getWorld().getTilesToContinents().get(tile);
-                if (continent != null) {
-                    // Draw an overlay in the continent's debug color
-                    renderer().drawTexture(Constants.TILE_BG_NAME, 0, 0, tileWidth, tileHeight,
-                                           continent.getOverlayColor());
-                }
-                break;
+    private Tile getMouseOverTile(Point mousePos) {
+        if (mousePos == null) {
+            return null;
         }
 
-        // If the mouse is over this tile, draw the mouse-over overlay
-        if (mouseOver) {
-            ColorTexture.mouseOver.draw(0, 0, tileWidth, tileHeight);
-        }
+        // Get the tile that the mouse is over and return it
+        final TilePoint mouseOverPos = worldHandler.pixelToTile(mousePos);
+        return worldHandler.getWorld().getTiles().getByPoint(mouseOverPos);
+    }
 
-        GL11.glPopMatrix();
+    private void zoom(double step) {
+        worldHandler.setTileRadius(worldHandler.getTileRadius() + step);
+        updateOnScreenTiles(); // Refresh the set of on-screen tiles
     }
 
     @Override
@@ -251,10 +251,10 @@ public class WorldScreen extends Screen {
     public void onScroll(ScrollEvent event) {
         if (event.yOffset < 0) {
             // Zoom out
-            worldHandler.setTileRadius(worldHandler.getTileRadius() - ZOOM_STEP);
+            zoom(-ZOOM_STEP);
         } else if (event.yOffset > 0) {
             // Zoom in
-            worldHandler.setTileRadius(worldHandler.getTileRadius() + ZOOM_STEP);
+            zoom(ZOOM_STEP);
         }
     }
 }
