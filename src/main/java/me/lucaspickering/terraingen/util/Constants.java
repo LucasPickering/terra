@@ -8,7 +8,6 @@ public class Constants {
     public static final String SAVE_PATH = "/saves/%s.csv";
 
     // Texture names
-    public static final String TILE_BG_NAME = "tile_background";
     public static final String BUTTON_NAME = "button";
 
     // Font names
