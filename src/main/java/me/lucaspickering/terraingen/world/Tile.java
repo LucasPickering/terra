@@ -122,14 +122,14 @@ public class Tile {
                 return biome().color();
             case COMPOSITE:
                 final Color elevColor = getColor(TileColorMode.ELEVATION);
-                double elevValue = Funcs.toHSV(elevColor)[2];
+                double elevValue = Funcs.toHsv(elevColor)[2];
                 elevValue = Math.pow(elevValue, 0.75); // Make it slightly brighter
 
                 // Scale this biome color's value by the value of the elevation color
-                final float[] biomeHsv = Funcs.toHSV(getColor(TileColorMode.BIOME));
+                final float[] biomeHsv = Funcs.toHsv(getColor(TileColorMode.BIOME));
                 biomeHsv[2] *= (float) elevValue;
 
-                return Funcs.toRGB(biomeHsv);
+                return Funcs.toRgb(biomeHsv);
             default:
                 throw new IllegalArgumentException("Unknown color mode: " + colorMode);
         }

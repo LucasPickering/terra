@@ -1,9 +1,14 @@
 package me.lucaspickering.terraingen.render.screen;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL30;
 
 import java.awt.Color;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -32,7 +37,11 @@ public class WorldScreen extends Screen {
     private static final int MAX_CLICK_TIME = 250;
 
     // Change of tile size in pixels with each zoom level
-    private static final double ZOOM_STEP = 5;
+    private static final double ZOOM_STEP = 1.0;
+
+    private static final int NUM_VERTICES = WorldHandler.TILE_VERTICES.length;
+    private static final int VERTEX_SIZE = 2;
+    private static final int COLOR_SIZE = 3;
 
     // Bind a key to each tile color mode
     private static final Map<Integer, TileColorMode> keyToTileColorMode =
@@ -63,6 +72,10 @@ public class WorldScreen extends Screen {
 
     private TileSet onScreenTiles;
 
+    private FloatBuffer colorBuffer;
+    private int vboVertexHandle;
+    private int vboColorHandle;
+
     public WorldScreen(WorldHandler worldHandler) {
         Objects.requireNonNull(worldHandler);
         this.worldHandler = worldHandler;
@@ -70,6 +83,28 @@ public class WorldScreen extends Screen {
         mouseOverTileInfo.setVisible(false); // Hide this for now
         addGuiElement(mouseOverTileInfo);
         updateOnScreenTiles();
+        initVbo();
+    }
+
+    private void initVbo() {
+        final DoubleBuffer vertexBuffer =
+            BufferUtils.createDoubleBuffer(VERTEX_SIZE * NUM_VERTICES);
+        colorBuffer = BufferUtils.createFloatBuffer(COLOR_SIZE * NUM_VERTICES);
+        for (Point vertex : WorldHandler.TILE_VERTICES) {
+            vertexBuffer.put(new double[]{vertex.x(), vertex.y()});
+        }
+        vertexBuffer.flip();
+        colorBuffer.flip();
+
+        vboVertexHandle = GL15.glGenBuffers();
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexBuffer, GL15.GL_STATIC_DRAW);
+        GL30.glBindVertexArray(0);
+
+        vboColorHandle = GL15.glGenBuffers();
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_DYNAMIC_DRAW);
+        GL30.glBindVertexArray(0);
     }
 
     @Override
@@ -81,7 +116,10 @@ public class WorldScreen extends Screen {
 
         updateScreenCenter(mousePos);
 
-        onScreenTiles.forEach(this::drawTile); // Draw each tile
+        // Draw each tile
+        for (Tile tile : onScreenTiles) {
+            drawTile(tile);
+        }
 
         // Draw the overlay for the tile that the mouse is over, then draw the text box with info
         // for that tile.
@@ -116,7 +154,6 @@ public class WorldScreen extends Screen {
 
         onScreenTiles = worldHandler.getWorld().getTiles().getTilesInRange(centerTilePos,
                                                                            screenRadius);
-        System.out.println("Updating on-screen tiles");
     }
 
     /**
@@ -172,12 +209,28 @@ public class WorldScreen extends Screen {
      * @param color the color for the hexagon
      */
     private void drawHex(Color color) {
+        GL11.glPushMatrix();
+        final double scale = worldHandler.getWorldScale();
+        GL11.glScaled(scale, scale, 0.0);
         Funcs.setGlColor(color);
-        GL11.glBegin(GL11.GL_POLYGON);
-        for (Point vertex : worldHandler.getTileVertices()) {
-            GL11.glVertex2d(vertex.x(), vertex.y());
-        }
-        GL11.glEnd();
+
+        // Set up the vertex buffer
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle);
+        GL11.glVertexPointer(VERTEX_SIZE, GL11.GL_DOUBLE, 0, 0L);
+
+        // Set up the color buffer
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle);
+        GL11.glColorPointer(COLOR_SIZE, GL11.GL_FLOAT, 0, 0L);
+
+        GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+        GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
+
+        GL11.glDrawArrays(GL11.GL_POLYGON, 0, NUM_VERTICES);
+
+        GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
+        GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
+
+        GL11.glPopMatrix();
     }
 
     private Tile getMouseOverTile(Point mousePos) {
@@ -191,7 +244,7 @@ public class WorldScreen extends Screen {
     }
 
     private void zoom(double step) {
-        worldHandler.setTileRadius(worldHandler.getTileRadius() + step);
+        worldHandler.adjustWorldScale(step);
         updateOnScreenTiles(); // Refresh the set of on-screen tiles
     }
 

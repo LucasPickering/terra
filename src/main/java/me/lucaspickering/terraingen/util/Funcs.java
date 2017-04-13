@@ -118,17 +118,17 @@ public class Funcs {
      * @return the color as a float array of Hue-Saturation-Value (in that order)
      */
     @NotNull
-    public static float[] toHSV(@NotNull Color color) {
+    public static float[] toHsv(@NotNull Color color) {
         return Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
     }
 
     @NotNull
-    public static Color toRGB(@NotNull float[] hsv) {
-        return toRGB(hsv[0], hsv[1], hsv[2]);
+    public static Color toRgb(@NotNull float[] hsv) {
+        return toRgb(hsv[0], hsv[1], hsv[2]);
     }
 
     @NotNull
-    public static Color toRGB(float hue, float saturation, float value) {
+    public static Color toRgb(float hue, float saturation, float value) {
         return colorFromRgb(Color.HSBtoRGB(hue, saturation, value));
     }
 }

@@ -56,9 +56,20 @@ public class WorldHandler {
     }
 
     /**
-     * A tile's radius (in pixels) must be in this range (this is essentially a zoom limit)
+     * The zoom factor on the world must in this range
      */
-    public static final Range<Double> VALID_TILE_RADII = new DoubleRange(10.0, 200.0);
+    private static final Range<Double> VALID_WORLD_SCALES = new DoubleRange(1.0, 10.0);
+
+    public static final double TILE_WIDTH = 20.0;
+    public static final double TILE_HEIGHT = (float) Math.sqrt(3) * TILE_WIDTH / 2.0;
+    public static final Point[] TILE_VERTICES = new Point[]{
+        new Point(-TILE_WIDTH / 4, -TILE_HEIGHT / 2), // Top-left
+        new Point(+TILE_WIDTH / 4, -TILE_HEIGHT / 2), // Top-right
+        new Point(+TILE_WIDTH / 2, 0),                // Right
+        new Point(+TILE_WIDTH / 4, +TILE_HEIGHT / 2), // Bottom-right
+        new Point(-TILE_WIDTH / 4, +TILE_HEIGHT / 2), // Bottom-left
+        new Point(-TILE_WIDTH / 2, 0)                 // Left
+    };
 
     // World size
     private static final int DEFAULT_SIZE = 200;
@@ -71,12 +82,7 @@ public class WorldHandler {
     private World world;
 
     private Point worldCenter; // The pixel location of the center of the world
-
-    // Tile pixel dimensions
-    private double tileRadius;
-    private double tileWidth;
-    private double tileHeight;
-    private Point[] tileVertices;
+    private double worldScale;
 
     public WorldHandler(long seed) {
         this(seed, DEFAULT_SIZE);
@@ -90,7 +96,7 @@ public class WorldHandler {
 
         logger.log(Level.FINE, String.format("Using seed '%d'", seed));
         worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
-        setTileRadius(VALID_TILE_RADII.lower());
+        worldScale = VALID_WORLD_SCALES.lower().floatValue();
     }
 
     /**
@@ -150,54 +156,16 @@ public class WorldHandler {
         this.worldCenter = worldCenter;
     }
 
-    public double getTileRadius() {
-        return tileRadius;
-    }
-
-    public void setTileRadius(double radius) {
-        tileRadius = VALID_TILE_RADII.coerce(radius);
-        tileWidth = tileRadius * 2;
-        tileHeight = Math.sqrt(3) * tileRadius;
-        tileVertices = new Point[]{
-            new Point(-tileWidth / 4, -tileHeight / 2),
-            new Point(tileWidth / 4, -tileHeight / 2),
-            new Point(tileRadius, 0),
-            new Point(tileWidth / 4, tileHeight / 2),
-            new Point(-tileWidth / 4, tileHeight / 2),
-            new Point(-tileRadius, 0)
-        };
-    }
-
-    public double getTileWidth() {
-        return tileWidth;
-    }
-
-    public double getTileHeight() {
-        return tileHeight;
-    }
-
-    public Point[] getTileVertices() {
-        return tileVertices;
-    }
-
-    public final Point getTileCenter(Tile tile) {
+    public Point getTileCenter(Tile tile) {
         return tileToPixel(tile.pos());
     }
 
-    public final Point getTileTopLeft(Point tileCenter) {
-        return tileCenter.plus(-getTileWidth() / 2, -getTileHeight() / 2);
+    public double getWorldScale() {
+        return worldScale;
     }
 
-    public Point getTileTopRight(Point tileCenter) {
-        return tileCenter.plus(getTileWidth() / 2, -getTileHeight() / 2);
-    }
-
-    public Point getTileBottomRight(Point tileCenter) {
-        return tileCenter.plus(getTileWidth() / 2, getTileHeight() / 2);
-    }
-
-    public Point getTileBottomLeft(Point tileCenter) {
-        return tileCenter.plus(-getTileWidth() / 2, getTileHeight() / 2);
+    public void adjustWorldScale(double delta) {
+        worldScale = VALID_WORLD_SCALES.coerce(worldScale + delta);
     }
 
 
@@ -209,8 +177,8 @@ public class WorldHandler {
      */
     @NotNull
     public Point tileToPixel(@NotNull TilePoint tile) {
-        final double x = getTileWidth() * tile.x() * 0.75;
-        final double y = -getTileHeight() * (tile.x() / 2.0 + tile.y());
+        final double x = TILE_WIDTH * tile.x() * 0.75;
+        final double y = -TILE_HEIGHT * (tile.x() / 2.0 + tile.y());
         return getWorldCenter().plus(x, y);
     }
 
@@ -228,9 +196,9 @@ public class WorldHandler {
     public TilePoint pixelToTile(@NotNull Point pos) {
         final Point shiftedPos = pos.minus(getWorldCenter());
         // Convert it to a fractional tile point
-        final double fracX = shiftedPos.x() * 4.0 / 3.0 / getTileWidth();
+        final double fracX = shiftedPos.x() * 4.0 / 3.0 / TILE_WIDTH;
         final double fracY = -(shiftedPos.x() + Math.sqrt(3.0) * shiftedPos.y())
-                             / (getTileRadius() * 3.0);
+                             / (TILE_WIDTH * 1.5);
         final double fracZ = -fracX - fracY; // We'll need this later
 
         // Return the rounded point

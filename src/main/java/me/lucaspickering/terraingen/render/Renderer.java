@@ -3,6 +3,7 @@ package me.lucaspickering.terraingen.render;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL15;
 
 import java.awt.Color;
 import java.awt.FontFormatException;
@@ -35,10 +36,13 @@ public class Renderer {
 
     private static final int BYTES_PER_PIXEL = 4; // RGBA
 
+
     private final Map<String, Texture> textures = new HashMap<>();
     private final Map<Font, TrueTypeFont> fonts = new EnumMap<>(Font.class);
 
     public Renderer() {
+
+
         // Load all fonts
         for (Font font : Font.values()) {
             try {
@@ -48,6 +52,10 @@ public class Renderer {
                 e.printStackTrace();
             }
         }
+    }
+
+    public int initVbos() {
+        return GL15.glGenBuffers();
     }
 
     /**
