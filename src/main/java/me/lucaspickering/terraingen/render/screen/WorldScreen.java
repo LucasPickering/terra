@@ -72,7 +72,6 @@ public class WorldScreen extends Screen {
 
     private TileSet onScreenTiles;
 
-    private FloatBuffer colorBuffer;
     private int vboVertexHandle;
     private int vboColorHandle;
 
@@ -87,11 +86,11 @@ public class WorldScreen extends Screen {
     }
 
     private void initVbo() {
-        final DoubleBuffer vertexBuffer =
-            BufferUtils.createDoubleBuffer(VERTEX_SIZE * NUM_VERTICES);
-        colorBuffer = BufferUtils.createFloatBuffer(COLOR_SIZE * NUM_VERTICES);
+        DoubleBuffer vertexBuffer = BufferUtils.createDoubleBuffer(VERTEX_SIZE * NUM_VERTICES);
+        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(COLOR_SIZE * NUM_VERTICES);
         for (Point vertex : WorldHandler.TILE_VERTICES) {
             vertexBuffer.put(new double[]{vertex.x(), vertex.y()});
+            colorBuffer.put(new float[]{1f, 0f, 0f});
         }
         vertexBuffer.flip();
         colorBuffer.flip();
@@ -103,7 +102,7 @@ public class WorldScreen extends Screen {
 
         vboColorHandle = GL15.glGenBuffers();
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_DYNAMIC_DRAW);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_STATIC_DRAW);
         GL30.glBindVertexArray(0);
     }
 
@@ -115,6 +114,10 @@ public class WorldScreen extends Screen {
         }
 
         updateScreenCenter(mousePos);
+
+        GL11.glPushMatrix();
+        final double scale = worldHandler.getWorldScale();
+        GL11.glScaled(scale, scale, 0.0);
 
         // Draw each tile
         for (Tile tile : onScreenTiles) {
@@ -130,6 +133,8 @@ public class WorldScreen extends Screen {
             drawMouseOverlay(mouseOverTile);
             mouseOverTileInfo.setText(mouseOverTile.info());
         }
+
+        GL11.glPopMatrix();
 
         super.draw(mousePos); // Draw GUI elements
     }
@@ -209,9 +214,6 @@ public class WorldScreen extends Screen {
      * @param color the color for the hexagon
      */
     private void drawHex(Color color) {
-        GL11.glPushMatrix();
-        final double scale = worldHandler.getWorldScale();
-        GL11.glScaled(scale, scale, 0.0);
         Funcs.setGlColor(color);
 
         // Set up the vertex buffer
@@ -220,17 +222,15 @@ public class WorldScreen extends Screen {
 
         // Set up the color buffer
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle);
-        GL11.glColorPointer(COLOR_SIZE, GL11.GL_FLOAT, 0, 0L);
+//        GL11.glColorPointer(COLOR_SIZE, GL11.GL_FLOAT, 0, 0L);
 
         GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-        GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
+//        GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
 
         GL11.glDrawArrays(GL11.GL_POLYGON, 0, NUM_VERTICES);
 
-        GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
+//        GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
         GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
-
-        GL11.glPopMatrix();
     }
 
     private Tile getMouseOverTile(Point mousePos) {
