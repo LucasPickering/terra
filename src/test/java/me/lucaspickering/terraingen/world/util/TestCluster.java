@@ -2,9 +2,6 @@ package me.lucaspickering.terraingen.world.util;
 
 import org.junit.Test;
 
-import me.lucaspickering.terraingen.world.util.TilePoint;
-import me.lucaspickering.terraingen.world.util.Cluster;
-import me.lucaspickering.terraingen.world.util.TileSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -19,15 +16,15 @@ public class TestCluster {
         adjacents = cluster.allAdjacents();
         assertTrue("Adjacents should be empty", adjacents.isEmpty());
 
-        cluster.add(tiles.getByPoint(TilePoint.ZERO));
+        cluster.add(tiles.getByPoint(HexPoint.ZERO));
         adjacents = cluster.allAdjacents();
         assertEquals(6, adjacents.size());
 
-        cluster.add(tiles.getByPoint(new TilePoint(1, -1, 0)));
+        cluster.add(tiles.getByPoint(new HexPoint(1, -1, 0)));
         adjacents = cluster.allAdjacents();
         assertEquals(8, adjacents.size());
 
-        cluster.removePoint(TilePoint.ZERO);
+        cluster.removePoint(HexPoint.ZERO);
         adjacents = cluster.allAdjacents();
         assertEquals(6, adjacents.size());
 

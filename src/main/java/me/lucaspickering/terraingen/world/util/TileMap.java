@@ -22,7 +22,7 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
 
     private class EntrySet extends AbstractSet<Entry<Tile, V>> {
 
-        private final Set<Entry<TilePoint, Pair<Tile, V>>> backingEntrySet;
+        private final Set<Entry<HexPoint, Pair<Tile, V>>> backingEntrySet;
 
         private EntrySet() {
             this.backingEntrySet = map.entrySet();
@@ -34,7 +34,7 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
             return new Iterator<Entry<Tile, V>>() {
 
                 // Internal iterator that backs this one
-                private Iterator<Entry<TilePoint, Pair<Tile, V>>> iter = backingEntrySet.iterator();
+                private Iterator<Entry<HexPoint, Pair<Tile, V>>> iter = backingEntrySet.iterator();
 
                 @Override
                 public boolean hasNext() {
@@ -44,7 +44,7 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
                 @Override
                 public Entry<Tile, V> next() {
                     // Get the next value in the backing iterator
-                    final Entry<TilePoint, Pair<Tile, V>> next = iter.next();
+                    final Entry<HexPoint, Pair<Tile, V>> next = iter.next();
                     final Pair<Tile, V> pair = next.getValue();
 
                     // Extract the values we ant from the next value and return them in an entry
@@ -77,16 +77,16 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
     }
 
     // Internal map
-    private final Map<TilePoint, Pair<Tile, V>> map;
+    private final Map<HexPoint, Pair<Tile, V>> map;
 
     // Cache this so we only need to make it once
     private Set<Entry<Tile, V>> entrySet;
 
     public TileMap() {
-        map = new TreeMap<>(); // Uses TilePoint's compareTo method for ordering
+        map = new TreeMap<>(); // Uses HexPoint's compareTo method for ordering
     }
 
-    private TileMap(Map<TilePoint, Pair<Tile, V>> map) {
+    private TileMap(Map<HexPoint, Pair<Tile, V>> map) {
         this.map = map;
     }
 

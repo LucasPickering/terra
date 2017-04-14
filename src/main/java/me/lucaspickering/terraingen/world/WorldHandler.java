@@ -17,7 +17,7 @@ import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.generate.NoiseElevationGenerator;
 import me.lucaspickering.terraingen.world.generate.NoiseHumidityGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
-import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.HexPoint;
 import me.lucaspickering.utils.Point;
 import me.lucaspickering.utils.range.DoubleRange;
 import me.lucaspickering.utils.range.Range;
@@ -170,9 +170,9 @@ public class WorldHandler {
 
 
     /**
-     * Converts a {@link TilePoint} in this world to a {@link Point} on the screen.
+     * Converts a {@link HexPoint} in this world to a {@link Point} on the screen.
      *
-     * @param tile the position of the tile as a {@link TilePoint}
+     * @param tile the position of the tile as a {@link HexPoint}
      * @return the position of that tile's center on the screen
      */
     @NotNull
@@ -183,7 +183,7 @@ public class WorldHandler {
     }
 
     /**
-     * Converts a {@link Point} on the screen to a {@link TilePoint} in this world. The returned
+     * Converts a {@link Point} on the screen to a {@link HexPoint} in this world. The returned
      * point is the location of the tile that contains the given screen point. It doesn't
      * necessarily exist in this world; it is just the position of a theoretical tile that could
      * exist there. The given point does not need to be shifted based on the world center before
@@ -193,7 +193,7 @@ public class WorldHandler {
      * @return the position of the tile that encloses the given point
      */
     @NotNull
-    public TilePoint pixelToTile(@NotNull Point pos) {
+    public HexPoint pixelToTile(@NotNull Point pos) {
         final Point shiftedPos = pos.minus(getWorldCenter());
         // Convert it to a fractional tile point
         final double fracX = shiftedPos.x() * 4.0 / 3.0 / TILE_WIDTH;
@@ -202,6 +202,6 @@ public class WorldHandler {
         final double fracZ = -fracX - fracY; // We'll need this later
 
         // Return the rounded point
-        return TilePoint.roundPoint(fracX, fracY, fracZ);
+        return HexPoint.roundPoint(fracX, fracY, fracZ);
     }
 }

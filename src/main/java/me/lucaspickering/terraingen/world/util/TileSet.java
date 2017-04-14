@@ -27,15 +27,15 @@ import me.lucaspickering.utils.Pair;
  * A set of {@link Tile}s. Internally, tiles are stored in a map, keyed by their position, but
  * externally this functions as a normal set of tiles would. No two tiles can have the same
  * position. Some additional map-like operations are provided, such as accessing tiles by their
- * {@link TilePoint}.
+ * {@link HexPoint}.
  */
 public class TileSet extends AbstractSet<Tile> {
 
     // Internal map
-    private final Map<TilePoint, Tile> map;
+    private final Map<HexPoint, Tile> map;
 
     public TileSet() {
-        map = new TreeMap<>(); // Uses TilePoint's compareTo method for ordering
+        map = new TreeMap<>(); // Uses HexPoint's compareTo method for ordering
     }
 
     /**
@@ -55,7 +55,7 @@ public class TileSet extends AbstractSet<Tile> {
      *
      * @param map the map to back this object
      */
-    private TileSet(Map<TilePoint, Tile> map) {
+    private TileSet(Map<HexPoint, Tile> map) {
         this.map = map;
     }
 
@@ -72,7 +72,7 @@ public class TileSet extends AbstractSet<Tile> {
         final TileSet tiles = new TileSet();
 
         // Add all tiles in the given radius to the set
-        tiles.applyInRange(point -> tiles.add(new Tile(point)), TilePoint.ZERO, radius);
+        tiles.applyInRange(point -> tiles.add(new Tile(point)), HexPoint.ZERO, radius);
 
         return tiles;
     }
@@ -85,7 +85,7 @@ public class TileSet extends AbstractSet<Tile> {
      * @param origin   the center of all tiles to be iterated over
      * @param range    the range to apply across (non-negative)
      */
-    private void applyInRange(Consumer<TilePoint> consumer, TilePoint origin, int range) {
+    private void applyInRange(Consumer<HexPoint> consumer, HexPoint origin, int range) {
         if (range < 0) {
             throw new IllegalArgumentException(String.format("Range cannot be negative, was [%d]",
                                                              range));
@@ -102,7 +102,7 @@ public class TileSet extends AbstractSet<Tile> {
                 final int z = -x - y; // We know the z value now
 
                 // Get the tile at this point and pass it to the consumer
-                final TilePoint point = origin.plus(x, y, z);
+                final HexPoint point = origin.plus(x, y, z);
                 consumer.accept(point);
             }
         }
@@ -116,14 +116,14 @@ public class TileSet extends AbstractSet<Tile> {
      */
     public TileSet immutableCopy() {
         // Turn the map of point:Tile into a map of point:ImmutableTile
-        final Map<TilePoint, Tile> tiles = new HashMap<>();
+        final Map<HexPoint, Tile> tiles = new HashMap<>();
         for (Tile tile : map.values()) {
             tiles.put(tile.pos(), tile.immutableCopy());
         }
         return new TileSet(Collections.unmodifiableMap(tiles));
     }
 
-    public Tile getByPoint(TilePoint point) {
+    public Tile getByPoint(HexPoint point) {
         return map.get(point);
     }
 
@@ -143,7 +143,7 @@ public class TileSet extends AbstractSet<Tile> {
         return o instanceof Tile && containsPoint(((Tile) o).pos());
     }
 
-    public boolean containsPoint(TilePoint point) {
+    public boolean containsPoint(HexPoint point) {
         return map.containsKey(point);
     }
 
@@ -169,7 +169,7 @@ public class TileSet extends AbstractSet<Tile> {
         return false;
     }
 
-    public boolean removePoint(TilePoint point) {
+    public boolean removePoint(HexPoint point) {
         return map.remove(point) != null;
     }
 
@@ -188,11 +188,11 @@ public class TileSet extends AbstractSet<Tile> {
     @NotNull
     public Map<Direction, Tile> getAdjacentTiles(@NotNull Tile tile) {
         Objects.requireNonNull(tile);
-        final TilePoint point = tile.pos();
+        final HexPoint point = tile.pos();
 
         final Map<Direction, Tile> result = new EnumMap<>(Direction.class);
         for (Direction dir : Direction.values()) {
-            final TilePoint otherPoint = dir.shift(point); // Get the shifted point
+            final HexPoint otherPoint = dir.shift(point); // Get the shifted point
 
             // If the shifted point is in the world, add it to the map
             final Tile otherTile = map.get(otherPoint);
@@ -210,15 +210,15 @@ public class TileSet extends AbstractSet<Tile> {
      * tile}. For example, giving a range of 0 returns just the given tile, 1 returns the tile
      * and all adjacent tiles, etc.
      *
-     * @param tilePoint  the tile to start counting from
+     * @param hexPoint  the tile to start counting from
      * @param range (non-negative)
      * @return all tiles in range of the given tile
      * @throws NullPointerException     if {@code tile == null}
      * @throws IllegalArgumentException if range is negative
      */
     @NotNull
-    public TileSet getTilesInRange(@NotNull TilePoint tilePoint, int range) {
-        Objects.requireNonNull(tilePoint);
+    public TileSet getTilesInRange(@NotNull HexPoint hexPoint, int range) {
+        Objects.requireNonNull(hexPoint);
         if (range < 0) {
             throw new IllegalArgumentException(String.format("Range must be positive, was [%d]",
                                                              range));
@@ -228,13 +228,13 @@ public class TileSet extends AbstractSet<Tile> {
 
         // Create a function that, given a point, if that point is in this set, add the tile at
         // the point to the result
-        final Consumer<TilePoint> adder = point -> {
+        final Consumer<HexPoint> adder = point -> {
             final Tile otherTile = getByPoint(point);
             if (otherTile != null) {
                 result.add(otherTile);
             }
         };
-        applyInRange(adder, tilePoint, range); // Apply that function to all tiles in the range
+        applyInRange(adder, hexPoint, range); // Apply that function to all tiles in the range
 
         return result;
     }
@@ -286,7 +286,7 @@ public class TileSet extends AbstractSet<Tile> {
         }
 
         // Step <distance> tiles southwest to get the first tile on the ring
-        TilePoint point = Direction.SOUTHWEST.shift(tile.pos(), distance);
+        HexPoint point = Direction.SOUTHWEST.shift(tile.pos(), distance);
 
         // For each direction, step <distance> tiles in that direction to get one side of the ring
         for (Direction dir : Direction.values()) {

@@ -5,7 +5,7 @@ import com.flowpowered.noise.module.source.Perlin;
 import java.util.Map;
 
 import me.lucaspickering.terraingen.world.Tile;
-import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.HexPoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.utils.Pair;
 
@@ -46,7 +46,7 @@ abstract class NoiseGenerator implements Generator {
      * @return the noise value for the given tile
      */
     private double generateNoise(Tile tile) {
-        final TilePoint pos = tile.pos();
+        final HexPoint pos = tile.pos();
 
         // The Perlin noise function relies of receiving non-integer input in order to generate
         // reasonable noise values. Divide x/y/z by some large constant to get decimal values.

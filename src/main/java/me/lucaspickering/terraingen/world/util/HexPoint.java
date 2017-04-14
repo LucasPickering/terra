@@ -4,21 +4,21 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents the position of one hex tile. This is meant to be used with the coordinate system
- * described by http://www.redblobgames.com/grids/hexagons/, so {@code x + y + z == 0} must
- * always be {@code true}. Technically this means that keeping z around is redundant, but it
- * makes certain things more elegant (like the distance calculation). Some computations, like
+ * described by http://www.redblobgames.com/grids/hexagons/, so {@code x + y + z == 0}.
+ * Technically this means that keeping z around is redundant, but it makes certain things more
+ * elegant (like the distance calculation). Some computations, like
  * {@link #equals} and {@link #hashCode}, don't use z for efficiency purposes.
  */
-public class TilePoint implements Comparable<TilePoint> {
+public class HexPoint implements Comparable<HexPoint> {
 
-    public static final TilePoint ZERO = new TilePoint(0, 0, 0);
+    public static final HexPoint ZERO = new HexPoint(0, 0, 0);
 
     private static final String STRING_FORMAT = "(%d, %d, %d)";
 
     private final int x, y, z;
 
     /**
-     * Constructs a new TilePoint using the given coordinates. Verifies that
+     * Constructs a new HexPoint using the given coordinates. Verifies that
      * {@code x + y + z == 0} first.
      *
      * @param x the x coord
@@ -26,7 +26,7 @@ public class TilePoint implements Comparable<TilePoint> {
      * @param z the z coord
      * @throws IllegalArgumentException if {@code x + y + z != 0}
      */
-    public TilePoint(int x, int y, int z) {
+    public HexPoint(int x, int y, int z) {
         if (x + y + z != 0) {
             throw new IllegalArgumentException("x + y + z must equal 0");
         }
@@ -37,7 +37,7 @@ public class TilePoint implements Comparable<TilePoint> {
 
     /**
      * Rounds the given fractional coordinate values into valid integer coordinates, and creates
-     * a {@link TilePoint} from those. The round point closest to the given fractional point will
+     * a {@link HexPoint} from those. The round point closest to the given fractional point will
      * be returned.
      *
      * @param x the fractional x
@@ -45,7 +45,7 @@ public class TilePoint implements Comparable<TilePoint> {
      * @param z the fractional z
      * @return the rounded point
      */
-    public static TilePoint roundPoint(double x, double y, double z) {
+    public static HexPoint roundPoint(double x, double y, double z) {
         // Convert the fractional tile coordinates to regular coordinates
         // First, get rounded versions of each coord
         int roundX = (int) Math.round(x);
@@ -68,7 +68,7 @@ public class TilePoint implements Comparable<TilePoint> {
             roundZ = -roundX - roundY;
         }
 
-        return new TilePoint(roundX, roundY, roundZ);
+        return new HexPoint(roundX, roundY, roundZ);
     }
 
     public int x() {
@@ -91,22 +91,22 @@ public class TilePoint implements Comparable<TilePoint> {
      * @param other the other point
      * @return the distance between this tile and {@param p}
      */
-    public final int distanceTo(TilePoint other) {
+    public final int distanceTo(HexPoint other) {
         return (Math.abs(x - other.x())
                 + Math.abs(y - other.y())
                 + Math.abs(z - other.z())) / 2;
     }
 
-    public final TilePoint plus(int x, int y, int z) {
-        return new TilePoint(this.x + x, this.y + y, this.z + z);
+    public final HexPoint plus(int x, int y, int z) {
+        return new HexPoint(this.x + x, this.y + y, this.z + z);
     }
 
-    public final TilePoint plus(TilePoint other) {
+    public final HexPoint plus(HexPoint other) {
         return plus(other.x(), other.y(), other.z());
     }
 
-    public final TilePoint times(int factor) {
-        return new TilePoint(x * factor, y * factor, z * factor);
+    public final HexPoint times(int factor) {
+        return new HexPoint(x * factor, y * factor, z * factor);
     }
 
     @Override
@@ -123,11 +123,11 @@ public class TilePoint implements Comparable<TilePoint> {
         if (this == o) {
             return true;
         }
-        if (o == null || !(o instanceof TilePoint)) {
+        if (o == null || !(o instanceof HexPoint)) {
             return false;
         }
 
-        final TilePoint point = (TilePoint) o;
+        final HexPoint point = (HexPoint) o;
         return equals(point.x, point.y, point.z);
     }
 
@@ -138,7 +138,7 @@ public class TilePoint implements Comparable<TilePoint> {
     }
 
     @Override
-    public int compareTo(@NotNull TilePoint other) {
+    public int compareTo(@NotNull HexPoint other) {
         // Compares by x then y
         int comp;
 

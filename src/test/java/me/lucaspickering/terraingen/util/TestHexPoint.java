@@ -3,18 +3,18 @@ package me.lucaspickering.terraingen.util;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
-import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.HexPoint;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class TestTilePoint {
+public class TestHexPoint {
 
     @Test
     public void testDistance() throws Exception {
-        final TilePoint origin = new TilePoint(0, 0, 0);
-        final TilePoint tile1 = new TilePoint(-1, 0, 1);
-        final TilePoint tile2 = new TilePoint(0, -5, 5);
-        final TilePoint tile3 = new TilePoint(-3, 2, 1);
+        final HexPoint origin = new HexPoint(0, 0, 0);
+        final HexPoint tile1 = new HexPoint(-1, 0, 1);
+        final HexPoint tile2 = new HexPoint(0, -5, 5);
+        final HexPoint tile3 = new HexPoint(-3, 2, 1);
 
         // Test reflexivity
         assertEquals(0, origin.distanceTo(origin));
@@ -39,8 +39,8 @@ public class TestTilePoint {
 
     @Test
     public void testEquals() throws Exception {
-        final TilePoint point = new TilePoint(-1, 1, 0);
-        assertFalse(point.equals(TilePoint.ZERO));
+        final HexPoint point = new HexPoint(-1, 1, 0);
+        assertFalse(point.equals(HexPoint.ZERO));
         assertTrue(point.equals(-1, 1, 0));
         assertFalse(point.equals(1, -1, 1));
     }

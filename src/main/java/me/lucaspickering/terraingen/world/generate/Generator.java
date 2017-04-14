@@ -5,11 +5,11 @@ import java.util.Random;
 
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
-import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.HexPoint;
 
 /**
  * Represents one stage in the world generation process. A {@link Generator} is given a
- * {@link Map} of {@link TilePoint}s to {@link Tile}s, representing a partially-generated
+ * {@link Map} of {@link HexPoint}s to {@link Tile}s, representing a partially-generated
  * world. It modifies the tiles in that map, and returns the same map with all the same objects.
  *
  * A specific instance of this type should only be used once. If you want to generate a new

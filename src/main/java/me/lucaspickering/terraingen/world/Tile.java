@@ -6,7 +6,7 @@ import java.util.Objects;
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
-import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.HexPoint;
 
 public class Tile {
 
@@ -44,19 +44,19 @@ public class Tile {
     /**
      * The position of this tile within the world. Non-null.
      */
-    private final TilePoint pos;
+    private final HexPoint pos;
     // Terrain features
     private Biome biome = Biome.NONE;
 
     private int elevation;
     private double humidity;
 
-    public Tile(TilePoint pos) {
+    public Tile(HexPoint pos) {
         Objects.requireNonNull(pos);
         this.pos = pos;
     }
 
-    private Tile(TilePoint pos, Biome biome, int elevation, double humidity) {
+    private Tile(HexPoint pos, Biome biome, int elevation, double humidity) {
         this(pos);
         Objects.requireNonNull(biome);
         this.biome = biome;
@@ -64,7 +64,7 @@ public class Tile {
         this.humidity = humidity;
     }
 
-    public final TilePoint pos() {
+    public final HexPoint pos() {
         return pos;
     }
 

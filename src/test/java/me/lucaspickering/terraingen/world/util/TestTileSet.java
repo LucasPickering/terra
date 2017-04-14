@@ -42,15 +42,15 @@ public class TestTileSet {
         Map<Direction, Tile> result;
 
         // Center tile has 6 adjacents
-        result = tiles.getAdjacentTiles(tiles.getByPoint(new TilePoint(0, 0, 0)));
+        result = tiles.getAdjacentTiles(tiles.getByPoint(new HexPoint(0, 0, 0)));
         assertEquals("Should have 6 adjacent tiles", 6, result.size());
 
         // Another one with 6 adjacents
-        result = tiles.getAdjacentTiles(tiles.getByPoint(new TilePoint(0, 1, -1)));
+        result = tiles.getAdjacentTiles(tiles.getByPoint(new HexPoint(0, 1, -1)));
         assertEquals("Should have 6 adjacent tiles", 6, result.size());
 
         // One on the edge with only 3 adjacents
-        result = tiles.getAdjacentTiles(tiles.getByPoint(new TilePoint(2, 0, -2)));
+        result = tiles.getAdjacentTiles(tiles.getByPoint(new HexPoint(2, 0, -2)));
         assertEquals("Should have 3 adjacent tiles", 3, result.size());
     }
 
@@ -60,7 +60,7 @@ public class TestTileSet {
         final int radius = 10;
         final TileSet tiles = TileSet.initByRadius(10);
 
-        final TilePoint origin = TilePoint.ZERO;
+        final HexPoint origin = HexPoint.ZERO;
         TileSet result;
 
         // Range of 0 returns just the 1 tile
@@ -81,7 +81,7 @@ public class TestTileSet {
         final int radius = 10;
         final TileSet tiles = TileSet.initByRadius(radius);
 
-        Tile origin = tiles.getByPoint(TilePoint.ZERO);
+        Tile origin = tiles.getByPoint(HexPoint.ZERO);
         TileSet result;
 
         // Test each distance in [1, radius]

@@ -66,7 +66,7 @@ public class Cluster extends TileSet {
     }
 
     @Override
-    public boolean removePoint(TilePoint point) {
+    public boolean removePoint(HexPoint point) {
         final boolean removed = super.removePoint(point);
 
         if (removed) {

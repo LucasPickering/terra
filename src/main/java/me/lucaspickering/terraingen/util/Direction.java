@@ -1,28 +1,28 @@
 package me.lucaspickering.terraingen.util;
 
-import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.HexPoint;
 
 public enum Direction {
 
     NORTH(0, 1, -1), NORTHEAST(1, 0, -1), SOUTHEAST(1, -1, 0),
     SOUTH(0, -1, 1), SOUTHWEST(-1, 0, 1), NORTHWEST(-1, 1, 0);
 
-    private final TilePoint delta;
+    private final HexPoint delta;
 
     Direction(int x, int y, int z) {
-        delta = new TilePoint(x, y, z);
+        delta = new HexPoint(x, y, z);
     }
 
-    public TilePoint delta() {
+    public HexPoint delta() {
         return delta;
     }
 
     /**
      * Shifts the given point 1 step in this direction.
      *
-     * @see #shift(TilePoint, int)
+     * @see #shift(HexPoint, int)
      */
-    public TilePoint shift(TilePoint point) {
+    public HexPoint shift(HexPoint point) {
         return shift(point, 1);
     }
 
@@ -33,7 +33,7 @@ public enum Direction {
      * @param distance the number of steps to shift it (non-negative)
      * @return the shifted point
      */
-    public TilePoint shift(TilePoint point, int distance) {
+    public HexPoint shift(HexPoint point, int distance) {
         if (distance < 0) {
             throw new IllegalArgumentException(String.format(
                 "Distance must be non-negative, was [%d]", distance));

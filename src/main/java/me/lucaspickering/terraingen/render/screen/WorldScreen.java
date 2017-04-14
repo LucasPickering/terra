@@ -23,7 +23,7 @@ import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.TileColorMode;
 import me.lucaspickering.terraingen.world.WorldHandler;
-import me.lucaspickering.terraingen.world.util.TilePoint;
+import me.lucaspickering.terraingen.world.util.HexPoint;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.utils.Point;
 
@@ -153,8 +153,8 @@ public class WorldScreen extends Screen {
     private void updateOnScreenTiles() {
         // This is a silly way. Gets the furthest tile from the center that is still on screen,
         // then renders all tiles in that range. Could definitely be more efficient.
-        final TilePoint topLeftTilePos = worldHandler.pixelToTile(Point.ZERO);
-        final TilePoint centerTilePos = worldHandler.pixelToTile(center);
+        final HexPoint topLeftTilePos = worldHandler.pixelToTile(Point.ZERO);
+        final HexPoint centerTilePos = worldHandler.pixelToTile(center);
         final int screenRadius = topLeftTilePos.distanceTo(centerTilePos);
 
         onScreenTiles = worldHandler.getWorld().getTiles().getTilesInRange(centerTilePos,
@@ -239,7 +239,7 @@ public class WorldScreen extends Screen {
         }
 
         // Get the tile that the mouse is over and return it
-        final TilePoint mouseOverPos = worldHandler.pixelToTile(mousePos);
+        final HexPoint mouseOverPos = worldHandler.pixelToTile(mousePos);
         return worldHandler.getWorld().getTiles().getByPoint(mouseOverPos);
     }
 
