@@ -25,8 +25,8 @@ public class NoiseElevationGenerator extends NoiseGenerator {
         super(new Perlin());
         noiseGenerator.setSeed((int) TerrainGen.instance().getSeed());
         noiseGenerator.setFrequency(3.5);
-        noiseGenerator.setLacunarity(Perlin.DEFAULT_PERLIN_LACUNARITY);
-        noiseGenerator.setPersistence(Perlin.DEFAULT_PERLIN_PERSISTENCE);
+        noiseGenerator.setLacunarity(2.5);
+        noiseGenerator.setPersistence(0.5);
         noiseGenerator.setOctaveCount(12);
     }
 
