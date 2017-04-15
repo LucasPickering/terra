@@ -8,7 +8,7 @@ public enum Biome {
 
     OCEAN("Ocean", 0x144ba4, Type.WATER),
     COAST("Coast", 0x398bc6, Type.WATER),
-    LAKE("Lake", 0x09729b, Type.WATER),
+    LAKE("Lake", 0x0b8cbe, Type.WATER),
 
     // The order of these matters because it determines the priority with which they are assigned
     // to tiles.

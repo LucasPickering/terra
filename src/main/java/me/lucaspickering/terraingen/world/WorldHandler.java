@@ -13,6 +13,7 @@ import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
 import me.lucaspickering.terraingen.world.generate.BiomePainter;
 import me.lucaspickering.terraingen.world.generate.ContinentClusterer;
+import me.lucaspickering.terraingen.world.generate.FreshWaterGenerator;
 import me.lucaspickering.terraingen.world.generate.Generator;
 import me.lucaspickering.terraingen.world.generate.NoiseElevationGenerator;
 import me.lucaspickering.terraingen.world.generate.NoiseHumidityGenerator;
@@ -38,7 +39,8 @@ public class WorldHandler {
         WATER_PAINTER(WaterPainter.class),
         BIOME_PAINTER(BiomePainter.class),
         CONTINENT_CLUSTERER(ContinentClusterer.class),
-        BEACH_GENERATOR(BeachGenerator.class);
+        BEACH_GENERATOR(BeachGenerator.class),
+        FRESH_WATER_GENERATOR(FreshWaterGenerator.class);
 
         private final Class<? extends Generator> clazz;
 

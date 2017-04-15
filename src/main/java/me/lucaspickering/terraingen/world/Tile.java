@@ -1,6 +1,8 @@
 package me.lucaspickering.terraingen.world;
 
 import java.awt.Color;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 
 import me.lucaspickering.terraingen.TerrainGen;
@@ -14,7 +16,7 @@ public class Tile {
 
     private static final String INFO_STRING =
         "Biome: %s%nElevation: %d%nHumidity: %d%%";
-    private static final String DEBUG_INFO_STRING = "%nPos: %s";
+    private static final String DEBUG_INFO_STRING = "%nPos: %s%nWater: %.2f/%.2f%n";
 
     /**
      * An immutable version of a tile. Should be created externally via {@link #immutableCopy()}.
@@ -22,7 +24,8 @@ public class Tile {
     private static class ImmutableTile extends Tile {
 
         private ImmutableTile(Tile tile) {
-            super(tile.pos(), tile.biome(), tile.elevation(), tile.humidity());
+            super(tile.pos, tile.biome, tile.elevation, tile.humidity,
+                  tile.waterLevel, tile.totalWaterTraversed);
         }
 
         @Override
@@ -41,6 +44,10 @@ public class Tile {
         }
     }
 
+    public enum RiverConnection {
+        ENTRY, EXIT
+    }
+
     /**
      * The position of this tile within the world. Non-null.
      */
@@ -51,17 +58,25 @@ public class Tile {
     private int elevation;
     private double humidity;
 
+    private double waterLevel;
+    private double totalWaterTraversed;
+
+    private final Map<Direction, RiverConnection> riverConnections = new EnumMap<>(Direction.class);
+
     public Tile(HexPoint pos) {
         Objects.requireNonNull(pos);
         this.pos = pos;
     }
 
-    private Tile(HexPoint pos, Biome biome, int elevation, double humidity) {
+    private Tile(HexPoint pos, Biome biome, int elevation, double humidity, double waterLevel,
+                 double totalWaterTraversed) {
         this(pos);
         Objects.requireNonNull(biome);
         this.biome = biome;
         this.elevation = elevation;
         this.humidity = humidity;
+        this.waterLevel = waterLevel;
+        this.totalWaterTraversed = totalWaterTraversed;
     }
 
     public final HexPoint pos() {
@@ -108,6 +123,43 @@ public class Tile {
         this.humidity = World.HUMIDITY_RANGE.coerce(humidity);
     }
 
+    public double getWaterLevel() {
+        return waterLevel;
+    }
+
+    public void addWater(double water) {
+        waterLevel += water;
+        totalWaterTraversed += water;
+    }
+
+    public void removeWater(double water) {
+        if (water > waterLevel) {
+            throw new IllegalArgumentException(String.format(
+                "Cannot remove [%f] water from tile; only [%f] is available", water, waterLevel));
+        }
+        waterLevel -= water;
+    }
+
+    public void clearWater() {
+        waterLevel = 0.0;
+    }
+
+    public double getTotalWaterTraversed() {
+        return totalWaterTraversed;
+    }
+
+    public RiverConnection getRiverConnection(Direction dir) {
+        return riverConnections.get(dir);
+    }
+
+    public void addRiverConnection(Direction dir, RiverConnection conn) {
+        riverConnections.put(dir, conn);
+    }
+
+    public void removeRiverConnection(Direction dir) {
+        riverConnections.remove(dir);
+    }
+
     public final Color getColor(TileColorMode colorMode) {
         switch (colorMode) {
             case ELEVATION:
@@ -140,7 +192,7 @@ public class Tile {
         final String info = String.format(INFO_STRING, biome.displayName(), elevation(),
                                           (int) (humidity() * 100));
         if (TerrainGen.instance().getDebug()) {
-            return info + String.format(DEBUG_INFO_STRING, pos);
+            return info + String.format(DEBUG_INFO_STRING, pos, waterLevel, totalWaterTraversed);
         }
         return info;
     }
