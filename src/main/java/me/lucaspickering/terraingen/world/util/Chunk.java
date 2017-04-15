@@ -49,14 +49,17 @@ public class Chunk implements Comparable<Chunk> {
 
     public static Chunk createChunkWithTiles(HexPoint pos) {
         final Chunk chunk = new Chunk(pos);
-        for (int i = 0; i < CHUNK_SIDE_LENGTH; i++) {
-            for (int j = 0; j < CHUNK_SIDE_LENGTH; j++) {
-                final HexPoint tilePos = new HexPoint(i * pos.x(), j * pos.y());
+        final int startX = pos.x() * CHUNK_SIDE_LENGTH;
+        final int startY = pos.y() * CHUNK_SIDE_LENGTH;
+        for (int x = startX; x < startX + CHUNK_SIDE_LENGTH; x++) {
+            for (int y = startY; y < startY + CHUNK_SIDE_LENGTH; y++) {
+                final HexPoint tilePos = new HexPoint(x, y);
                 final Tile tile = new Tile(tilePos, chunk);
                 chunk.tiles.add(tile);
                 tile.setChunk(chunk);
             }
         }
+        assert chunk.tiles.size() == CHUNK_SIZE;
         return chunk.immutableCopy();
     }
 

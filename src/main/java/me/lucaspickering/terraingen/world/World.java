@@ -57,11 +57,6 @@ public class World {
             return chunks.size() * Chunk.CHUNK_SIZE;
         }
 
-        @Override
-        public boolean isEmpty() {
-            return chunks.isEmpty(); // Chunks themselves cannot be empty
-        }
-
         @NotNull
         @Override
         public Iterator<Tile> iterator() {
@@ -83,7 +78,7 @@ public class World {
             throw new UnsupportedOperationException(); // Cannot remove tiles
         }
 
-        // Potential optimization? Override getAdjacentTiles and make is chunk-aware, so that it
+        // Potential optimization? Override getAdjacentTiles and make it chunk-aware, so that it
         // only looks for tiles outside the current chunk if it needs to.
     }
 

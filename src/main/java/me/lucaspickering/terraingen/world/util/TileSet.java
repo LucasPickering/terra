@@ -11,10 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import me.lucaspickering.terraingen.util.Direction;
@@ -58,37 +56,6 @@ public class TileSet extends AbstractSet<Tile> {
         this.map = map;
     }
 
-    /**
-     * Applies the given {@link Consumer} to all points in the given range of the given tile.
-     * A point does not have to be in this collection in order to have to consumer applied to it.
-     *
-     * @param consumer the function to apply to each point
-     * @param origin   the center of all tiles to be iterated over
-     * @param range    the range to apply across (non-negative)
-     */
-    private void applyInRange(Consumer<HexPoint> consumer, HexPoint origin, int range) {
-        if (range < 0) {
-            throw new IllegalArgumentException(String.format("Range cannot be negative, was [%d]",
-                                                             range));
-        }
-
-        // Implementation from http://www.redblobgames.com/grids/hexagons/#range
-        // For all possible x values in the range...
-        for (int x = -range; x <= range; x++) {
-
-            // Calculate the min and max y values that a tile in this range can have
-            final int minY = Math.max(-range, -x - range);
-            final int maxY = Math.min(range, -x + range);
-            for (int y = minY; y <= maxY; y++) {
-                final int z = -x - y; // We know the z value now
-
-                // Get the tile at this point and pass it to the consumer
-                final HexPoint point = origin.plus(x, y, z);
-                consumer.accept(point);
-            }
-        }
-    }
-
     public Tile getByPoint(HexPoint point) {
         return map.get(point);
     }
@@ -100,7 +67,7 @@ public class TileSet extends AbstractSet<Tile> {
 
     @Override
     public boolean isEmpty() {
-        return map.isEmpty();
+        return size() == 0;
     }
 
     @Override
@@ -176,31 +143,38 @@ public class TileSet extends AbstractSet<Tile> {
      * tile}. For example, giving a range of 0 returns just the given tile, 1 returns the tile
      * and all adjacent tiles, etc.
      *
-     * @param hexPoint the tile to start counting from
-     * @param range    (non-negative)
+     * @param tilePos the tile to start counting from
+     * @param range   (non-negative)
      * @return all tiles in range of the given tile
      * @throws NullPointerException     if {@code tile == null}
      * @throws IllegalArgumentException if range is negative
      */
     @NotNull
-    public TileSet getTilesInRange(@NotNull HexPoint hexPoint, int range) {
-        Objects.requireNonNull(hexPoint);
+    public TileSet getTilesInRange(@NotNull HexPoint tilePos, int range) {
+        Objects.requireNonNull(tilePos);
         if (range < 0) {
-            throw new IllegalArgumentException(String.format("Range must be positive, was [%d]",
+            throw new IllegalArgumentException(String.format("Range cannot be negative, was [%d]",
                                                              range));
         }
 
         final TileSet result = new TileSet();
 
-        // Create a function that, given a point, if that point is in this set, add the tile at
-        // the point to the result
-        final Consumer<HexPoint> adder = point -> {
-            final Tile otherTile = getByPoint(point);
-            if (otherTile != null) {
-                result.add(otherTile);
+        // Implementation from http://www.redblobgames.com/grids/hexagons/#range
+        // For all possible x values in the range...
+        for (int x = -range; x <= range; x++) {
+
+            // Calculate the min and max y values that a tile in this range can have
+            final int minY = Math.max(-range, -x - range);
+            final int maxY = Math.min(range, -x + range);
+            for (int y = minY; y <= maxY; y++) {
+                // Get the tile at this point and add it to the result
+                final HexPoint point = tilePos.plus(x, y, -x - y);
+                final Tile otherTile = getByPoint(point);
+                if (otherTile != null) {
+                    result.add(otherTile);
+                }
             }
-        };
-        applyInRange(adder, hexPoint, range); // Apply that function to all tiles in the range
+        }
 
         return result;
     }
@@ -264,45 +238,6 @@ public class TileSet extends AbstractSet<Tile> {
                     result.add(otherTile);
                 }
                 point = dir.shift(point);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Randomly selects the specified number of tiles from this collection. If necessary,
-     * this ensures a minimum spacing between selections. If that spacing is 0, nothing in
-     * enforced. If it is 1, it makes sure that no two selections are adjacent, and so on.
-     *
-     * If there are enough tiles in the collection to select as many as requested while keeping the
-     * requested spacing, then fewer tiles will be returned. Note that fewer than the requested
-     * number may be returned even if the requested number is attainable. This could happen if
-     * the function randomly chooses a suboptimal spread of tiles and forces itself out of space.
-     *
-     * @param random     the random instance to use
-     * @param numToPick  the amount of tiles to select
-     * @param minSpacing the minimum amount of tiles separating selections, or 0 for no separation
-     * @return the randomly-selected tiles
-     */
-    @NotNull
-    public TileSet selectTiles(Random random, int numToPick, int minSpacing) {
-        // Copy the tiles because we're going to be modifying it
-        final TileSet candidates = new TileSet(this);
-        final TileSet result = new TileSet(); // The tiles that will be returnec
-
-        // While we haven't hit our target number and there are tiles left to pick...
-        while (result.size() < numToPick && !candidates.isEmpty()) {
-            // Pick a random peak from the set of potential peaks
-            final Tile tile = GeneralFuncs.randomFromCollection(random, candidates);
-            result.add(tile); // Add it to the collection
-
-            // If we need spacing, remove nearby tiles
-            if (minSpacing > 0) {
-                // Get all the tiles that are too close to this one to be selected themselves,
-                // and remove them from the set of candidates
-                final TileSet tooClose = getTilesInRange(tile, minSpacing);
-                tooClose.forEach(candidates::remove); // Remove each tile
             }
         }
 
