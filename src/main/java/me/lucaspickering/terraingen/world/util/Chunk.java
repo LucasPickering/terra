@@ -3,32 +3,39 @@ package me.lucaspickering.terraingen.world.util;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
-import java.util.Set;
-import java.util.TreeSet;
 
 import me.lucaspickering.terraingen.world.Tile;
 
 public class Chunk implements Comparable<Chunk> {
 
-    public static final int CHUNK_SIZE = 10;
-    public static final Chunk ZERO = new Chunk(HexPoint.ZERO);
+    public static final int CHUNK_SIZE = 50;
+
+    private static final int OVERLAY_RGB_FACTOR = 50;
+    private static final int OVERLAY_ALPHA = 10;
 
     private final HexPoint pos; // Position of this chunk relative to other chunks
     private final TileSet tiles = new TileSet();
     private final Color overlayColor;
-    private final Set<HexPoint> points = new TreeSet<>();
 
     public Chunk(HexPoint pos) {
         this.pos = pos;
-        final int x = Math.abs(pos.x());
-        final int y = Math.abs(pos.y());
-        final int z = Math.abs(pos.z());
-        overlayColor = new Color(x * 50 % 256, y * 50 % 256, z * 50 % 256);
-        System.out.println(overlayColor);
+        overlayColor = new Color(pos.x() * OVERLAY_RGB_FACTOR & 0xff,
+                                 pos.y() * OVERLAY_RGB_FACTOR & 0xff,
+                                 pos.z() * OVERLAY_RGB_FACTOR & 0xff,
+                                 OVERLAY_ALPHA);
     }
 
+    /**
+     * Converts the given tile position to the position of the chunk to which that tile should
+     * belong.
+     *
+     * @param tilePos the position of the tile
+     * @return the position of the chunk that should contain that tile
+     */
     public static HexPoint getChunkPosForTile(HexPoint tilePos) {
-        return HexPoint.ZERO; //TODO
+        final int x = Math.floorDiv(tilePos.x(), CHUNK_SIZE);
+        final int y = Math.floorDiv(tilePos.y(), CHUNK_SIZE);
+        return new HexPoint(x, y);
     }
 
     public HexPoint getPos() {
@@ -53,18 +60,6 @@ public class Chunk implements Comparable<Chunk> {
         }
         tiles.add(tile);
         tile.setChunk(this);
-    }
-
-    public Set<HexPoint> getPointsInChunk() {
-        if (points.isEmpty()) {
-            for (int x = pos.x(); x < pos.x() + CHUNK_SIZE; x++) {
-                for (int y = pos.y(); y < pos.y() + CHUNK_SIZE; y++) {
-                    points.add(new HexPoint(x, y));
-                }
-            }
-        }
-
-        return points;
     }
 
     public Color getOverlayColor() {
