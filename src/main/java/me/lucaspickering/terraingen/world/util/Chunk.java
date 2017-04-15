@@ -47,6 +47,15 @@ public class Chunk implements Comparable<Chunk> {
         this.overlayColor = overlayColor;
     }
 
+    /**
+     * Creates an immutable chunk at the given position. Each tile that belongs in the chunk is
+     * constructed. The chunk is immutable in that no tiles can be added or removed, but the
+     * tiles themselves are mutable. Each tile in the chunk will be initialized so that it
+     * belongs to this chunk.
+     *
+     * @param pos the position of the chunk
+     * @return the created chunk
+     */
     public static Chunk createChunkWithTiles(HexPoint pos) {
         final Chunk chunk = new Chunk(pos);
         final int startX = pos.x() * CHUNK_SIDE_LENGTH;

@@ -171,6 +171,10 @@ public class World {
         return result;
     }
 
+    public Map<HexPoint, Chunk> getChunks() {
+        return chunks;
+    }
+
     public TileSet getTiles() {
         return worldTiles;
     }

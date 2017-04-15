@@ -9,7 +9,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.world.generate.BeachGenerator;
 import me.lucaspickering.terraingen.world.generate.BiomePainter;
 import me.lucaspickering.terraingen.world.generate.ContinentClusterer;
@@ -20,8 +19,6 @@ import me.lucaspickering.terraingen.world.generate.NoiseHumidityGenerator;
 import me.lucaspickering.terraingen.world.generate.WaterPainter;
 import me.lucaspickering.terraingen.world.util.HexPoint;
 import me.lucaspickering.utils.Point;
-import me.lucaspickering.utils.range.DoubleRange;
-import me.lucaspickering.utils.range.Range;
 
 /**
  * A class with fields and methods that can entirely encapsulate a {@link World} and
@@ -60,11 +57,10 @@ public class WorldHandler {
     /**
      * The zoom factor on the world must in this range
      */
-    private static final Range<Double> VALID_WORLD_SCALES = new DoubleRange(1.0, 10.0);
 
     public static final double TILE_WIDTH = 20.0;
     public static final double TILE_HEIGHT = (float) Math.sqrt(3) * TILE_WIDTH / 2.0;
-    public static final Point[] TILE_VERTICES = new Point[]{
+    public static final Point[] TILE_VERTICES = {
         new Point(-TILE_WIDTH / 4, -TILE_HEIGHT / 2), // Top-left
         new Point(+TILE_WIDTH / 4, -TILE_HEIGHT / 2), // Top-right
         new Point(+TILE_WIDTH / 2, 0),                // Right
@@ -73,7 +69,7 @@ public class WorldHandler {
         new Point(-TILE_WIDTH / 2, 0)                 // Left
     };
 
-    private static final int DEFAULT_CHUNK_RADIUS = 5; // Default radius of the world, in chunks
+    private static final int DEFAULT_CHUNK_RADIUS = 3; // Default radius of the world, in chunks
 
     private final Logger logger;
     private final long seed;
@@ -81,9 +77,6 @@ public class WorldHandler {
 
     // Properties of the world
     private World world;
-
-    private Point worldCenter; // The pixel location of the center of the world
-    private double worldScale;
 
     public WorldHandler(long seed) {
         this(seed, DEFAULT_CHUNK_RADIUS);
@@ -96,8 +89,7 @@ public class WorldHandler {
         this.size = size;
 
         logger.log(Level.FINE, String.format("Using seed '%d'", seed));
-        worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
-        worldScale = VALID_WORLD_SCALES.lower().floatValue();
+
     }
 
     /**
@@ -151,24 +143,8 @@ public class WorldHandler {
         return world;
     }
 
-    public Point getWorldCenter() {
-        return worldCenter;
-    }
-
-    public void setWorldCenter(Point worldCenter) {
-        this.worldCenter = worldCenter;
-    }
-
     public Point getTileCenter(Tile tile) {
         return tileToPixel(tile.pos());
-    }
-
-    public double getWorldScale() {
-        return worldScale;
-    }
-
-    public void adjustWorldScale(double delta) {
-        worldScale = VALID_WORLD_SCALES.coerce(worldScale + delta);
     }
 
     /**
@@ -181,25 +157,24 @@ public class WorldHandler {
     public Point tileToPixel(@NotNull TilePoint tile) {
         final double x = TILE_WIDTH * tile.x() * 0.75;
         final double y = -TILE_HEIGHT * (tile.x() / 2.0 + tile.y());
-        return getWorldCenter().plus(x, y);
+        return new Point(x, y);
     }
 
     /**
      * Converts a {@link Point} on the screen to a {@link HexPoint} in this world. The returned
      * point is the location of the tile that contains the given screen point. It doesn't
      * necessarily exist in this world; it is just the position of a theoretical tile that could
-     * exist there. The given point does not need to be shifted based on the world center before
-     * calling this function.
+     * exist there. The given point should be shifted so that it is relative to the origin rather
+     * than the center of the screen.
      *
      * @param pos any point on the screen
      * @return the position of the tile that encloses the given point
      */
     @NotNull
     public HexPoint pixelToTile(@NotNull Point pos) {
-        final Point shiftedPos = pos.minus(getWorldCenter());
         // Convert it to a fractional tile point
-        final double fracX = shiftedPos.x() * 4.0 / 3.0 / TILE_WIDTH;
-        final double fracY = -(shiftedPos.x() + Math.sqrt(3.0) * shiftedPos.y())
+        final double fracX = pos.x() * 4.0 / 3.0 / TILE_WIDTH;
+        final double fracY = -(pos.x() + Math.sqrt(3.0) * pos.y())
                              / (TILE_WIDTH * 1.5);
         final double fracZ = -fracX - fracY; // We'll need this later
 
