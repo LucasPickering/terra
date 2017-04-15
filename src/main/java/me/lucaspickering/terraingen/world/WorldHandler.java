@@ -123,7 +123,9 @@ public class WorldHandler {
         final World world = new World(size);
 
         // Apply each generator in sequence (this is the heavy lifting)
-        generators.forEach(gen -> runGenerator(gen, world));
+        for (Generator generator : generators) {
+            runGenerator(generator, world);
+        }
 
         this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
         logger.log(Level.FINE, String.format("World generation took %d ms",

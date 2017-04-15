@@ -6,9 +6,21 @@ import java.awt.Color;
 
 import me.lucaspickering.terraingen.world.Tile;
 
+/**
+ * A Chunk is a set of tiles of a set size that makes up a portion of the world. The
+ * shape of a chunk is a parallelogram, with the length of each side of the chunk being
+ * {@link #CHUNK_SIDE_LENGTH} tiles. A chunk has the following properties:
+ * <ul>
+ * <li>It cannot be empty</li>
+ * <li>There are always exactly {@link #CHUNK_SIZE} tiles in a chunk</li>
+ * <li>Tiles cannot be added to or removed from the chunk after initialization</li>
+ * <li>A tile that is in this chunk cannot be in any other chunk</li>
+ * </ul>
+ */
 public class Chunk implements Comparable<Chunk> {
 
-    public static final int CHUNK_SIZE = 50;
+    public static final int CHUNK_SIDE_LENGTH = 50;
+    public static final int CHUNK_SIZE = CHUNK_SIDE_LENGTH * CHUNK_SIDE_LENGTH;
 
     private static final int OVERLAY_RGB_FACTOR = 50;
     private static final int OVERLAY_ALPHA = 10;
@@ -26,15 +38,26 @@ public class Chunk implements Comparable<Chunk> {
                                  OVERLAY_ALPHA);
     }
 
+    /**
+     * Copy constructor
+     */
+    private Chunk(HexPoint pos, TileSet tiles, Color overlayColor) {
+        this.pos = pos;
+        this.tiles = tiles;
+        this.overlayColor = overlayColor;
+    }
+
     public static Chunk createChunkWithTiles(HexPoint pos) {
         final Chunk chunk = new Chunk(pos);
-        for (int i = 0; i < CHUNK_SIZE; i++) {
-            for (int j = 0; j < CHUNK_SIZE; j++) {
+        for (int i = 0; i < CHUNK_SIDE_LENGTH; i++) {
+            for (int j = 0; j < CHUNK_SIDE_LENGTH; j++) {
                 final HexPoint tilePos = new HexPoint(i * pos.x(), j * pos.y());
-                chunk.addTile(new Tile(tilePos, chunk));
+                final Tile tile = new Tile(tilePos, chunk);
+                chunk.tiles.add(tile);
+                tile.setChunk(chunk);
             }
         }
-        return chunk;
+        return chunk.immutableCopy();
     }
 
     /**
@@ -45,8 +68,8 @@ public class Chunk implements Comparable<Chunk> {
      * @return the position of the chunk that should contain that tile
      */
     public static HexPoint getChunkPosForTile(HexPoint tilePos) {
-        final int x = Math.floorDiv(tilePos.x(), CHUNK_SIZE);
-        final int y = Math.floorDiv(tilePos.y(), CHUNK_SIZE);
+        final int x = Math.floorDiv(tilePos.x(), CHUNK_SIDE_LENGTH);
+        final int y = Math.floorDiv(tilePos.y(), CHUNK_SIDE_LENGTH);
         return new HexPoint(x, y);
     }
 
@@ -58,24 +81,12 @@ public class Chunk implements Comparable<Chunk> {
         return tiles;
     }
 
-    /**
-     * Adds the given tile to this chunk. Also sets the tile's chunk to be this. This cannot be
-     * done if the tile is already in a chunk.
-     *
-     * @param tile the tile to add to this chunk
-     * @throws IllegalArgumentException if the tile is already in a chunk (even if it is already in
-     *                                  this chunk)
-     */
-    public void addTile(Tile tile) {
-        if (tile.getChunk() != null) {
-            throw new IllegalArgumentException("This tile is already in a chunk!");
-        }
-        tiles.add(tile);
-        tile.setChunk(this);
-    }
-
     public Color getOverlayColor() {
         return overlayColor;
+    }
+
+    public Chunk immutableCopy() {
+        return new Chunk(pos, tiles.immutableCopy(), overlayColor);
     }
 
     @Override

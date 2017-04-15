@@ -6,8 +6,8 @@ import java.util.Map;
 
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.util.HexPoint;
+import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
-import me.lucaspickering.utils.Pair;
 
 /**
  * A generator that uses a noise function to generate some type of values.
@@ -32,9 +32,14 @@ abstract class NoiseGenerator implements Generator {
     Map<Tile, Double> generateNoises(TileSet tiles) {
         // Compute a noise value for each tile. This can be done in parallel, as the calculations
         // are all independent of each other.
-        return tiles.parallelStream()
-            .map(t -> new Pair<>(t, generateNoise(t))) // Generate a noise for each tile
-            .collect(Pair.mapCollector()); // Collect the tile:noise pairs into a map
+//        return tiles.stream()
+//            .map(t -> new Pair<>(t, generateNoise(t))) // Generate a noise for each tile
+//            .collect(Pair.mapCollector()); // Collect the tile:noise pairs into a map
+        final TileMap<Double> noises = new TileMap<>();
+        for (Tile tile : tiles) {
+            noises.put(tile, generateNoise(tile));
+        }
+        return noises;
     }
 
     /**

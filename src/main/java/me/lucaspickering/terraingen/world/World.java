@@ -1,9 +1,13 @@
 package me.lucaspickering.terraingen.world;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import me.lucaspickering.terraingen.world.util.Chunk;
@@ -22,6 +26,101 @@ import me.lucaspickering.utils.range.Range;
 public class World {
 
     /**
+     * This is an abstraction that allows a user to iterate over all tiles in the world easily.
+     * The tiles are stored independently in different chunks, so this class iterates over all
+     * tiles in one chunk, then moves onto the next chunk, and so on. Tiles cannot be added or
+     * removed from this set.
+     */
+    private class WorldTiles extends TileSet {
+
+        private WorldTiles() {
+            // Give the super class a null map to make sure we don't rely on that map for any
+            // operations. If we did, it would just be empty anyway, which could cause spoopy bugs.
+            super((Map<HexPoint, Tile>) null);
+        }
+
+        @Override
+        public Tile getByPoint(HexPoint point) {
+            // Find the chunk that contains the given point, then get the tile from that chunk
+            final HexPoint chunkPos = Chunk.getChunkPosForTile(point);
+            final Chunk chunk = chunks.get(chunkPos);
+            if (chunk != null) {
+                return chunk.getTiles().getByPoint(point);
+            }
+            return null; // The chunk doesn't exist, therefore the tile doesn't exist
+        }
+
+        @Override
+        public int size() {
+            // Chunks have a constant size so we can calculate the total number of tiles from the
+            // total number of chunks
+            return chunks.size() * Chunk.CHUNK_SIZE;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return chunks.isEmpty(); // Chunks themselves cannot be empty
+        }
+
+        @NotNull
+        @Override
+        public Iterator<Tile> iterator() {
+            return new WorldTilesIterator();
+        }
+
+        @Override
+        public boolean add(Tile tile) {
+            throw new UnsupportedOperationException(); // Cannot add tiles
+        }
+
+        @Override
+        public boolean removePoint(HexPoint point) {
+            throw new UnsupportedOperationException(); // Cannot remove tiles
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException(); // Cannot remove tiles
+        }
+
+        // Potential optimization? Override getAdjacentTiles and make is chunk-aware, so that it
+        // only looks for tiles outside the current chunk if it needs to.
+    }
+
+    private class WorldTilesIterator implements Iterator<Tile> {
+
+        private final Iterator<Chunk> chunkIterator;
+        private Iterator<Tile> tileIterator;
+
+        private WorldTilesIterator() {
+            chunkIterator = chunks.values().iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            // If there is another tile in this chunk, or there's another chunk after this one,
+            // then there is a next iteration.
+            return (tileIterator != null && tileIterator.hasNext()) || chunkIterator.hasNext();
+        }
+
+        @Override
+        public Tile next() {
+            // If this tile iterator is out of tiles, move onto the next chunk
+            if (tileIterator == null || !tileIterator.hasNext()) {
+                // If there is no next chunk, throw an exception
+                if (!chunkIterator.hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                // Get the next chunk, and get a tile iterator for it
+                final Chunk nextChunk = chunkIterator.next();
+                tileIterator = nextChunk.getTiles().iterator();
+            }
+            return tileIterator.next(); // Return the next tile
+        }
+    }
+
+    /**
      * Every tile's elevation must be in this range
      */
     public static final Range<Integer> ELEVATION_RANGE = new IntRange(-50, 50);
@@ -34,6 +133,7 @@ public class World {
     public static final int SEA_LEVEL = 0;
 
     private final Map<HexPoint, Chunk> chunks;
+    private final WorldTiles worldTiles = new WorldTiles();
     private final List<Continent> continents;
     private final TileMap<Continent> tilesToContinents;
 
@@ -74,6 +174,10 @@ public class World {
         }
 
         return result;
+    }
+
+    public TileSet getTiles() {
+        return worldTiles;
     }
 
     public List<Continent> getContinents() {

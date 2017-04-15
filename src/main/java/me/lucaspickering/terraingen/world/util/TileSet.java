@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractSet;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -53,7 +54,7 @@ public class TileSet extends AbstractSet<Tile> {
      *
      * @param map the map to back this object
      */
-    private TileSet(Map<HexPoint, Tile> map) {
+    protected TileSet(Map<HexPoint, Tile> map) {
         this.map = map;
     }
 
@@ -109,7 +110,7 @@ public class TileSet extends AbstractSet<Tile> {
     }
 
     public boolean containsPoint(HexPoint point) {
-        return map.containsKey(point);
+        return getByPoint(point) != null;
     }
 
     @NotNull
@@ -160,7 +161,7 @@ public class TileSet extends AbstractSet<Tile> {
             final HexPoint otherPoint = dir.shift(point); // Get the shifted point
 
             // If the shifted point is in the world, add it to the map
-            final Tile otherTile = map.get(otherPoint);
+            final Tile otherTile = getByPoint(otherPoint);
             if (otherTile != null) {
                 result.put(dir, otherTile);
             }
@@ -424,5 +425,15 @@ public class TileSet extends AbstractSet<Tile> {
     public List<Cluster> cluster(@NotNull BiFunction<Tile, Tile, Double> similarityFunc,
                                  double similarityThreshold) {
         throw new UnsupportedOperationException(); // TODO implement if necessary
+    }
+
+    /**
+     * Creates a shallow immutable copy of this set. The internal tiles are still mutable, but no
+     * tiles can be added/removed from the copy.
+     *
+     * @return an shallow immutable copy of this set
+     */
+    public TileSet immutableCopy() {
+        return new TileSet(Collections.unmodifiableMap(map));
     }
 }
