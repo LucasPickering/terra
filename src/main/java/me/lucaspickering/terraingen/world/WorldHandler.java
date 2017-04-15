@@ -170,7 +170,6 @@ public class WorldHandler {
         worldScale = VALID_WORLD_SCALES.coerce(worldScale + delta);
     }
 
-
     /**
      * Converts a {@link HexPoint} in this world to a {@link Point} on the screen.
      *

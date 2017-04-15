@@ -1,6 +1,6 @@
 package me.lucaspickering.terraingen.world;
 
-import java.awt.*;
+import java.awt.Color;
 
 import me.lucaspickering.utils.range.Range;
 

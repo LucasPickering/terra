@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;

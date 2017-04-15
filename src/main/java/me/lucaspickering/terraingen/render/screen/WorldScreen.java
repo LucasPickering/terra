@@ -30,7 +30,7 @@ import me.lucaspickering.utils.Point;
 public class WorldScreen extends Screen {
 
     private enum TileOverlay {
-        NONE, CONTINENT
+        NONE, CONTINENT, CHUNK
     }
 
     // Maximum time a click can be held down to be considered a click and not a drag
@@ -56,6 +56,7 @@ public class WorldScreen extends Screen {
     private static final Map<Integer, TileOverlay> keyToTileOverlay =
         new HashMap<Integer, TileOverlay>() {{
             put(GLFW.GLFW_KEY_F5, TileOverlay.CONTINENT);
+            put(GLFW.GLFW_KEY_F6, TileOverlay.CHUNK);
         }};
 
     private final WorldHandler worldHandler;
@@ -194,6 +195,9 @@ public class WorldScreen extends Screen {
                     // Draw an overlay in the continent's color
                     drawHex(continent.getOverlayColor());
                 }
+                break;
+            case CHUNK:
+                drawHex(tile.getChunk().getOverlayColor());
                 break;
         }
     }

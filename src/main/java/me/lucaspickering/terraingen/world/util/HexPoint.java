@@ -18,6 +18,17 @@ public class HexPoint implements Comparable<HexPoint> {
     private final int x, y, z;
 
     /**
+     * Constructs a new HexPoint using the given x and y coordinates. The z coordinate is
+     * calculated from the x and y.
+     *
+     * @param x the x coord
+     * @param y the y coord
+     */
+    public HexPoint(int x, int y) {
+        this(x, y, -x - y);
+    }
+
+    /**
      * Constructs a new HexPoint using the given coordinates. Verifies that
      * {@code x + y + z == 0} first.
      *

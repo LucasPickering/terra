@@ -8,6 +8,7 @@ import java.util.Objects;
 import me.lucaspickering.terraingen.TerrainGen;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
+import me.lucaspickering.terraingen.world.util.Chunk;
 import me.lucaspickering.terraingen.world.util.HexPoint;
 
 public class Tile {
@@ -16,7 +17,7 @@ public class Tile {
 
     private static final String INFO_STRING =
         "Biome: %s%nElevation: %d%nHumidity: %d%%";
-    private static final String DEBUG_INFO_STRING = "%nPos: %s%nWater: %.2f/%.2f%n";
+    private static final String DEBUG_INFO_STRING = "%nPos: %s%nChunk: %s%nWater: %.2f/%.2f%n";
 
     /**
      * An immutable version of a tile. Should be created externally via {@link #immutableCopy()}.
@@ -24,7 +25,7 @@ public class Tile {
     private static class ImmutableTile extends Tile {
 
         private ImmutableTile(Tile tile) {
-            super(tile.pos, tile.biome, tile.elevation, tile.humidity,
+            super(tile.pos, tile.chunk, tile.biome, tile.elevation, tile.humidity,
                   tile.waterLevel, tile.totalWaterTraversed);
         }
 
@@ -48,11 +49,10 @@ public class Tile {
         ENTRY, EXIT
     }
 
-    /**
-     * The position of this tile within the world. Non-null.
-     */
-    private final HexPoint pos;
-    // Terrain features
+    private final HexPoint pos; // The position of this tile in the world (NOT chunk-relative)
+
+    private Chunk chunk; // The chunk that this tile belongs to
+
     private Biome biome = Biome.NONE;
 
     private int elevation;
@@ -68,15 +68,24 @@ public class Tile {
         this.pos = pos;
     }
 
-    private Tile(HexPoint pos, Biome biome, int elevation, double humidity, double waterLevel,
-                 double totalWaterTraversed) {
+    private Tile(HexPoint pos, Chunk chunk, Biome biome, int elevation, double humidity,
+                 double waterLevel, double totalWaterTraversed) {
         this(pos);
-        Objects.requireNonNull(biome);
+        this.chunk = chunk;
         this.biome = biome;
         this.elevation = elevation;
         this.humidity = humidity;
         this.waterLevel = waterLevel;
         this.totalWaterTraversed = totalWaterTraversed;
+    }
+
+    public Chunk getChunk() {
+        return chunk;
+    }
+
+    public void setChunk(Chunk chunk) {
+        Objects.requireNonNull(chunk);
+        this.chunk = chunk;
     }
 
     public final HexPoint pos() {
@@ -92,7 +101,6 @@ public class Tile {
      * @throws NullPointerException if {@code tile == null}
      */
     public final boolean isAdjacentTo(Tile tile) {
-        Objects.requireNonNull(tile);
         return pos.distanceTo(tile.pos()) == 1;
     }
 
@@ -192,7 +200,8 @@ public class Tile {
         final String info = String.format(INFO_STRING, biome.displayName(), elevation(),
                                           (int) (humidity() * 100));
         if (TerrainGen.instance().getDebug()) {
-            return info + String.format(DEBUG_INFO_STRING, pos, waterLevel, totalWaterTraversed);
+            return info + String.format(DEBUG_INFO_STRING, pos, chunk.getPos(),
+                                        waterLevel, totalWaterTraversed);
         }
         return info;
     }
