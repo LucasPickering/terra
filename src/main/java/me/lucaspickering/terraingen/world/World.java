@@ -33,25 +33,21 @@ public class World {
      */
     public static final int SEA_LEVEL = 0;
 
-    private final TileSet tiles;
     private final Map<HexPoint, Chunk> chunks;
     private final List<Continent> continents;
     private final TileMap<Continent> tilesToContinents;
 
-    public World(int radius) {
-        tiles = TileSet.initByRadius(radius);
-        chunks = new TreeMap<>();
+    public World(int chunkRadius) {
+        chunks = initChunks(chunkRadius);
         continents = new ArrayList<>();
         tilesToContinents = new TileMap<>();
-        initChunks();
     }
 
     /**
      * Copy constructor.
      */
-    private World(TileSet tiles, Map<HexPoint, Chunk> chunks, List<Continent> continents,
+    private World(Map<HexPoint, Chunk> chunks, List<Continent> continents,
                   TileMap<Continent> tilesToContinents) {
-        this.tiles = tiles;
         this.chunks = chunks;
         this.continents = continents;
         this.tilesToContinents = tilesToContinents;
@@ -60,24 +56,24 @@ public class World {
     /**
      * Initializes all chunks in the world, so that each tile belongs to exactly one chunk.
      */
-    private void initChunks() {
-        for (Tile tile : tiles) {
-            final HexPoint chunkPos = Chunk.getChunkPosForTile(tile.pos());
+    private Map<HexPoint, Chunk> initChunks(int radius) {
+        final Map<HexPoint, Chunk> result = new TreeMap<>();
 
-            final Chunk chunk;
-            if (chunks.containsKey(chunkPos)) {
-                chunk = chunks.get(chunkPos);
-            } else {
-                chunk = new Chunk(chunkPos);
-                chunks.put(chunkPos, chunk);
+        // Iterate over x and y to create a "circle" of chunks with the given radius
+        for (int x = -radius; x <= radius; x++) {
+
+            // Calculate the min and max y values that a chunk in this range can have
+            final int minY = Math.max(-radius, -x - radius);
+            final int maxY = Math.min(radius, -x + radius);
+            for (int y = minY; y <= maxY; y++) {
+                // Create a chunk at this location
+                final HexPoint pos = new HexPoint(x, y);
+                final Chunk chunk = Chunk.createChunkWithTiles(pos);
+                result.put(pos, chunk);
             }
-
-            chunk.addTile(tile);
         }
-    }
 
-    public TileSet getTiles() {
-        return tiles;
+        return result;
     }
 
     public List<Continent> getContinents() {
@@ -89,7 +85,7 @@ public class World {
     }
 
     public World immutableCopy() {
-        return new World(tiles.immutableCopy(), Collections.unmodifiableMap(chunks),
+        return new World(Collections.unmodifiableMap(chunks), // NO DEEP COPY
                          Collections.unmodifiableList(continents), // NO DEEP COPY
                          tilesToContinents.immutableCopy()); // NO DEEP COPY
     }

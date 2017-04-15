@@ -23,7 +23,7 @@ public class WorldBenchmark {
 
     private final long seed = "this is a great seed".hashCode();
 
-    @Param({"150", "250"})
+    @Param({"3", "5"})
     private int size;
 
     @Benchmark

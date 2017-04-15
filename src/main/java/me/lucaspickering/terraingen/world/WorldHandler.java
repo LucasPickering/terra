@@ -73,8 +73,7 @@ public class WorldHandler {
         new Point(-TILE_WIDTH / 2, 0)                 // Left
     };
 
-    // World size
-    private static final int DEFAULT_SIZE = 200;
+    private static final int DEFAULT_CHUNK_RADIUS = 5; // Default radius of the world, in chunks
 
     private final Logger logger;
     private final long seed;
@@ -87,7 +86,7 @@ public class WorldHandler {
     private double worldScale;
 
     public WorldHandler(long seed) {
-        this(seed, DEFAULT_SIZE);
+        this(seed, DEFAULT_CHUNK_RADIUS);
     }
 
     // Package visible for benchmarking purposes

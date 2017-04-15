@@ -19,32 +19,6 @@ public class Tile {
         "Biome: %s%nElevation: %d%nHumidity: %d%%";
     private static final String DEBUG_INFO_STRING = "%nPos: %s%nChunk: %s%nWater: %.2f/%.2f%n";
 
-    /**
-     * An immutable version of a tile. Should be created externally via {@link #immutableCopy()}.
-     */
-    private static class ImmutableTile extends Tile {
-
-        private ImmutableTile(Tile tile) {
-            super(tile.pos, tile.chunk, tile.biome, tile.elevation, tile.humidity,
-                  tile.waterLevel, tile.totalWaterTraversed);
-        }
-
-        @Override
-        public void setBiome(Biome biome) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setElevation(int elevation) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setHumidity(double humidity) {
-            throw new UnsupportedOperationException();
-        }
-    }
-
     public enum RiverConnection {
         ENTRY, EXIT
     }
@@ -63,20 +37,11 @@ public class Tile {
 
     private final Map<Direction, RiverConnection> riverConnections = new EnumMap<>(Direction.class);
 
-    public Tile(HexPoint pos) {
+    public Tile(HexPoint pos, Chunk chunk) {
         Objects.requireNonNull(pos);
+        Objects.requireNonNull(chunk);
         this.pos = pos;
-    }
-
-    private Tile(HexPoint pos, Chunk chunk, Biome biome, int elevation, double humidity,
-                 double waterLevel, double totalWaterTraversed) {
-        this(pos);
         this.chunk = chunk;
-        this.biome = biome;
-        this.elevation = elevation;
-        this.humidity = humidity;
-        this.waterLevel = waterLevel;
-        this.totalWaterTraversed = totalWaterTraversed;
     }
 
     public Chunk getChunk() {
@@ -204,10 +169,6 @@ public class Tile {
                                         waterLevel, totalWaterTraversed);
         }
         return info;
-    }
-
-    public Tile immutableCopy() {
-        return new ImmutableTile(this);
     }
 
     @Override

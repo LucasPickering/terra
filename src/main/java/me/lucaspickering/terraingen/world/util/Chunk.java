@@ -14,15 +14,27 @@ public class Chunk implements Comparable<Chunk> {
     private static final int OVERLAY_ALPHA = 10;
 
     private final HexPoint pos; // Position of this chunk relative to other chunks
-    private final TileSet tiles = new TileSet();
+    private final TileSet tiles;
     private final Color overlayColor;
 
-    public Chunk(HexPoint pos) {
+    private Chunk(HexPoint pos) {
         this.pos = pos;
+        tiles = new TileSet();
         overlayColor = new Color(pos.x() * OVERLAY_RGB_FACTOR & 0xff,
                                  pos.y() * OVERLAY_RGB_FACTOR & 0xff,
                                  pos.z() * OVERLAY_RGB_FACTOR & 0xff,
                                  OVERLAY_ALPHA);
+    }
+
+    public static Chunk createChunkWithTiles(HexPoint pos) {
+        final Chunk chunk = new Chunk(pos);
+        for (int i = 0; i < CHUNK_SIZE; i++) {
+            for (int j = 0; j < CHUNK_SIZE; j++) {
+                final HexPoint tilePos = new HexPoint(i * pos.x(), j * pos.y());
+                chunk.addTile(new Tile(tilePos, chunk));
+            }
+        }
+        return chunk;
     }
 
     /**

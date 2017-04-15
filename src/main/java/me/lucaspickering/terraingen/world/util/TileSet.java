@@ -4,9 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractSet;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,24 +58,6 @@ public class TileSet extends AbstractSet<Tile> {
     }
 
     /**
-     * Initializes a {@link TileSet} collection of the given radius. Each tile will have default
-     * biome and elevation. The returned {@link TileSet} will have an origin tile and {@code
-     * radius} rings of tiles around that origin.
-     *
-     * @param radius the radius of the collection of tiles
-     * @return the initialized {@link TileSet}
-     */
-    @NotNull
-    public static TileSet initByRadius(int radius) {
-        final TileSet tiles = new TileSet();
-
-        // Add all tiles in the given radius to the set
-        tiles.applyInRange(point -> tiles.add(new Tile(point)), HexPoint.ZERO, radius);
-
-        return tiles;
-    }
-
-    /**
      * Applies the given {@link Consumer} to all points in the given range of the given tile.
      * A point does not have to be in this collection in order to have to consumer applied to it.
      *
@@ -106,21 +86,6 @@ public class TileSet extends AbstractSet<Tile> {
                 consumer.accept(point);
             }
         }
-    }
-
-    /**
-     * Creates a deep immutable copy of this object. Each internal tile will also be copied and
-     * made immutable.
-     *
-     * @return the immutable copy
-     */
-    public TileSet immutableCopy() {
-        // Turn the map of point:Tile into a map of point:ImmutableTile
-        final Map<HexPoint, Tile> tiles = new HashMap<>();
-        for (Tile tile : map.values()) {
-            tiles.put(tile.pos(), tile.immutableCopy());
-        }
-        return new TileSet(Collections.unmodifiableMap(tiles));
     }
 
     public Tile getByPoint(HexPoint point) {
@@ -210,8 +175,8 @@ public class TileSet extends AbstractSet<Tile> {
      * tile}. For example, giving a range of 0 returns just the given tile, 1 returns the tile
      * and all adjacent tiles, etc.
      *
-     * @param hexPoint  the tile to start counting from
-     * @param range (non-negative)
+     * @param hexPoint the tile to start counting from
+     * @param range    (non-negative)
      * @return all tiles in range of the given tile
      * @throws NullPointerException     if {@code tile == null}
      * @throws IllegalArgumentException if range is negative
