@@ -9,7 +9,7 @@ public class Colors {
     public static final Color MENU_SHADER = new Color(0xcc101010, true); // ARGB
 
     // Tile overlay colors
-    public static final Color MOUSE_OVER = new Color(0xf0aa1111, true); // ARGB
+    public static final Color MOUSE_OVER = new Color(0xc0aa1111, true); // ARGB
     public static final Color TILE_INFO_BG = new Color(0xee444444); // ARGB
 
     // Button colors

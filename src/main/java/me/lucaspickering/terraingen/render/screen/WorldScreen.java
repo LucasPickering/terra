@@ -220,8 +220,8 @@ public class WorldScreen extends Screen {
 
         // If the mouse is over a new tile now, change its color
         if (newMouseOverTile != null) {
-            final Color tileColor = Funcs.blendColors(getTileColor(newMouseOverTile),
-                                                      Colors.MOUSE_OVER);
+            final Color tileColor = Funcs.overlayColors(Colors.MOUSE_OVER,
+                                                        getTileColor(newMouseOverTile));
             setTileColor(newMouseOverTile, tileColor);
         }
 
@@ -334,7 +334,7 @@ public class WorldScreen extends Screen {
 
         // If there is an overlay color, mix the two colors
         if (overlayColor != null) {
-            return Funcs.blendColors(baseColor, overlayColor);
+            return Funcs.overlayColors(overlayColor, baseColor);
         }
         return baseColor;
     }

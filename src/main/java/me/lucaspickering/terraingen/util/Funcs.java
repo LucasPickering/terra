@@ -15,9 +15,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import me.lucaspickering.terraingen.TerrainGen;
+import me.lucaspickering.utils.range.IntRange;
+import me.lucaspickering.utils.range.Range;
 import static org.lwjgl.BufferUtils.createByteBuffer;
 
 public class Funcs {
+
+    private static final Range<Integer> BYTE_RANGE = new IntRange(0, 255);
 
     private Funcs() {
         // This should never be instantiated
@@ -118,6 +122,35 @@ public class Funcs {
         final int green = Math.min((int) (c1.getGreen() * alpha1 + c2.getGreen() * alpha2), 255);
         final int blue = Math.min((int) (c1.getBlue() * alpha1 + c2.getBlue() * alpha2), 255);
         final int alpha = Math.min((int) ((alpha1 + alpha2) * 255), 255);
+        return new Color(red, green, blue, alpha);
+    }
+
+
+    /**
+     * Overlays the first color onto the second. If the foreground color is opaque, then the
+     * result will be just the foreground. If the foreground is transparent, then the result will
+     * be just the background. Otherwise, foreground is blended into the background according to
+     * its alpha value.
+     *
+     * @param fg the foreground color
+     * @param bg the background color
+     * @return the blended color
+     */
+    @NotNull
+    public static Color overlayColors(Color fg, Color bg) {
+        final float fgAlpha = fg.getAlpha() / 255f;
+        final float invFgAlpha = 1f - fgAlpha;
+
+        int red = (int) (fg.getRed() * fgAlpha + bg.getRed() * invFgAlpha);
+        int green = (int) (fg.getGreen() * fgAlpha + bg.getGreen() * invFgAlpha);
+        int blue = (int) (fg.getBlue() * fgAlpha + bg.getBlue() * invFgAlpha);
+        int alpha = (int) (fgAlpha * 255) + bg.getAlpha();
+
+        red = BYTE_RANGE.coerce(red);
+        green = BYTE_RANGE.coerce(green);
+        blue = BYTE_RANGE.coerce(blue);
+        alpha = BYTE_RANGE.coerce(alpha);
+
         return new Color(red, green, blue, alpha);
     }
 }
