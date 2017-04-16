@@ -10,8 +10,9 @@ import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.world.util.Chunk;
 import me.lucaspickering.terraingen.world.util.HexPoint;
+import me.lucaspickering.terraingen.world.util.HexPointable;
 
-public class Tile {
+public class Tile implements HexPointable {
 
     public static final int NUM_SIDES = Direction.values().length;
 
@@ -54,6 +55,11 @@ public class Tile {
     }
 
     public final HexPoint pos() {
+        return pos;
+    }
+
+    @Override
+    public final HexPoint toHexPoint() {
         return pos;
     }
 

@@ -69,7 +69,7 @@ public class FreshWaterGenerator implements Generator {
      */
     private void spreadWaterDownhill(TileSet allTiles, Tile tile) {
         // Get all tiles adjacent to this one with a lower elevation
-        final TileSet lowerTiles = allTiles.getAdjacentTiles(tile).values().stream()
+        final TileSet lowerTiles = allTiles.getAdjacentTiles(tile.pos()).values().stream()
             .filter(adj -> adj.elevation() < tile.elevation())
             .collect(Collectors.toCollection(TileSet::new));
 

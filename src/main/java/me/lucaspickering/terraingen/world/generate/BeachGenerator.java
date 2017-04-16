@@ -28,7 +28,7 @@ public class BeachGenerator implements Generator {
             // If this tile is land and within our elevation bound, check the adjacent tiles, and
             // if there is an ocean (or similar) tile adjacent, make a beach.
             if (tile.biome().isLand() && tile.elevation() <= MAX_BEACH_ELEV) {
-                for (Tile adj : worldTiles.getAdjacentTiles(tile).values()) {
+                for (Tile adj : worldTiles.getAdjacentTiles(tile.pos()).values()) {
                     if (BEACHABLE_BIOMES.contains(adj.biome())) {
                         tile.setBiome(Biome.BEACH);
                         break; // Done with this tile

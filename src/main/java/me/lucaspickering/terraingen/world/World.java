@@ -8,10 +8,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.TreeMap;
 
 import me.lucaspickering.terraingen.world.util.Chunk;
 import me.lucaspickering.terraingen.world.util.HexPoint;
+import me.lucaspickering.terraingen.world.util.HexPointSet;
 import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.utils.range.DoubleRange;
@@ -43,7 +43,7 @@ public class World {
         public Tile getByPoint(HexPoint point) {
             // Find the chunk that contains the given point, then get the tile from that chunk
             final HexPoint chunkPos = Chunk.getChunkPosForTile(point);
-            final Chunk chunk = chunks.get(chunkPos);
+            final Chunk chunk = chunks.getByPoint(chunkPos);
             if (chunk != null) {
                 return chunk.getTiles().getByPoint(point);
             }
@@ -69,7 +69,7 @@ public class World {
         }
 
         @Override
-        public boolean removePoint(HexPoint point) {
+        public boolean removeByPoint(HexPoint point) {
             throw new UnsupportedOperationException(); // Cannot remove tiles
         }
 
@@ -88,7 +88,7 @@ public class World {
         private Iterator<Tile> tileIterator;
 
         private WorldTilesIterator() {
-            chunkIterator = chunks.values().iterator();
+            chunkIterator = chunks.iterator();
         }
 
         @Override
@@ -127,7 +127,7 @@ public class World {
      */
     public static final int SEA_LEVEL = 0;
 
-    private final Map<HexPoint, Chunk> chunks;
+    private final HexPointSet<Chunk> chunks;
     private final WorldTiles worldTiles = new WorldTiles();
     private final List<Continent> continents;
     private final TileMap<Continent> tilesToContinents;
@@ -141,7 +141,7 @@ public class World {
     /**
      * Copy constructor.
      */
-    private World(Map<HexPoint, Chunk> chunks, List<Continent> continents,
+    private World(HexPointSet<Chunk> chunks, List<Continent> continents,
                   TileMap<Continent> tilesToContinents) {
         this.chunks = chunks;
         this.continents = continents;
@@ -151,8 +151,8 @@ public class World {
     /**
      * Initializes all chunks in the world, so that each tile belongs to exactly one chunk.
      */
-    private Map<HexPoint, Chunk> initChunks(int radius) {
-        final Map<HexPoint, Chunk> result = new TreeMap<>();
+    private HexPointSet<Chunk> initChunks(int radius) {
+        final HexPointSet<Chunk> result = new HexPointSet<>();
 
         // Iterate over x and y to create a "circle" of chunks with the given radius
         for (int x = -radius; x <= radius; x++) {
@@ -163,8 +163,7 @@ public class World {
             for (int y = minY; y <= maxY; y++) {
                 // Create a chunk at this location
                 final HexPoint pos = new HexPoint(x, y);
-                final Chunk chunk = Chunk.createChunkWithTiles(pos);
-                result.put(pos, chunk);
+                result.add(Chunk.createChunkWithTiles(pos));
             }
         }
 
@@ -188,7 +187,7 @@ public class World {
     }
 
     public World immutableCopy() {
-        return new World(Collections.unmodifiableMap(chunks), // NO DEEP COPY
+        return new World(chunks.immutableCopy(), // NO DEEP COPY
                          Collections.unmodifiableList(continents), // NO DEEP COPY
                          tilesToContinents.immutableCopy()); // NO DEEP COPY
     }

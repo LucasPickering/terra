@@ -1,7 +1,5 @@
 package me.lucaspickering.terraingen.world.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.awt.Color;
 
 import me.lucaspickering.terraingen.world.Tile;
@@ -17,7 +15,7 @@ import me.lucaspickering.terraingen.world.Tile;
  * <li>A tile that is in this chunk cannot be in any other chunk</li>
  * </ul>
  */
-public class Chunk implements Comparable<Chunk> {
+public class Chunk implements HexPointable {
 
     public static final int CHUNK_SIDE_LENGTH = 50;
     public static final int CHUNK_SIZE = CHUNK_SIDE_LENGTH * CHUNK_SIDE_LENGTH;
@@ -89,6 +87,11 @@ public class Chunk implements Comparable<Chunk> {
         return pos;
     }
 
+    @Override
+    public final HexPoint toHexPoint() {
+        return pos;
+    }
+
     public TileSet getTiles() {
         return tiles;
     }
@@ -118,10 +121,5 @@ public class Chunk implements Comparable<Chunk> {
     @Override
     public int hashCode() {
         return pos.hashCode();
-    }
-
-    @Override
-    public int compareTo(@NotNull Chunk o) {
-        return pos.compareTo(o.pos);
     }
 }

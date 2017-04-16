@@ -54,7 +54,7 @@ public class Cluster extends TileSet {
         if (added) {
             adjacentTiles.remove(tile); // Remove this tile because it's no longer external
             // Add any adjacent tiles that aren't in this cluster
-            final Collection<Tile> adjacents = world.getAdjacentTiles(tile).values();
+            final Collection<Tile> adjacents = world.getAdjacentTiles(tile.pos()).values();
             for (Tile adjTile : adjacents) {
                 if (!contains(adjTile)) {
                     adjacentTiles.add(adjTile);
@@ -66,16 +66,16 @@ public class Cluster extends TileSet {
     }
 
     @Override
-    public boolean removePoint(HexPoint point) {
-        final boolean removed = super.removePoint(point);
+    public boolean removeByPoint(HexPoint point) {
+        final boolean removed = super.removeByPoint(point);
 
         if (removed) {
             final Tile tile = world.getByPoint(point);
             // For each tile adjacent to the removed one...
-            for (Tile adjTile : adjacentTiles.getAdjacentTiles(tile).values()) {
+            for (Tile adjTile : adjacentTiles.getAdjacentTiles(tile.pos()).values()) {
                 // If there are no more tiles in the cluster adjacent to this one, then it is no
                 // longer adjacent to the cluster and should therefore be removed from that set
-                if (getAdjacentTiles(adjTile).isEmpty()) {
+                if (getAdjacentTiles(adjTile.pos()).isEmpty()) {
                     adjacentTiles.remove(adjTile);
                 }
             }

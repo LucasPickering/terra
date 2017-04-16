@@ -2,11 +2,9 @@ package me.lucaspickering.terraingen.world.util;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +24,7 @@ import me.lucaspickering.utils.Pair;
  * position. Some additional map-like operations are provided, such as accessing tiles by their
  * {@link HexPoint}.
  */
-public class TileSet extends AbstractSet<Tile> {
+public class TileSet extends HexPointSet<Tile> {
 
     // Internal map
     private final Map<HexPoint, Tile> map;
@@ -56,76 +54,20 @@ public class TileSet extends AbstractSet<Tile> {
         this.map = map;
     }
 
-    public Tile getByPoint(HexPoint point) {
-        return map.get(point);
-    }
-
-    @Override
-    public int size() {
-        return map.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        // Cast o to a tile and check if its position is in the map
-        return o instanceof Tile && containsPoint(((Tile) o).pos());
-    }
-
-    public boolean containsPoint(HexPoint point) {
-        return getByPoint(point) != null;
-    }
-
-    @NotNull
-    @Override
-    public Iterator<Tile> iterator() {
-        return map.values().iterator();
-    }
-
-    @Override
-    public boolean add(Tile tile) {
-        Objects.requireNonNull(tile);
-        map.put(tile.pos(), tile);
-        return true;
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        if (o instanceof Tile) {
-            final Tile tile = (Tile) o;
-            return removePoint(tile.pos());
-        }
-        return false;
-    }
-
-    public boolean removePoint(HexPoint point) {
-        return map.remove(point) != null;
-    }
-
-    @Override
-    public void clear() {
-        map.clear();
-    }
-
     /**
      * Gets the set of all tiles adjacent to the given tile.
      *
-     * @param tile the center of the search
+     * @param tilePos the center of the search
      * @return tiles adjacent to {@code tile}, in a direction:point map
      * @throws IllegalArgumentException if {@code tile} is not in this collection
      */
     @NotNull
-    public Map<Direction, Tile> getAdjacentTiles(@NotNull Tile tile) {
-        Objects.requireNonNull(tile);
-        final HexPoint point = tile.pos();
+    public Map<Direction, Tile> getAdjacentTiles(@NotNull HexPoint tilePos) {
+        Objects.requireNonNull(tilePos);
 
         final Map<Direction, Tile> result = new EnumMap<>(Direction.class);
         for (Direction dir : Direction.values()) {
-            final HexPoint otherPoint = dir.shift(point); // Get the shifted point
+            final HexPoint otherPoint = dir.shift(tilePos); // Get the shifted point
 
             // If the shifted point is in the world, add it to the map
             final Tile otherTile = getByPoint(otherPoint);
@@ -180,34 +122,16 @@ public class TileSet extends AbstractSet<Tile> {
     }
 
     /**
-     * Gets all tile points in the given range of the given tile. A tile will be included in
-     * the output if it is in this collection, and it is within {@code range} steps of {@code
-     * tile}. For example, giving a range of 0 returns just the given tile, 1 returns the tile
-     * and all adjacent tiles, etc.
-     *
-     * @param tile  the tile to start counting from
-     * @param range (non-negative)
-     * @return all tiles in range of the given tile
-     * @throws NullPointerException     if {@code tile == null}
-     * @throws IllegalArgumentException if range is negative
-     */
-    @NotNull
-    public TileSet getTilesInRange(@NotNull Tile tile, int range) {
-        Objects.requireNonNull(tile);
-        return getTilesInRange(tile.pos(), range);
-    }
-
-    /**
      * Gets the set of all tiles that are in this collection and exactly the given distance from
      * the given tile.
      *
-     * @param tile     the epicenter of the ring
+     * @param tilePos  the center of the ring
      * @param distance the distance of the ring from the epicenter (non-negative)
      * @return a new {@link TileSet} of all tiles in this collection that are the given distance
      * from the given tile
      */
     @NotNull
-    public TileSet getTilesAtDistance(@NotNull Tile tile, int distance) {
+    public TileSet getTilesAtDistance(@NotNull HexPoint tilePos, int distance) {
         if (distance < 0) {
             throw new IllegalArgumentException(String.format(
                 "Distance must be non-negative, was [%d]", distance));
@@ -219,14 +143,15 @@ public class TileSet extends AbstractSet<Tile> {
 
         // Special case for distance 0
         if (distance == 0) {
-            if (contains(tile)) {
+            final Tile tile = getByPoint(tilePos);
+            if (tile != null) {
                 result.add(tile);
             }
             return result;
         }
 
         // Step <distance> tiles southwest to get the first tile on the ring
-        HexPoint point = Direction.SOUTHWEST.shift(tile.pos(), distance);
+        HexPoint point = Direction.SOUTHWEST.shift(tilePos, distance);
 
         // For each direction, step <distance> tiles in that direction to get one side of the ring
         for (Direction dir : Direction.values()) {
@@ -308,7 +233,7 @@ public class TileSet extends AbstractSet<Tile> {
                 final Tile tile = GeneralFuncs.firstFromCollection(uncheckedTiles);
 
                 // For each tile adjacent to that one...
-                for (final Tile adjTile : getAdjacentTiles(tile).values()) {
+                for (final Tile adjTile : getAdjacentTiles(tile.pos()).values()) {
                     // If this adjacent tile has the same pos/neg state, and it's not already in
                     // the cluster...
                     if (predicate.test(adjTile) == isPositive && !cluster.contains(adjTile)) {
