@@ -5,12 +5,12 @@ import java.awt.Color;
 public class Colors {
 
     // General
-    public static final Color CLEAR = Funcs.colorFromRgb(0x777777);
-    public static final Color MENU_SHADER = Funcs.colorFromArgb(0xcc101010);
+    public static final Color CLEAR = new Color(0x777777); // RGB
+    public static final Color MENU_SHADER = new Color(0xcc101010, true); // ARGB
 
     // Tile overlay colors
-    public static final Color MOUSE_OVER = Funcs.colorFromArgb(0xf0aa1111);
-    public static final Color TILE_INFO_BG = Funcs.colorFromArgb(0xee444444);
+    public static final Color MOUSE_OVER = new Color(0xf0aa1111, true); // ARGB
+    public static final Color TILE_INFO_BG = new Color(0xee444444); // ARGB
 
     // Button colors
     public static final Color BUTTON_NORMAL = Color.BLACK;

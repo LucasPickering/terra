@@ -20,6 +20,7 @@ import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Colors;
+import me.lucaspickering.terraingen.util.Funcs;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.TileColorMode;
@@ -219,7 +220,8 @@ public class WorldScreen extends Screen {
 
         // If the mouse is over a new tile now, change its color
         if (newMouseOverTile != null) {
-            final Color tileColor = blendColors(getTileColor(newMouseOverTile), Colors.MOUSE_OVER);
+            final Color tileColor = Funcs.blendColors(getTileColor(newMouseOverTile),
+                                                      Colors.MOUSE_OVER);
             setTileColor(newMouseOverTile, tileColor);
         }
 
@@ -332,7 +334,7 @@ public class WorldScreen extends Screen {
 
         // If there is an overlay color, mix the two colors
         if (overlayColor != null) {
-            return blendColors(baseColor, overlayColor);
+            return Funcs.blendColors(baseColor, overlayColor);
         }
         return baseColor;
     }
@@ -359,24 +361,6 @@ public class WorldScreen extends Screen {
                 return tile.getChunk().getOverlayColor();
         }
         return null;
-    }
-
-    /**
-     * Blends the two given colors according to their individual alpha values.
-     *
-     * @param c1 the first color
-     * @param c2 the second color
-     * @return the blended color
-     */
-    private Color blendColors(Color c1, Color c2) {
-        final float alpha1 = c1.getAlpha() / 255f;
-        final float alpha2 = c2.getAlpha() / 255f;
-
-        final int red = (int) (c1.getRed() * alpha1 + c2.getRed() * alpha2) & 0xff;
-        final int green = (int) (c1.getGreen() * alpha1 + c2.getGreen() * alpha2) & 0xff;
-        final int blue = (int) (c1.getBlue() * alpha1 + c2.getBlue() * alpha2) & 0xff;
-        final int alpha = (int) ((alpha1 + alpha2) * 255) & 0xff;
-        return new Color(red, green, blue, alpha);
     }
 
     private void setTileColorMode(TileColorMode colorMode) {

@@ -153,14 +153,14 @@ public class Tile implements HexPointable {
                 return biome().color();
             case COMPOSITE:
                 final Color elevColor = getColor(TileColorMode.ELEVATION);
-                double elevValue = Funcs.toHsv(elevColor)[2];
-                elevValue = Math.pow(elevValue, 0.75); // Make it slightly brighter
+                float elevBrightness = Funcs.toHsb(elevColor)[2];
+                elevBrightness = (float) Math.pow(elevBrightness, 0.75); // Make it slightly brighter
 
                 // Scale this biome color's value by the value of the elevation color
-                final float[] biomeHsv = Funcs.toHsv(getColor(TileColorMode.BIOME));
-                biomeHsv[2] *= (float) elevValue;
+                final float[] biomeHsb = Funcs.toHsb(getColor(TileColorMode.BIOME));
+                biomeHsb[2] *= elevBrightness;
 
-                return Funcs.toRgb(biomeHsv);
+                return Funcs.toRgb(biomeHsb);
             default:
                 throw new IllegalArgumentException("Unknown color mode: " + colorMode);
         }

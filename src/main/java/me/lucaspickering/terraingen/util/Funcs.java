@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import me.lucaspickering.terraingen.TerrainGen;
-
 import static org.lwjgl.BufferUtils.createByteBuffer;
 
 public class Funcs {
@@ -86,49 +85,39 @@ public class Funcs {
     }
 
     /**
-     * Creates a {@link Color} from the given RGB code with alpha 255 (opaque).
-     *
-     * @param rgb the RGB code
-     * @return the given color as a {@link Color} with alpha 255
-     */
-    @NotNull
-    public static Color colorFromRgb(int rgb) {
-        return new Color(rgb); // Set alpha to 255
-    }
-
-    /**
-     * Creates a {@link Color} from the given ARGB (alpha-red-green-blue) code.
-     *
-     * @param argb the ARGB code
-     * @return the given color as a {@link Color}
-     */
-    @NotNull
-    public static Color colorFromArgb(int argb) {
-        final int alpha = argb >> 24 & 0xff;
-        final int red = argb >> 16 & 0xff;
-        final int green = argb >> 8 & 0xff;
-        final int blue = argb & 0xff;
-        return new Color(red, green, blue, alpha);
-    }
-
-    /**
-     * Converts the given color to a Hue-Saturation-Value array.
+     * Converts the given color to a Hue-Saturation-Brightness array.
      *
      * @param color the color in RGB form
-     * @return the color as a float array of Hue-Saturation-Value (in that order)
+     * @return the color as a float array of Hue-Saturation-Brightness (in that order)
      */
     @NotNull
-    public static float[] toHsv(@NotNull Color color) {
+    public static float[] toHsb(@NotNull Color color) {
         return Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
     }
 
     @NotNull
     public static Color toRgb(@NotNull float[] hsv) {
-        return toRgb(hsv[0], hsv[1], hsv[2]);
+        return Color.getHSBColor(hsv[0], hsv[1], hsv[2]);
     }
 
+
+    /**
+     * Blends the two given colors according to their individual alpha values. A color with a
+     * higher alpha will have a stronger effect on the blended color.
+     *
+     * @param c1 the first color
+     * @param c2 the second color
+     * @return the blended color
+     */
     @NotNull
-    public static Color toRgb(float hue, float saturation, float value) {
-        return colorFromRgb(Color.HSBtoRGB(hue, saturation, value));
+    public static Color blendColors(Color c1, Color c2) {
+        final float alpha1 = c1.getAlpha() / 255f;
+        final float alpha2 = c2.getAlpha() / 255f;
+
+        final int red = Math.min((int) (c1.getRed() * alpha1 + c2.getRed() * alpha2), 255);
+        final int green = Math.min((int) (c1.getGreen() * alpha1 + c2.getGreen() * alpha2), 255);
+        final int blue = Math.min((int) (c1.getBlue() * alpha1 + c2.getBlue() * alpha2), 255);
+        final int alpha = Math.min((int) ((alpha1 + alpha2) * 255), 255);
+        return new Color(red, green, blue, alpha);
     }
 }

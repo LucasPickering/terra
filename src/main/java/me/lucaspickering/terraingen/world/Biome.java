@@ -2,8 +2,6 @@ package me.lucaspickering.terraingen.world;
 
 import java.awt.Color;
 
-import me.lucaspickering.terraingen.util.Funcs;
-
 public enum Biome {
 
     OCEAN("Ocean", 0x144ba4, Type.WATER),
@@ -33,7 +31,7 @@ public enum Biome {
 
     Biome(String displayName, int color, Type type) {
         this.displayName = displayName;
-        this.color = Funcs.colorFromRgb(color);
+        this.color = new Color(color);
         this.type = type;
     }
 
