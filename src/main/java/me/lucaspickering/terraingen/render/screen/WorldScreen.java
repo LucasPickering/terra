@@ -19,6 +19,7 @@ import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
+import me.lucaspickering.terraingen.util.Colors;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.TileColorMode;
@@ -87,11 +88,9 @@ public class WorldScreen extends Screen {
     private TileColorMode tileColorMode = TileColorMode.COMPOSITE;
     private TileOverlay tileOverlay = TileOverlay.NONE;
 
-    // The last position of the mouse while dragging. Null if not dragging.
-    private Point lastMouseDragPos;
-
-    // The time at which the user pressed the mouse button down
-    private long mouseDownTime;
+    private Point lastMouseDragPos; // The last position of the mouse while dragging, or null
+    private Tile mouseOverTile; // The tile that the mouse is currently over
+    private long mouseDownTime; // The time at which the user pressed the mouse button down
 
     // We frequently have to use float arrays for color purposes, so just allocate one
     private final float[] colorArray = new float[COLOR_SIZE];
@@ -110,9 +109,9 @@ public class WorldScreen extends Screen {
 
         // We need an array that tells us which which vertex to start at for each tile, and the
         // size (in vertices) of each tile.
-        startingIndices = new int[Chunk.CHUNK_SIZE];
-        sizes = new int[Chunk.CHUNK_SIZE];
-        for (int i = 0; i < Chunk.CHUNK_SIZE; i++) {
+        startingIndices = new int[Chunk.TOTAL_TILES];
+        sizes = new int[Chunk.TOTAL_TILES];
+        for (int i = 0; i < Chunk.TOTAL_TILES; i++) {
             startingIndices[i] = i * NUM_VERTICES;
             sizes[i] = NUM_VERTICES;
         }
@@ -173,7 +172,7 @@ public class WorldScreen extends Screen {
             lastMouseDragPos = null; // No longer dragging
         }
 
-        updateScreenCenter(mousePos);
+        processMouse(mousePos); // Update state based on mouse position
 
         GL11.glPushMatrix();
         GL11.glTranslated(worldCenter.x(), worldCenter.y(), 0.0);
@@ -184,11 +183,57 @@ public class WorldScreen extends Screen {
             drawChunk(vboHandles);
         }
 
-        processMouseOver(mousePos); // Update state based on mouse position
-
         GL11.glPopMatrix();
 
         super.draw(mousePos); // Draw GUI elements
+    }
+
+    private void processMouse(Point mousePos) {
+        // If the mouse is being dragged, shift the world center based on it.
+        // Otherwise, draw info for the tile that the mouse is currently over.
+        if (lastMouseDragPos != null) {
+            mouseOverTile = null; // While dragging,
+            // Shift the world
+            final Point diff = mousePos.minus(lastMouseDragPos);
+            worldCenter = worldCenter.plus(diff);
+            lastMouseDragPos = mousePos; // Update the mouse pos
+        } else {
+            // Update which tile the mouse is over, update state if that value changed since last
+            // frame, then update the text for the tile.
+            final Tile newMouseOverTile = calcTileUnderMouse(mousePos);
+            if (newMouseOverTile != mouseOverTile) {
+                changeMouseOverTile(newMouseOverTile);
+            }
+            if (mouseOverTile != null) {
+                // Draw the overlay then set text for the info box
+                mouseOverTileInfo.setText(mouseOverTile.info());
+            }
+        }
+    }
+
+    private void changeMouseOverTile(Tile newMouseOverTile) {
+        // Set the old tile's color back to normal
+        if (mouseOverTile != null) {
+            setTileColor(mouseOverTile, getTileColor(mouseOverTile));
+        }
+
+        // If the mouse is over a new tile now, change its color
+        if (newMouseOverTile != null) {
+            final Color tileColor = blendColors(getTileColor(newMouseOverTile), Colors.MOUSE_OVER);
+            setTileColor(newMouseOverTile, tileColor);
+        }
+
+        mouseOverTile = newMouseOverTile; // Make the switch
+        mouseOverTileInfo.setVisible(mouseOverTile != null);
+    }
+
+    private Tile calcTileUnderMouse(Point mousePos) {
+        // Shift and scale the mouse pos to align with the world
+        final Point fixedMousePos = mousePos.minus(worldCenter).scale(1.0 / worldScale);
+
+        // Get the tile that the mouse is over and return it
+        final HexPoint mouseOverPos = worldHandler.pixelToTile(fixedMousePos);
+        return worldHandler.getWorld().getTiles().getByPoint(mouseOverPos);
     }
 
     private void drawChunk(VboHandles vboHandles) {
@@ -208,16 +253,6 @@ public class WorldScreen extends Screen {
 
         GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
         GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
-    }
-
-    private void updateScreenCenter(Point mousePos) {
-        // If the mouse is being dragged, shift the world center based on it
-        if (lastMouseDragPos != null) {
-            // Shift the world
-            final Point diff = mousePos.minus(lastMouseDragPos);
-            worldCenter = worldCenter.plus(diff);
-            lastMouseDragPos = mousePos; // Update the mouse pos
-        }
     }
 
     private void updateAllTileColors() {
@@ -242,21 +277,40 @@ public class WorldScreen extends Screen {
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.color);
         long offset = 0;
         for (Tile tile : chunk.getTiles()) {
-            updateTileColor(tile, offset);
+            updateColor(getTileColor(tile), offset);
             offset += COLOR_SIZE_BYTES * NUM_VERTICES;
         }
     }
 
     /**
-     * Updates the color of the given tile. The current color of the tile is re-computed, then
-     * the color is updated in the buffer. The color buffer MUST be bound before calling this
-     * (using {@link GL15#glBindBuffer(int, int)}, or it will not work.
+     * Sets the color of the given tile to be the given value. This finds the VBO that the given
+     * tile belongs to, and modifies its color buffer to contain the given color.
      *
-     * @param tile   the tile whose color is being updated
-     * @param offset the byte offset for the given tile's color in buffer
+     * @param tile  the tile whose color will be changed
+     * @param color the new color for the tile
      */
-    private void updateTileColor(Tile tile, long offset) {
-        getTileColor(tile).getColorComponents(colorArray);
+    private void setTileColor(Tile tile, Color color) {
+        // Find the handle for the appropriate color VBO and bind it
+        final HexPoint chunkPos = Chunk.getChunkPosForTile(tile.pos());
+        final VboHandles vboHandles = chunkVboMap.getByPoint(chunkPos);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.color);
+
+        final HexPoint relPos = Chunk.getRelativeTilePos(tile.pos());
+        final long offset = (relPos.x() * Chunk.SIDE_LENGTH + relPos.y()) *
+                            NUM_VERTICES * COLOR_SIZE_BYTES;
+        updateColor(color, offset);
+    }
+
+    /**
+     * Updates the color at the given offset in the buffer that is currently bound. The color buffer
+     * MUST be bound before calling this(using {@link GL15#glBindBuffer(int, int)}, or it will not
+     * work.
+     *
+     * @param color  the new color
+     * @param offset the byte offset for the tile whose color you want to change
+     */
+    private void updateColor(Color color, long offset) {
+        color.getColorComponents(colorArray);
 
         // Change the color for each vertex of this tile
         for (int i = 0; i < NUM_VERTICES; i++) {
@@ -323,35 +377,6 @@ public class WorldScreen extends Screen {
         final int blue = (int) (c1.getBlue() * alpha1 + c2.getBlue() * alpha2) & 0xff;
         final int alpha = (int) ((alpha1 + alpha2) * 255) & 0xff;
         return new Color(red, green, blue, alpha);
-    }
-
-    private void processMouseOver(Point mousePos) {
-        // Draw the overlay for the tile that the mouse is over, then draw the text box with info
-        // for that tile.
-        final Tile mouseOverTile = getMouseOverTile(mousePos);
-        mouseOverTileInfo.setVisible(mouseOverTile != null);
-        if (mouseOverTile != null) {
-            // Draw the overlay then set text for the info box
-            drawMouseOverlay(mouseOverTile);
-            mouseOverTileInfo.setText(mouseOverTile.info());
-        }
-    }
-
-    private void drawMouseOverlay(Tile tile) {
-        // TODO set color for the tile
-    }
-
-    private Tile getMouseOverTile(Point mousePos) {
-        if (mousePos == null) {
-            return null;
-        }
-
-        // Shift and scale the mouse pos to align with the world
-        final Point fixedMousePos = mousePos.minus(worldCenter).scale(1.0 / worldScale);
-
-        // Get the tile that the mouse is over and return it
-        final HexPoint mouseOverPos = worldHandler.pixelToTile(fixedMousePos);
-        return worldHandler.getWorld().getTiles().getByPoint(mouseOverPos);
     }
 
     private void setTileColorMode(TileColorMode colorMode) {

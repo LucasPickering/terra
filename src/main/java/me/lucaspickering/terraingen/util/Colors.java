@@ -9,7 +9,7 @@ public class Colors {
     public static final Color MENU_SHADER = Funcs.colorFromArgb(0xcc101010);
 
     // Tile overlay colors
-    public static final Color MOUSE_OVER = Funcs.colorFromArgb(0x90aa1111);
+    public static final Color MOUSE_OVER = Funcs.colorFromArgb(0xf0aa1111);
     public static final Color TILE_INFO_BG = Funcs.colorFromArgb(0xee444444);
 
     // Button colors

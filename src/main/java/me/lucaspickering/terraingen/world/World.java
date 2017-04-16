@@ -54,7 +54,7 @@ public class World {
         public int size() {
             // Chunks have a constant size so we can calculate the total number of tiles from the
             // total number of chunks
-            return chunks.size() * Chunk.CHUNK_SIZE;
+            return chunks.size() * Chunk.TOTAL_TILES;
         }
 
         @NotNull
