@@ -21,7 +21,7 @@ public class Chunk implements HexPointable {
     public static final int CHUNK_SIZE = CHUNK_SIDE_LENGTH * CHUNK_SIDE_LENGTH;
 
     private static final int OVERLAY_RGB_FACTOR = 50;
-    private static final int OVERLAY_ALPHA = 10;
+    private static final int OVERLAY_ALPHA = 100;
 
     private final HexPoint pos; // Position of this chunk relative to other chunks
     private final TileSet tiles;
@@ -78,9 +78,20 @@ public class Chunk implements HexPointable {
      * @return the position of the chunk that should contain that tile
      */
     public static HexPoint getChunkPosForTile(HexPoint tilePos) {
-        final int x = Math.floorDiv(tilePos.x(), CHUNK_SIDE_LENGTH);
-        final int y = Math.floorDiv(tilePos.y(), CHUNK_SIDE_LENGTH);
-        return new HexPoint(x, y);
+        return new HexPoint(Math.floorDiv(tilePos.x(), CHUNK_SIDE_LENGTH),
+                            Math.floorDiv(tilePos.y(), CHUNK_SIDE_LENGTH));
+    }
+
+    /**
+     * Gets a chunk-relative coordinate for the given tile. The result is the given position, if
+     * it were relative to the lowest-value (min x and y) coordinate in its chunk.
+     *
+     * @param tilePos the tile position to be converted
+     * @return the given coordinate relative to the origin of its chunk
+     */
+    public static HexPoint getRelativeTilePos(HexPoint tilePos) {
+        return new HexPoint(Math.floorMod(tilePos.x(), CHUNK_SIDE_LENGTH),
+                            Math.floorMod(tilePos.y(), CHUNK_SIDE_LENGTH));
     }
 
     public HexPoint getPos() {

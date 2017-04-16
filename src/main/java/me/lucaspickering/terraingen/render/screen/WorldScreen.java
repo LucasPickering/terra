@@ -122,6 +122,12 @@ public class WorldScreen extends Screen {
         }
     }
 
+    /**
+     * Creates two VBOs for the given chunk. One contains the vertex data for all tiles in the
+     * chunk, and the other contains all color data.
+     *
+     * @param chunk the chunk for which the VBOs should be generated
+     */
     private void initVboForChunk(Chunk chunk) {
         final TileSet tiles = chunk.getTiles();
 
@@ -157,7 +163,7 @@ public class WorldScreen extends Screen {
 
         final int vboColorHandle = GL15.glGenBuffers();
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_STATIC_DRAW);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_DYNAMIC_DRAW);
         GL30.glBindVertexArray(0);
 
         chunkVboMap.put(chunk, new VboHandles(vboVertexHandle, vboColorHandle));
@@ -176,11 +182,12 @@ public class WorldScreen extends Screen {
         GL11.glTranslated(worldCenter.x(), worldCenter.y(), 0.0);
         GL11.glScaled(worldScale, worldScale, 1.0);
 
+        // Draw each chunk
         for (VboHandles vboHandles : chunkVboMap.values()) {
             drawChunk(vboHandles);
         }
 
-        processMouseOver(mousePos);
+        processMouseOver(mousePos); // Update state based on mouse position
 
         GL11.glPopMatrix();
 
@@ -217,33 +224,42 @@ public class WorldScreen extends Screen {
     }
 
     private void updateAllTileColors() {
-        for (Chunk chunk : worldHandler.getWorld().getChunks()) {
-            for (Tile tile : chunk.getTiles()) {
-                updateTileColor(chunk, tile);
+        final float[] colorArray = new float[COLOR_SIZE];
+        for (Map.Entry<Chunk, VboHandles> entry : chunkVboMap.entrySet()) {
+            for (Tile tile : entry.getKey().getTiles()) {
+                updateTileColor(entry.getValue(), tile, colorArray);
             }
         }
     }
 
     /**
      * Updates the color of the given tile. The current color of the tile is re-computed, then
-     * the color is updated in the buffer.
+     * the color is updated in the buffer. An array can be passed in that will be used to store
+     * the tile's color. This is an optimization that prevents having to allocate a new array for
+     * each tile.
      *
-     * @param chunk the chunk that this tile belongs to (this can be computed but it's faster to
-     *              pass it in)
-     * @param tile  the tile whose color is being updated
+     * @param vboHandles the handles for the VBO corresponding to the given tile's chunk
+     * @param tile       the tile whose color is being updated
+     * @param colorArray an array in which the tile's color will be stored; if {@code null}, a new
+     *                   array is allocated
      */
-    private void updateTileColor(Chunk chunk, Tile tile) {
-        // Find and bind the handle for the color buffer
-        final VboHandles vboHandles = chunkVboMap.get(chunk);
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.color);
-
-        final Color color = getTileColor(tile); // Compute the tile's new color
+    private void updateTileColor(VboHandles vboHandles, Tile tile, float[] colorArray) {
+        if (colorArray == null) {
+            colorArray = new float[COLOR_SIZE];
+        }
+        // Compute the tile's new color and put it in the array
+        getTileColor(tile).getColorComponents(colorArray);
 
         // Compute the location of this tile's color in the entire color buffer, as a byte offset
-        final HexPoint tilePos = tile.pos();
-        long offset = (tilePos.x() * Chunk.CHUNK_SIZE + tilePos.y()) * COLOR_SIZE_BYTES;
+        final HexPoint tilePos = Chunk.getRelativeTilePos(tile.pos());
+        long offset = (tilePos.x() * Chunk.CHUNK_SIDE_LENGTH + tilePos.y()) * // Tile number
+                      NUM_VERTICES * // Colors per tile (one color per vertex)
+                      COLOR_SIZE_BYTES; // Bytes per color
 
-        final float[] colorArray = color.getColorComponents(null);
+        // Find and bind the handle for the color buffer
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.color);
+
+        // Change the color for each vertex of this tile
         for (int i = 0; i < NUM_VERTICES; i++) {
             GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset, colorArray);
             offset += COLOR_SIZE_BYTES; // Move up to the next color
