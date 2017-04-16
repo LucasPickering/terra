@@ -93,6 +93,8 @@ public class WorldScreen extends Screen {
     // The time at which the user pressed the mouse button down
     private long mouseDownTime;
 
+    // We frequently have to use float arrays for color purposes, so just allocate one
+    private final float[] colorArray = new float[COLOR_SIZE];
     private final HexPointMap<Chunk, VboHandles> chunkVboMap = new HexPointMap<>();
     private final int[] startingIndices;
     private final int[] sizes;
@@ -130,27 +132,19 @@ public class WorldScreen extends Screen {
      */
     private void initVboForChunk(Chunk chunk) {
         final TileSet tiles = chunk.getTiles();
+        final int totalVertices = NUM_VERTICES * tiles.size();
 
         // Allocate and populate vertex and color buffers
-        final DoubleBuffer vertexBuffer =
-            BufferUtils.createDoubleBuffer(VERTEX_SIZE * NUM_VERTICES * tiles.size());
-        final FloatBuffer colorBuffer =
-            BufferUtils.createFloatBuffer(COLOR_SIZE * NUM_VERTICES * tiles.size());
-        final float[] colorArray = new float[COLOR_SIZE]; // Color components will be stored here
-
-        // Create vertex and color buffers for each tile in the chunk
+        final DoubleBuffer vertexBuffer = BufferUtils.createDoubleBuffer(VERTEX_SIZE *
+                                                                         totalVertices);
+        final FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(COLOR_SIZE * totalVertices);
         for (Tile tile : tiles) {
             final Point tileCenter = worldHandler.getTileCenter(tile);
-
-            // Store the RGBA components of this tile's color in an array
-            final Color color = tile.getColor(tileColorMode);
-            color.getColorComponents(colorArray);
             for (Point vertex : WorldHandler.TILE_VERTICES) {
                 // Shift this vertex by the tile's center, and add it to the buffer
                 vertexBuffer.put(tileCenter.x() + vertex.x());
                 vertexBuffer.put(tileCenter.y() + vertex.y());
-
-                colorBuffer.put(colorArray); // Add the tile color for this vertex
+                colorBuffer.put(colorArray); // This will be updated later (see below)
             }
         }
         vertexBuffer.flip();
@@ -166,7 +160,10 @@ public class WorldScreen extends Screen {
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_DYNAMIC_DRAW);
         GL30.glBindVertexArray(0);
 
-        chunkVboMap.put(chunk, new VboHandles(vboVertexHandle, vboColorHandle));
+        final VboHandles vboHandles = new VboHandles(vboVertexHandle, vboColorHandle);
+        chunkVboMap.put(chunk, vboHandles);
+
+        updateChunkColors(chunk, vboHandles); // Populate the color buffer now
     }
 
     @Override
@@ -224,40 +221,42 @@ public class WorldScreen extends Screen {
     }
 
     private void updateAllTileColors() {
-        final float[] colorArray = new float[COLOR_SIZE];
+        final long startTime = System.currentTimeMillis();
         for (Map.Entry<Chunk, VboHandles> entry : chunkVboMap.entrySet()) {
-            for (Tile tile : entry.getKey().getTiles()) {
-                updateTileColor(entry.getValue(), tile, colorArray);
-            }
+            updateChunkColors(entry.getKey(), entry.getValue());
+        }
+        final long endTime = System.currentTimeMillis();
+        System.out.printf("Color update took %d ms%n", endTime - startTime);
+    }
+
+    /**
+     * Updates the color of each tile in the given chunk. The chunk's VBO handles are passed so
+     * that they don't have to be looked up. This is generally going to be called from iteration
+     * over all chunks, so the handles should be readily available and lookup can be avoided.
+     *
+     * @param chunk      the chunk to update
+     * @param vboHandles the VBO handles for the given chunk
+     */
+    private void updateChunkColors(Chunk chunk, VboHandles vboHandles) {
+        // Bind the handle for the color buffer
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.color);
+        long offset = 0;
+        for (Tile tile : chunk.getTiles()) {
+            updateTileColor(tile, offset);
+            offset += COLOR_SIZE_BYTES * NUM_VERTICES;
         }
     }
 
     /**
      * Updates the color of the given tile. The current color of the tile is re-computed, then
-     * the color is updated in the buffer. An array can be passed in that will be used to store
-     * the tile's color. This is an optimization that prevents having to allocate a new array for
-     * each tile.
+     * the color is updated in the buffer. The color buffer MUST be bound before calling this
+     * (using {@link GL15#glBindBuffer(int, int)}, or it will not work.
      *
-     * @param vboHandles the handles for the VBO corresponding to the given tile's chunk
-     * @param tile       the tile whose color is being updated
-     * @param colorArray an array in which the tile's color will be stored; if {@code null}, a new
-     *                   array is allocated
+     * @param tile   the tile whose color is being updated
+     * @param offset the byte offset for the given tile's color in buffer
      */
-    private void updateTileColor(VboHandles vboHandles, Tile tile, float[] colorArray) {
-        if (colorArray == null) {
-            colorArray = new float[COLOR_SIZE];
-        }
-        // Compute the tile's new color and put it in the array
+    private void updateTileColor(Tile tile, long offset) {
         getTileColor(tile).getColorComponents(colorArray);
-
-        // Compute the location of this tile's color in the entire color buffer, as a byte offset
-        final HexPoint tilePos = Chunk.getRelativeTilePos(tile.pos());
-        long offset = (tilePos.x() * Chunk.CHUNK_SIDE_LENGTH + tilePos.y()) * // Tile number
-                      NUM_VERTICES * // Colors per tile (one color per vertex)
-                      COLOR_SIZE_BYTES; // Bytes per color
-
-        // Find and bind the handle for the color buffer
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.color);
 
         // Change the color for each vertex of this tile
         for (int i = 0; i < NUM_VERTICES; i++) {
