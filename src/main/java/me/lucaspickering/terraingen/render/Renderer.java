@@ -64,14 +64,17 @@ public class Renderer {
      * @param name the name of the file, which will be formatted into {@link Constants#TEXTURE_PATH}
      *             to create the file path
      */
-    public void loadTexture(String name) {
+    public Texture loadTexture(String name) {
         try {
             BufferedImage image = ImageIO.read(new File(Funcs.getResource(Constants.TEXTURE_PATH,
                                                                           name)));
-            textures.put(name, new Texture(loadTextureFromImage(image)));
+            final Texture texture = new Texture(loadTextureFromImage(image));
+            textures.put(name, texture);
+            return texture;
         } catch (IOException e) {
             System.err.println("Error loading texture: " + name);
             e.printStackTrace();
+            return null;
         }
     }
 

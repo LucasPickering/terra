@@ -15,11 +15,13 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 import me.lucaspickering.terraingen.render.Renderer;
+import me.lucaspickering.terraingen.render.Texture;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Colors;
+import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
@@ -70,6 +72,7 @@ public class WorldScreen extends Screen {
         }};
 
     private final WorldHandler worldHandler;
+    private final Texture tileTexture;
     private final MouseTextBox mouseOverTileInfo;
     private Point worldCenter; // The pixel location of the center of the world
     private double worldScale = 1.0;
@@ -88,6 +91,7 @@ public class WorldScreen extends Screen {
     public WorldScreen(WorldHandler worldHandler) {
         Objects.requireNonNull(worldHandler);
         this.worldHandler = worldHandler;
+        tileTexture = renderer().loadTexture(Constants.TEX_HEXAGON);
         worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
         mouseOverTileInfo = new MouseTextBox();
         mouseOverTileInfo.setVisible(false); // Hide this for now

@@ -34,7 +34,7 @@ public class Button extends GuiElement {
     @Override
     public void draw(Point mousePos) {
         final boolean mouseOver = contains(mousePos);
-        renderer().drawTexture(Constants.BUTTON_NAME, 0, 0, getWidth(), getHeight());
+        renderer().drawTexture(Constants.TEX_BUTTON, 0, 0, getWidth(), getHeight());
         renderer().drawString(Font.UI, text, getWidth() / 2, getHeight() / 2,
                               mouseOver ? Colors.BUTTON_TEXT_HIGHLIGHT : Colors.BUTTON_TEXT_NORMAL,
                               HorizAlignment.CENTER, VertAlignment.CENTER);
