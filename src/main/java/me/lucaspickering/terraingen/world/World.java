@@ -170,7 +170,7 @@ public class World {
         return result;
     }
 
-    public Map<HexPoint, Chunk> getChunks() {
+    public HexPointSet<Chunk> getChunks() {
         return chunks;
     }
 

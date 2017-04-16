@@ -3,6 +3,7 @@ package me.lucaspickering.terraingen.render.screen;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
 
@@ -12,16 +13,13 @@ import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 
 import me.lucaspickering.terraingen.render.Renderer;
-import me.lucaspickering.terraingen.render.Texture;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.event.ScrollEvent;
 import me.lucaspickering.terraingen.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terraingen.util.Colors;
-import me.lucaspickering.terraingen.util.Constants;
 import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
@@ -29,8 +27,8 @@ import me.lucaspickering.terraingen.world.TileColorMode;
 import me.lucaspickering.terraingen.world.WorldHandler;
 import me.lucaspickering.terraingen.world.util.Chunk;
 import me.lucaspickering.terraingen.world.util.HexPoint;
+import me.lucaspickering.terraingen.world.util.HexPointMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
-import me.lucaspickering.utils.Pair;
 import me.lucaspickering.utils.Point;
 import me.lucaspickering.utils.range.DoubleRange;
 import me.lucaspickering.utils.range.Range;
@@ -39,6 +37,17 @@ public class WorldScreen extends Screen {
 
     private enum TileOverlay {
         NONE, CONTINENT, CHUNK
+    }
+
+    private static class VboHandles {
+
+        private final int vertex;
+        private final int color;
+
+        private VboHandles(int vertex, int color) {
+            this.vertex = vertex;
+            this.color = color;
+        }
     }
 
     private static final Range<Double> VALID_WORLD_SCALES = new DoubleRange(0.5, 10.0);
@@ -51,7 +60,7 @@ public class WorldScreen extends Screen {
 
     // Each side of the tile is rendered by forming a triangle between it and the center, so
     // there's three vertices for each side of the tile.
-    private static final int NUM_VERTICES = Direction.values().length * 3;
+    private static final int NUM_VERTICES = Direction.values().length;
     private static final int VERTEX_SIZE = 2;
     private static final int COLOR_SIZE = 4;
 
@@ -72,7 +81,6 @@ public class WorldScreen extends Screen {
         }};
 
     private final WorldHandler worldHandler;
-    private final Texture tileTexture;
     private final MouseTextBox mouseOverTileInfo;
     private Point worldCenter; // The pixel location of the center of the world
     private double worldScale = 1.0;
@@ -86,21 +94,31 @@ public class WorldScreen extends Screen {
     // The time at which the user pressed the mouse button down
     private long mouseDownTime;
 
-    private final Map<Chunk, Pair<Integer, Integer>> chunkVboMap = new TreeMap<>();
+    private final HexPointMap<Chunk, VboHandles> chunkVboMap = new HexPointMap<>();
+    private final int[] startingIndices;
+    private final int[] sizes;
 
     public WorldScreen(WorldHandler worldHandler) {
         Objects.requireNonNull(worldHandler);
         this.worldHandler = worldHandler;
-        tileTexture = renderer().loadTexture(Constants.TEX_HEXAGON);
         worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
         mouseOverTileInfo = new MouseTextBox();
         mouseOverTileInfo.setVisible(false); // Hide this for now
         addGuiElement(mouseOverTileInfo);
         initVbos();
+
+        startingIndices = new int[Chunk.CHUNK_SIZE];
+        sizes = new int[Chunk.CHUNK_SIZE];
+        for (int i = 0; i < Chunk.CHUNK_SIZE; i++) {
+            startingIndices[i] = i * NUM_VERTICES;
+            sizes[i] = NUM_VERTICES;
+        }
+
+        setTileColor(HexPoint.ZERO, Color.RED);
     }
 
     private void initVbos() {
-        for (Chunk chunk : worldHandler.getWorld().getChunks().values()) {
+        for (Chunk chunk : worldHandler.getWorld().getChunks()) {
             initVboForChunk(chunk);
         }
     }
@@ -120,20 +138,12 @@ public class WorldScreen extends Screen {
             // Store the RGBA components of this tile's color in an array
             final Color color = tile.getColor(tileColorMode);
             color.getRGBComponents(colorArray);
-            for (int i = 0; i < WorldHandler.TILE_VERTICES.length; i++) {
-                final Point vertex1 = WorldHandler.TILE_VERTICES[i];
-                final Point vertex2 = WorldHandler.TILE_VERTICES[(i + 1) %
-                                                                 WorldHandler.TILE_VERTICES.length];
-                vertexBuffer.put(tileCenter.x() + vertex1.x());
-                vertexBuffer.put(tileCenter.y() + vertex1.y());
-                vertexBuffer.put(tileCenter.x() + vertex2.x());
-                vertexBuffer.put(tileCenter.y() + vertex2.y());
-                vertexBuffer.put(tileCenter.x());
-                vertexBuffer.put(tileCenter.y());
+            for (Point vertex : WorldHandler.TILE_VERTICES) {
+                // Shift this vertex by the tile's center, and add it to the buffer
+                vertexBuffer.put(tileCenter.x() + vertex.x());
+                vertexBuffer.put(tileCenter.y() + vertex.y());
 
-                colorBuffer.put(colorArray);
-                colorBuffer.put(colorArray);
-                colorBuffer.put(colorArray);
+                colorBuffer.put(colorArray); // Add the tile color for this vertex
             }
         }
         vertexBuffer.flip();
@@ -149,7 +159,7 @@ public class WorldScreen extends Screen {
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_STATIC_DRAW);
         GL30.glBindVertexArray(0);
 
-        chunkVboMap.put(chunk, new Pair<>(vboVertexHandle, vboColorHandle));
+        chunkVboMap.put(chunk, new VboHandles(vboVertexHandle, vboColorHandle));
     }
 
     @Override
@@ -165,11 +175,11 @@ public class WorldScreen extends Screen {
         GL11.glTranslated(worldCenter.x(), worldCenter.y(), 0.0);
         GL11.glScaled(worldScale, worldScale, 1.0);
 
-        processMouseOver(mousePos);
-
-        for (Pair<Integer, Integer> vboHandles : chunkVboMap.values()) {
-            drawChunk(vboHandles.first(), vboHandles.second());
+        for (VboHandles vboHandles : chunkVboMap.values()) {
+            drawChunk(vboHandles);
         }
+
+        processMouseOver(mousePos);
 
         GL11.glPopMatrix();
 
@@ -198,18 +208,34 @@ public class WorldScreen extends Screen {
         }
     }
 
-    private void drawChunk(int vertexHandle, int colorHandle) {
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexHandle);
+    private void setTileColor(HexPoint tilePos, Color color) {
+        // Find and bind the handle for the color buffer
+        final HexPoint chunkPos = Chunk.getChunkPosForTile(tilePos);
+        final VboHandles vboHandles = chunkVboMap.getByPoint(chunkPos);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.color);
+
+        long offset = (tilePos.x() + tilePos.y() + tilePos.z()) * COLOR_SIZE * 4;
+        final float[] colorArray = color.getColorComponents(null);
+        for (int i = 0; i < NUM_VERTICES; i++) {
+            GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset, colorArray);
+            offset += COLOR_SIZE * 4;
+        }
+    }
+
+    private void drawChunk(VboHandles vboHandles) {
+        // Set up the vertex buffer
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.vertex);
         GL11.glVertexPointer(VERTEX_SIZE, GL11.GL_DOUBLE, 0, 0L);
 
         // Set up the color buffer
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorHandle);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.color);
         GL11.glColorPointer(COLOR_SIZE, GL11.GL_FLOAT, 0, 0L);
 
         GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
         GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
 
-        GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, NUM_VERTICES * Chunk.CHUNK_SIZE);
+        // Draw all tiles in the chunk
+        GL14.glMultiDrawArrays(GL11.GL_TRIANGLE_FAN, startingIndices, sizes);
 
         GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
         GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
@@ -261,8 +287,11 @@ public class WorldScreen extends Screen {
             return null;
         }
 
+        // Shift and scale the mouse pos to align with the world
+        final Point fixedMousePos = mousePos.minus(worldCenter).scale(1.0 / worldScale);
+
         // Get the tile that the mouse is over and return it
-        final HexPoint mouseOverPos = worldHandler.pixelToTile(mousePos.minus(worldCenter));
+        final HexPoint mouseOverPos = worldHandler.pixelToTile(fixedMousePos);
         return worldHandler.getWorld().getTiles().getByPoint(mouseOverPos);
     }
 

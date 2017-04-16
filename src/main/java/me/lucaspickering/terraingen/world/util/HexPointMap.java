@@ -97,10 +97,14 @@ public class HexPointMap<K extends HexPointable, V> extends AbstractMap<K, V> {
         // If the key is a Tile, try to get it from the map
         if (key instanceof HexPointable) {
             final HexPointable hp = (HexPointable) key;
-            final Pair<K, V> retrieved = map.get(hp.toHexPoint());
-            return extractValue(retrieved);
+            return getByPoint(hp.toHexPoint());
         }
         return null; // Nothing was retrieved
+    }
+
+    public V getByPoint(HexPoint point) {
+        final Pair<K, V> retrieved = map.get(point);
+        return extractValue(retrieved);
     }
 
     @Override
@@ -114,10 +118,14 @@ public class HexPointMap<K extends HexPointable, V> extends AbstractMap<K, V> {
         // If the key is a Tile, try to remove it from the map
         if (key instanceof HexPointable) {
             final HexPointable hp = (HexPointable) key;
-            final Pair<K, V> removed = map.remove(hp.toHexPoint());
-            return extractValue(removed);
+            return removeByPoint(hp.toHexPoint());
         }
         return null; // Nothing was removed
+    }
+
+    public V removeByPoint(HexPoint point) {
+        final Pair<K, V> removed = map.remove(point);
+        return extractValue(removed);
     }
 
     @NotNull
