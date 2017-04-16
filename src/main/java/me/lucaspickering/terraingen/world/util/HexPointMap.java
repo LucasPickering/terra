@@ -10,19 +10,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.utils.Pair;
 
-/**
- * A map of {@link Tile}s to some other type. Internally, Tile:T pairs are stored in a map, keyed
- * by the tile's position, but externally this functions as a normal map of Tile:T would. No two
- * tiles can have the same position.
- */
-public class TileMap<V> extends AbstractMap<Tile, V> {
+public class HexPointMap<K extends HexPointable, V> extends AbstractMap<K, V> {
 
-    private class EntrySet extends AbstractSet<Entry<Tile, V>> {
+    private class EntrySet extends AbstractSet<Entry<K, V>> {
 
-        private final Set<Entry<HexPoint, Pair<Tile, V>>> backingEntrySet;
+        private final Set<Entry<HexPoint, Pair<K, V>>> backingEntrySet;
 
         private EntrySet() {
             this.backingEntrySet = map.entrySet();
@@ -30,11 +24,11 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
 
         @NotNull
         @Override
-        public Iterator<Entry<Tile, V>> iterator() {
-            return new Iterator<Entry<Tile, V>>() {
+        public Iterator<Entry<K, V>> iterator() {
+            return new Iterator<Entry<K, V>>() {
 
                 // Internal iterator that backs this one
-                private Iterator<Entry<HexPoint, Pair<Tile, V>>> iter = backingEntrySet.iterator();
+                private Iterator<Entry<HexPoint, Pair<K, V>>> iter = backingEntrySet.iterator();
 
                 @Override
                 public boolean hasNext() {
@@ -42,10 +36,10 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
                 }
 
                 @Override
-                public Entry<Tile, V> next() {
+                public Entry<K, V> next() {
                     // Get the next value in the backing iterator
-                    final Entry<HexPoint, Pair<Tile, V>> next = iter.next();
-                    final Pair<Tile, V> pair = next.getValue();
+                    final Entry<HexPoint, Pair<K, V>> next = iter.next();
+                    final Pair<K, V> pair = next.getValue();
 
                     // Extract the values we ant from the next value and return them in an entry
                     return new SimpleEntry<>(pair.first(), pair.second());
@@ -77,20 +71,20 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
     }
 
     // Internal map
-    private final Map<HexPoint, Pair<Tile, V>> map;
+    private final Map<HexPoint, Pair<K, V>> map;
 
     // Cache this so we only need to make it once
-    private Set<Entry<Tile, V>> entrySet;
+    private Set<Entry<K, V>> entrySet;
 
-    public TileMap() {
+    public HexPointMap() {
         map = new TreeMap<>(); // Uses HexPoint's compareTo method for ordering
     }
 
-    private TileMap(Map<HexPoint, Pair<Tile, V>> map) {
+    private HexPointMap(Map<HexPoint, Pair<K, V>> map) {
         this.map = map;
     }
 
-    private V extractValue(Pair<Tile, V> pair) {
+    private V extractValue(Pair<K, V> pair) {
         // If the pair isn't null, get the value out, otherwise just return null
         if (pair != null) {
             return pair.second();
@@ -101,26 +95,26 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
     @Override
     public V get(Object key) {
         // If the key is a Tile, try to get it from the map
-        if (key instanceof Tile) {
-            final Tile tile = (Tile) key;
-            final Pair<Tile, V> retrieved = map.get(tile.pos());
+        if (key instanceof HexPointable) {
+            final HexPointable hp = (HexPointable) key;
+            final Pair<K, V> retrieved = map.get(hp.toHexPoint());
             return extractValue(retrieved);
         }
         return null; // Nothing was retrieved
     }
 
     @Override
-    public V put(Tile tile, V value) {
-        final Pair<Tile, V> evicted = map.put(tile.pos(), new Pair<>(tile, value));
+    public V put(K key, V value) {
+        final Pair<K, V> evicted = map.put(key.toHexPoint(), new Pair<>(key, value));
         return extractValue(evicted);
     }
 
     @Override
     public V remove(Object key) {
         // If the key is a Tile, try to remove it from the map
-        if (key instanceof Tile) {
-            final Tile tile = (Tile) key;
-            final Pair<Tile, V> removed = map.remove(tile.pos());
+        if (key instanceof HexPointable) {
+            final HexPointable hp = (HexPointable) key;
+            final Pair<K, V> removed = map.remove(hp.toHexPoint());
             return extractValue(removed);
         }
         return null; // Nothing was removed
@@ -128,7 +122,7 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
 
     @NotNull
     @Override
-    public Set<Map.Entry<Tile, V>> entrySet() {
+    public Set<Entry<K, V>> entrySet() {
         // If entrySet isn't already initialized, do that now
         if (entrySet == null) {
             entrySet = new EntrySet();
@@ -137,12 +131,12 @@ public class TileMap<V> extends AbstractMap<Tile, V> {
     }
 
     /**
-     * Creates a deep immutable copy of this object. Each internal tile will also be copied and
-     * made immutable.
+     * Creates a shallow immutable copy of this map. Items can no longer be added or removed, but
+     * they can be modified.
      *
      * @return the immutable copy
      */
-    public TileMap<V> immutableCopy() {
-        return new TileMap<>(Collections.unmodifiableMap(map));
+    public HexPointMap<K, V> immutableCopy() {
+        return new HexPointMap<>(Collections.unmodifiableMap(map));
     }
 }

@@ -7,7 +7,7 @@ import me.lucaspickering.terraingen.world.Continent;
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.World;
 import me.lucaspickering.terraingen.world.util.Cluster;
-import me.lucaspickering.terraingen.world.util.TileMap;
+import me.lucaspickering.terraingen.world.util.HexPointMap;
 
 /**
  * Clusters all land tiles in the world together to become continents. This should probably be
@@ -24,7 +24,7 @@ public class ContinentClusterer implements Generator {
             world.getTiles().cluster(tile -> tile.biome().isLand()).first();
 
         final List<Continent> continents = world.getContinents();
-        final TileMap<Continent> tilesToContinents = world.getTilesToContinents();
+        final HexPointMap<Tile, Continent> tilesToContinents = world.getTilesToContinents();
 
         // Clear the containers so they can be repopulated
         continents.clear();

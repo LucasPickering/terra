@@ -42,6 +42,10 @@ public class HexPointSet<E extends HexPointable> extends AbstractSet<E> {
         this.map = map;
     }
 
+    protected Map<HexPoint, E> immutableInternalMap() {
+        return Collections.unmodifiableMap(map);
+    }
+
     public E getByPoint(HexPoint point) {
         return map.get(point);
     }
@@ -104,7 +108,6 @@ public class HexPointSet<E extends HexPointable> extends AbstractSet<E> {
      * @return an shallow immutable copy of this set
      */
     public HexPointSet<E> immutableCopy() {
-        return new HexPointSet<>(Collections.unmodifiableMap(map));
+        return new HexPointSet<>(immutableInternalMap());
     }
-
 }

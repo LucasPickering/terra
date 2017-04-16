@@ -3,13 +3,11 @@ package me.lucaspickering.terraingen.world.util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -26,11 +24,8 @@ import me.lucaspickering.utils.Pair;
  */
 public class TileSet extends HexPointSet<Tile> {
 
-    // Internal map
-    private final Map<HexPoint, Tile> map;
-
     public TileSet() {
-        map = new TreeMap<>(); // Uses HexPoint's compareTo method for ordering
+        super();
     }
 
     /**
@@ -41,8 +36,7 @@ public class TileSet extends HexPointSet<Tile> {
      * @param tiles the object to copy
      */
     public TileSet(Collection<? extends Tile> tiles) {
-        this();
-        addAll(tiles);
+        super(tiles);
     }
 
     /**
@@ -51,7 +45,7 @@ public class TileSet extends HexPointSet<Tile> {
      * @param map the map to back this object
      */
     protected TileSet(Map<HexPoint, Tile> map) {
-        this.map = map;
+        super(map);
     }
 
     /**
@@ -294,6 +288,6 @@ public class TileSet extends HexPointSet<Tile> {
      * @return an shallow immutable copy of this set
      */
     public TileSet immutableCopy() {
-        return new TileSet(Collections.unmodifiableMap(map));
+        return new TileSet(immutableInternalMap());
     }
 }

@@ -11,8 +11,8 @@ import java.util.NoSuchElementException;
 
 import me.lucaspickering.terraingen.world.util.Chunk;
 import me.lucaspickering.terraingen.world.util.HexPoint;
+import me.lucaspickering.terraingen.world.util.HexPointMap;
 import me.lucaspickering.terraingen.world.util.HexPointSet;
-import me.lucaspickering.terraingen.world.util.TileMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.utils.range.DoubleRange;
 import me.lucaspickering.utils.range.IntRange;
@@ -130,19 +130,19 @@ public class World {
     private final HexPointSet<Chunk> chunks;
     private final WorldTiles worldTiles = new WorldTiles();
     private final List<Continent> continents;
-    private final TileMap<Continent> tilesToContinents;
+    private final HexPointMap<Tile, Continent> tilesToContinents;
 
     public World(int chunkRadius) {
         chunks = initChunks(chunkRadius);
         continents = new ArrayList<>();
-        tilesToContinents = new TileMap<>();
+        tilesToContinents = new HexPointMap<>();
     }
 
     /**
      * Copy constructor.
      */
     private World(HexPointSet<Chunk> chunks, List<Continent> continents,
-                  TileMap<Continent> tilesToContinents) {
+                  HexPointMap<Tile, Continent> tilesToContinents) {
         this.chunks = chunks;
         this.continents = continents;
         this.tilesToContinents = tilesToContinents;
@@ -182,7 +182,7 @@ public class World {
         return continents;
     }
 
-    public TileMap<Continent> getTilesToContinents() {
+    public HexPointMap<Tile, Continent> getTilesToContinents() {
         return tilesToContinents;
     }
 
