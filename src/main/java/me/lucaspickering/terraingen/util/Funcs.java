@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import me.lucaspickering.terraingen.TerrainGen;
+import me.lucaspickering.utils.MathFuncs;
 import me.lucaspickering.utils.range.IntRange;
 import me.lucaspickering.utils.range.Range;
 import static org.lwjgl.BufferUtils.createByteBuffer;
@@ -89,21 +90,14 @@ public class Funcs {
     }
 
     /**
-     * Converts the given color to a Hue-Saturation-Brightness array.
+     * Gets the brightness value of the given color.
      *
-     * @param color the color in RGB form
-     * @return the color as a float array of Hue-Saturation-Brightness (in that order)
+     * @param color the color
+     * @return the brightness of color, i.e. the third component of its HSB form
      */
-    @NotNull
-    public static float[] toHsb(@NotNull Color color) {
-        return Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+    public static float getColorBrightness(@NotNull Color color) {
+        return MathFuncs.max(color.getRed(), color.getGreen(), color.getBlue()) / 255f;
     }
-
-    @NotNull
-    public static Color toRgb(@NotNull float[] hsv) {
-        return Color.getHSBColor(hsv[0], hsv[1], hsv[2]);
-    }
-
 
     /**
      * Blends the two given colors according to their individual alpha values. A color with a

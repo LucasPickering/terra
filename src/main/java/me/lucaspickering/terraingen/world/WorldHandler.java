@@ -89,7 +89,6 @@ public class WorldHandler {
         this.size = size;
 
         logger.log(Level.FINE, String.format("Using seed '%d'", seed));
-
     }
 
     /**

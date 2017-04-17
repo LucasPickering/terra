@@ -13,6 +13,8 @@ import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
@@ -95,14 +97,18 @@ public class WorldScreen extends Screen {
     private Tile mouseOverTile; // The tile that the mouse is currently over
     private long mouseDownTime; // The time at which the user pressed the mouse button down
 
+    private final Logger logger;
+
     // We frequently have to use float arrays for color purposes, so just allocate one
     private final float[] colorArray = new float[COLOR_SIZE];
     private final HexPointMap<Chunk, VboHandles> chunkVboMap = new HexPointMap<>();
-    private final int[] startingIndices;
-    private final int[] sizes;
+    private final int[] startingIndices = new int[Chunk.TOTAL_TILES];
+    private final int[] sizes = new int[Chunk.TOTAL_TILES];
 
     public WorldScreen(WorldHandler worldHandler) {
         Objects.requireNonNull(worldHandler);
+
+        logger = Logger.getLogger(getClass().getName());
         this.worldHandler = worldHandler;
         worldCenter = SCREEN_CENTER;
         mouseOverTileInfo = new MouseTextBox();
@@ -112,8 +118,6 @@ public class WorldScreen extends Screen {
 
         // We need an array that tells us which which vertex to start at for each tile, and the
         // size (in vertices) of each tile.
-        startingIndices = new int[Chunk.TOTAL_TILES];
-        sizes = new int[Chunk.TOTAL_TILES];
         for (int i = 0; i < Chunk.TOTAL_TILES; i++) {
             startingIndices[i] = i * NUM_VERTICES;
             sizes[i] = NUM_VERTICES;
@@ -265,7 +269,7 @@ public class WorldScreen extends Screen {
             updateChunkColors(entry.getKey(), entry.getValue());
         }
         final long endTime = System.currentTimeMillis();
-        System.out.printf("Color update took %d ms%n", endTime - startTime);
+        logger.log(Level.FINEST, String.format("Color update took %d ms", endTime - startTime));
     }
 
     /**
