@@ -64,7 +64,7 @@ public class WorldScreen extends Screen {
 
     // Each side of the tile is rendered by forming a triangle between it and the center, so
     // there's three vertices for each side of the tile.
-    private static final int NUM_VERTICES = WorldHandler.TILE_VERTICES.length;
+    private static final int NUM_VERTICES = WorldScreenHelper.TILE_VERTICES.length;
     private static final int VERTEX_SIZE = 2;
     private static final int COLOR_SIZE = 3; // RGB
     private static final int COLOR_SIZE_BYTES = COLOR_SIZE * Float.BYTES;
@@ -145,8 +145,8 @@ public class WorldScreen extends Screen {
                                                                          totalVertices);
         final FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(COLOR_SIZE * totalVertices);
         for (Tile tile : tiles) {
-            final Point tileCenter = worldHandler.getTileCenter(tile);
-            for (Point vertex : WorldHandler.TILE_VERTICES) {
+            final Point tileCenter = WorldScreenHelper.tileToPixel(tile.pos());
+            for (Point vertex : WorldScreenHelper.TILE_VERTICES) {
                 // Shift this vertex by the tile's center, and add it to the buffer
                 vertexBuffer.put(tileCenter.x() + vertex.x());
                 vertexBuffer.put(tileCenter.y() + vertex.y());
@@ -240,7 +240,7 @@ public class WorldScreen extends Screen {
         final Point fixedMousePos = mousePos.minus(worldCenter).scale(1.0 / worldScale);
 
         // Get the tile that the mouse is over and return it
-        final HexPoint mouseOverPos = worldHandler.pixelToTile(fixedMousePos);
+        final HexPoint mouseOverPos = WorldScreenHelper.pixelToTile(fixedMousePos);
         return worldHandler.getWorld().getTiles().getByPoint(mouseOverPos);
     }
 
