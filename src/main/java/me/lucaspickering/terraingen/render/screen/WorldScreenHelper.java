@@ -8,6 +8,7 @@ import java.util.Map;
 
 import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.world.TileColorMode;
+import me.lucaspickering.terraingen.world.util.Chunk;
 import me.lucaspickering.terraingen.world.util.HexPoint;
 import me.lucaspickering.utils.Point;
 import me.lucaspickering.utils.range.DoubleRange;
@@ -20,7 +21,7 @@ class WorldScreenHelper {
     }
 
     static final double TILE_WIDTH = 20.0; // Width of each tile, in pixels
-    static final double TILE_HEIGHT = (float) Math.sqrt(3) * TILE_WIDTH / 2.0;
+    static final double TILE_HEIGHT = Math.sqrt(3) * TILE_WIDTH / 2.0;
     static final Point[] TILE_VERTICES = {
         new Point(-TILE_WIDTH / 4, -TILE_HEIGHT / 2), // Top-left
         new Point(+TILE_WIDTH / 4, -TILE_HEIGHT / 2), // Top-right
@@ -67,13 +68,13 @@ class WorldScreenHelper {
     /**
      * Converts a {@link HexPoint} in to a {@link Point} on the screen.
      *
-     * @param tile the position of the tile as a {@link HexPoint}
+     * @param tilePos the position of the tile as a {@link HexPoint}
      * @return the position of that tile's center on the screen
      */
     @NotNull
-    static Point tileToPixel(@NotNull HexPoint tile) {
-        final double x = TILE_WIDTH * tile.x() * 0.75;
-        final double y = -TILE_HEIGHT * (tile.x() / 2.0 + tile.y());
+    static Point tileToPixel(@NotNull HexPoint tilePos) {
+        final double x = TILE_WIDTH * tilePos.x() * 0.75;
+        final double y = -TILE_HEIGHT * (tilePos.x() / 2.0 + tilePos.y());
         return new Point(x, y);
     }
 
@@ -97,5 +98,16 @@ class WorldScreenHelper {
 
         // Return the rounded point
         return HexPoint.roundPoint(fracX, fracY, fracZ);
+    }
+
+    /**
+     * Gets the pixel position of the center of the tile at the bottom-left of the given chunk.
+     *
+     * @param chunkPos the chunk
+     * @return the center of the tile at the bottom-left of the chunk
+     */
+    @NotNull
+    static Point chunkToPixel(@NotNull HexPoint chunkPos) {
+        return tileToPixel(Chunk.getChunkOrigin(chunkPos));
     }
 }
