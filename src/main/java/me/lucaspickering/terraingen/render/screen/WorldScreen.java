@@ -51,6 +51,8 @@ public class WorldScreen extends Screen {
     }
 
     private static final Range<Double> VALID_WORLD_SCALES = new DoubleRange(0.5, 10.0);
+    private static final Point SCREEN_CENTER = new Point(Renderer.RES_WIDTH / 2,
+                                                         Renderer.RES_HEIGHT / 2);
 
     // Maximum time a click can be held down to be considered a click and not a drag
     private static final int MAX_CLICK_TIME = 250;
@@ -102,7 +104,7 @@ public class WorldScreen extends Screen {
     public WorldScreen(WorldHandler worldHandler) {
         Objects.requireNonNull(worldHandler);
         this.worldHandler = worldHandler;
-        worldCenter = new Point(Renderer.RES_WIDTH / 2, Renderer.RES_HEIGHT / 2);
+        worldCenter = SCREEN_CENTER;
         mouseOverTileInfo = new MouseTextBox();
         mouseOverTileInfo.setVisible(false); // Hide this for now
         addGuiElement(mouseOverTileInfo);
@@ -380,7 +382,13 @@ public class WorldScreen extends Screen {
     }
 
     private void zoom(double step) {
+        final double oldScale = worldScale;
         worldScale = VALID_WORLD_SCALES.coerce(worldScale + step);
+        // Adjust the world center so that the tile at the center of the screen stays there
+        worldCenter = worldCenter
+            .minus(SCREEN_CENTER)
+            .scale(worldScale / oldScale)
+            .plus(SCREEN_CENTER);
     }
 
     @Override
