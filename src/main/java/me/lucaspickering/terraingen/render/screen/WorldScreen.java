@@ -10,13 +10,11 @@ import org.lwjgl.opengl.GL30;
 import java.awt.Color;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import me.lucaspickering.terraingen.render.Renderer;
 import me.lucaspickering.terraingen.render.event.KeyEvent;
 import me.lucaspickering.terraingen.render.event.MouseButtonEvent;
 import me.lucaspickering.terraingen.render.event.ScrollEvent;
@@ -32,14 +30,8 @@ import me.lucaspickering.terraingen.world.util.HexPoint;
 import me.lucaspickering.terraingen.world.util.HexPointMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.utils.Point;
-import me.lucaspickering.utils.range.DoubleRange;
-import me.lucaspickering.utils.range.Range;
 
 public class WorldScreen extends Screen {
-
-    private enum TileOverlay {
-        NONE, CONTINENT, CHUNK
-    }
 
     private static class VboHandles {
 
@@ -52,46 +44,13 @@ public class WorldScreen extends Screen {
         }
     }
 
-    private static final Range<Double> VALID_WORLD_SCALES = new DoubleRange(0.5, 10.0);
-    private static final Point SCREEN_CENTER = new Point(Renderer.RES_WIDTH / 2,
-                                                         Renderer.RES_HEIGHT / 2);
-
-    // Maximum time a click can be held down to be considered a click and not a drag
-    private static final int MAX_CLICK_TIME = 250;
-
-    // Change of tile size in pixels with each zoom level
-    private static final double ZOOM_STEP = 1.0;
-
-    // Each side of the tile is rendered by forming a triangle between it and the center, so
-    // there's three vertices for each side of the tile.
-    private static final int NUM_VERTICES = WorldScreenHelper.TILE_VERTICES.length;
-    private static final int VERTEX_SIZE = 2;
-    private static final int COLOR_SIZE = 3; // RGB
-    private static final int COLOR_SIZE_BYTES = COLOR_SIZE * Float.BYTES;
-
-    // Bind a key to each tile color mode
-    private static final Map<Integer, TileColorMode> keyToTileColorMode =
-        new HashMap<Integer, TileColorMode>() {{
-            put(GLFW.GLFW_KEY_F1, TileColorMode.ELEVATION);
-            put(GLFW.GLFW_KEY_F2, TileColorMode.HUMIDITY);
-            put(GLFW.GLFW_KEY_F3, TileColorMode.BIOME);
-            put(GLFW.GLFW_KEY_F4, TileColorMode.COMPOSITE);
-        }};
-
-    // Assign a key to each tile overlay
-    private static final Map<Integer, TileOverlay> keyToTileOverlay =
-        new HashMap<Integer, TileOverlay>() {{
-            put(GLFW.GLFW_KEY_F5, TileOverlay.CONTINENT);
-            put(GLFW.GLFW_KEY_F6, TileOverlay.CHUNK);
-        }};
-
     private final WorldHandler worldHandler;
     private final MouseTextBox mouseOverTileInfo;
     private Point worldCenter; // The pixel location of the center of the world
     private double worldScale = 1.0;
 
     private TileColorMode tileColorMode = TileColorMode.COMPOSITE;
-    private TileOverlay tileOverlay = TileOverlay.NONE;
+    private WorldScreenHelper.TileOverlay tileOverlay = WorldScreenHelper.TileOverlay.NONE;
 
     private Point lastMouseDragPos; // The last position of the mouse while dragging, or null
     private Tile mouseOverTile; // The tile that the mouse is currently over
@@ -100,7 +59,7 @@ public class WorldScreen extends Screen {
     private final Logger logger;
 
     // We frequently have to use float arrays for color purposes, so just allocate one
-    private final float[] colorArray = new float[COLOR_SIZE];
+    private final float[] colorArray = new float[WorldScreenHelper.COLOR_SIZE];
     private final HexPointMap<Chunk, VboHandles> chunkVboMap = new HexPointMap<>();
     private final int[] startingIndices = new int[Chunk.TOTAL_TILES];
     private final int[] sizes = new int[Chunk.TOTAL_TILES];
@@ -110,7 +69,7 @@ public class WorldScreen extends Screen {
 
         logger = Logger.getLogger(getClass().getName());
         this.worldHandler = worldHandler;
-        worldCenter = SCREEN_CENTER;
+        worldCenter = WorldScreenHelper.SCREEN_CENTER;
         mouseOverTileInfo = new MouseTextBox();
         mouseOverTileInfo.setVisible(false); // Hide this for now
         addGuiElement(mouseOverTileInfo);
@@ -119,8 +78,8 @@ public class WorldScreen extends Screen {
         // We need an array that tells us which which vertex to start at for each tile, and the
         // size (in vertices) of each tile.
         for (int i = 0; i < Chunk.TOTAL_TILES; i++) {
-            startingIndices[i] = i * NUM_VERTICES;
-            sizes[i] = NUM_VERTICES;
+            startingIndices[i] = i * WorldScreenHelper.NUM_VERTICES;
+            sizes[i] = WorldScreenHelper.NUM_VERTICES;
         }
     }
 
@@ -138,12 +97,13 @@ public class WorldScreen extends Screen {
      */
     private void initVboForChunk(Chunk chunk) {
         final TileSet tiles = chunk.getTiles();
-        final int totalVertices = NUM_VERTICES * tiles.size();
+        final int totalVertices = WorldScreenHelper.NUM_VERTICES * tiles.size();
 
         // Allocate and populate vertex and color buffers
-        final DoubleBuffer vertexBuffer = BufferUtils.createDoubleBuffer(VERTEX_SIZE *
-                                                                         totalVertices);
-        final FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(COLOR_SIZE * totalVertices);
+        final DoubleBuffer vertexBuffer =
+            BufferUtils.createDoubleBuffer(WorldScreenHelper.VERTEX_SIZE * totalVertices);
+        final FloatBuffer colorBuffer =
+            BufferUtils.createFloatBuffer(WorldScreenHelper.COLOR_SIZE * totalVertices);
         for (Tile tile : tiles) {
             final Point tileCenter = WorldScreenHelper.tileToPixel(tile.pos());
             for (Point vertex : WorldScreenHelper.TILE_VERTICES) {
@@ -247,11 +207,11 @@ public class WorldScreen extends Screen {
     private void drawChunk(VboHandles vboHandles) {
         // Set up the vertex buffer
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.vertex);
-        GL11.glVertexPointer(VERTEX_SIZE, GL11.GL_DOUBLE, 0, 0L);
+        GL11.glVertexPointer(WorldScreenHelper.VERTEX_SIZE, GL11.GL_DOUBLE, 0, 0L);
 
         // Set up the color buffer
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboHandles.color);
-        GL11.glColorPointer(COLOR_SIZE, GL11.GL_FLOAT, 0, 0L);
+        GL11.glColorPointer(WorldScreenHelper.COLOR_SIZE, GL11.GL_FLOAT, 0, 0L);
 
         GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
         GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
@@ -286,7 +246,7 @@ public class WorldScreen extends Screen {
         long offset = 0;
         for (Tile tile : chunk.getTiles()) {
             updateColor(getTileColor(tile), offset);
-            offset += COLOR_SIZE_BYTES * NUM_VERTICES;
+            offset += WorldScreenHelper.COLOR_SIZE_BYTES * WorldScreenHelper.NUM_VERTICES;
         }
     }
 
@@ -305,7 +265,7 @@ public class WorldScreen extends Screen {
 
         final HexPoint relPos = Chunk.getRelativeTilePos(tile.pos());
         final long offset = (relPos.x() * Chunk.SIDE_LENGTH + relPos.y()) *
-                            NUM_VERTICES * COLOR_SIZE_BYTES;
+                            WorldScreenHelper.NUM_VERTICES * WorldScreenHelper.COLOR_SIZE_BYTES;
         updateColor(color, offset);
     }
 
@@ -321,9 +281,9 @@ public class WorldScreen extends Screen {
         color.getColorComponents(colorArray);
 
         // Change the color for each vertex of this tile
-        for (int i = 0; i < NUM_VERTICES; i++) {
+        for (int i = 0; i < WorldScreenHelper.NUM_VERTICES; i++) {
             GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset, colorArray);
-            offset += COLOR_SIZE_BYTES; // Move up to the next color
+            offset += WorldScreenHelper.COLOR_SIZE_BYTES; // Move up to the next color
         }
     }
 
@@ -374,10 +334,10 @@ public class WorldScreen extends Screen {
         updateAllTileColors();
     }
 
-    private void setTileOverlay(TileOverlay overlay) {
+    private void setTileOverlay(WorldScreenHelper.TileOverlay overlay) {
         // If this overlay is already enabled, disable it, otherwise switch to it
         if (overlay == tileOverlay) {
-            tileOverlay = TileOverlay.NONE;
+            tileOverlay = WorldScreenHelper.TileOverlay.NONE;
         } else {
             tileOverlay = overlay;
         }
@@ -387,12 +347,12 @@ public class WorldScreen extends Screen {
 
     private void zoom(double step) {
         final double oldScale = worldScale;
-        worldScale = VALID_WORLD_SCALES.coerce(worldScale + step);
+        worldScale = WorldScreenHelper.VALID_WORLD_SCALES.coerce(worldScale + step);
         // Adjust the world center so that the tile at the center of the screen stays there
         worldCenter = worldCenter
-            .minus(SCREEN_CENTER)
+            .minus(WorldScreenHelper.SCREEN_CENTER)
             .scale(worldScale / oldScale)
-            .plus(SCREEN_CENTER);
+            .plus(WorldScreenHelper.SCREEN_CENTER);
     }
 
     @Override
@@ -410,13 +370,16 @@ public class WorldScreen extends Screen {
             }
 
             // Check if the key is assigned to a tile color mode
-            final TileColorMode keyTileColorMode = keyToTileColorMode.get(key);
+            final TileColorMode
+                keyTileColorMode =
+                WorldScreenHelper.KEY_TO_TILE_COLOR_MODE.get(key);
             if (keyTileColorMode != null) {
                 setTileColorMode(keyTileColorMode);
             }
 
             // Check if the key is assigned to a tile overlay
-            final TileOverlay keyTileOverlay = keyToTileOverlay.get(key);
+            final WorldScreenHelper.TileOverlay keyTileOverlay =
+                WorldScreenHelper.KEY_TO_TILE_OVERLAY.get(key);
             if (keyTileOverlay != null) {
                 setTileOverlay(keyTileOverlay);
             }
@@ -433,7 +396,8 @@ public class WorldScreen extends Screen {
                     mouseDownTime = System.currentTimeMillis();
                 } else if (event.action == GLFW.GLFW_RELEASE) {
                     // If the elapsed time between mouse down and up is below a threshold, call it a click
-                    if (System.currentTimeMillis() - mouseDownTime <= MAX_CLICK_TIME) {
+                    if (System.currentTimeMillis() - mouseDownTime
+                        <= WorldScreenHelper.MAX_CLICK_TIME) {
                         super.onClick(event);
                     }
                     lastMouseDragPos = null; // Wipe this out
@@ -446,10 +410,10 @@ public class WorldScreen extends Screen {
     public void onScroll(ScrollEvent event) {
         if (event.yOffset < 0) {
             // Zoom out
-            zoom(-ZOOM_STEP);
+            zoom(-WorldScreenHelper.ZOOM_STEP);
         } else if (event.yOffset > 0) {
             // Zoom in
-            zoom(ZOOM_STEP);
+            zoom(WorldScreenHelper.ZOOM_STEP);
         }
     }
 }
