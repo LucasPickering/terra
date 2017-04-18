@@ -4,11 +4,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
+import me.lucaspickering.terraingen.util.Direction;
 import me.lucaspickering.terraingen.world.util.Chunk;
 import me.lucaspickering.terraingen.world.util.HexPoint;
 import me.lucaspickering.terraingen.world.util.HexPointMap;
@@ -78,8 +81,44 @@ public class World {
             throw new UnsupportedOperationException(); // Cannot remove tiles
         }
 
-        // Potential optimization? Override getAdjacentTiles and make it chunk-aware, so that it
-        // only looks for tiles outside the current chunk if it needs to.
+        /**
+         * Gets the set of all tiles adjacent to the given tile. This is an optimized version of
+         * {@link TileSet#getAdjacentTiles(HexPoint)}. The tiles in this container are divided by
+         * chunk. For a large majority of lookups, all adjacent tiles will be in the same chunk
+         * as the given ("host") tile. We can avoid doing unnecessary chunk lookups by first
+         * checking if the adjacent tile is in the same chunk as the host tile.
+         *
+         * @param tilePos the center of the search
+         * @return tiles adjacent to {@code tile}, in a direction:point map
+         */
+        @Override
+        @NotNull
+        public Map<Direction, Tile> getAdjacentTiles(@NotNull HexPoint tilePos) {
+            Objects.requireNonNull(tilePos);
+            final Map<Direction, Tile> result = new EnumMap<>(Direction.class);
+            final Chunk hostChunk = chunks.getByPoint(Chunk.getChunkPosForTile(tilePos));
+
+            for (Direction dir : Direction.values()) {
+                final HexPoint otherPoint = dir.shift(tilePos); // Get the shifted point
+                final Tile otherTile;
+
+                // If the other tile is in the same chunk as the given tile, we already have that
+                // chunk on-hand so just look it up from there. Otherwise, look it up normally,
+                // which means it looks up the chunk, then the tile.
+                if (Chunk.getChunkPosForTile(tilePos).equals(hostChunk.getPos())) {
+                    otherTile = hostChunk.getTiles().getByPoint(otherPoint);
+                } else {
+                    otherTile = getByPoint(otherPoint);
+                }
+
+                // If the other point is in the world, add it to the map
+                if (otherTile != null) {
+                    result.put(dir, otherTile);
+                }
+            }
+
+            return result;
+        }
     }
 
     private class WorldTilesIterator implements Iterator<Tile> {

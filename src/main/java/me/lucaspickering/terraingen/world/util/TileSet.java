@@ -53,7 +53,6 @@ public class TileSet extends HexPointSet<Tile> {
      *
      * @param tilePos the center of the search
      * @return tiles adjacent to {@code tile}, in a direction:point map
-     * @throws IllegalArgumentException if {@code tile} is not in this collection
      */
     @NotNull
     public Map<Direction, Tile> getAdjacentTiles(@NotNull HexPoint tilePos) {
