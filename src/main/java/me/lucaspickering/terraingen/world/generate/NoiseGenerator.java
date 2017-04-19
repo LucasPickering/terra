@@ -2,10 +2,9 @@ package me.lucaspickering.terraingen.world.generate;
 
 import com.flowpowered.noise.module.source.Perlin;
 
-import java.util.Map;
-
 import me.lucaspickering.terraingen.world.Tile;
 import me.lucaspickering.terraingen.world.util.HexPoint;
+import me.lucaspickering.terraingen.world.util.HexPointMap;
 import me.lucaspickering.terraingen.world.util.TileSet;
 import me.lucaspickering.utils.Pair;
 
@@ -29,12 +28,12 @@ abstract class NoiseGenerator implements Generator {
      * @return a map containing tile:noise entries, with exactly one entry for each tile in the
      * given set.
      */
-    Map<Tile, Double> generateNoises(TileSet tiles) {
+    HexPointMap<Tile, Double> generateNoises(TileSet tiles) {
         // Compute a noise value for each tile. This can be done in parallel, as the calculations
         // are all independent of each other.
         return tiles.stream()
             .map(t -> new Pair<>(t, generateNoise(t))) // Generate a noise for each tile
-            .collect(Pair.mapCollector()); // Collect the tile:noise pairs into a map
+            .collect(Pair.mapCollector(HexPointMap::new));
     }
 
     /**

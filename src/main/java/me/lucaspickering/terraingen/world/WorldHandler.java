@@ -88,8 +88,9 @@ public class WorldHandler {
      */
     public void generate() {
         // Initialize generators outside the timer. This may get its own timer later?
-        final List<Generator> generators = Arrays.stream(Generators.values()).map
-            (Generators::makeGenerator).collect(Collectors.toList());
+        final List<Generator> generators = Arrays.stream(Generators.values())
+            .map(Generators::makeGenerator)
+            .collect(Collectors.toList());
 
         final long startTime = System.currentTimeMillis(); // We're timing this
         final World world = new World(size);
