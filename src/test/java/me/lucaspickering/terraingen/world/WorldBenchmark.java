@@ -16,19 +16,19 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @Threads(1)
 @Warmup(iterations = 3, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 10, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
 @Fork(value = 5)
 @BenchmarkMode(Mode.AverageTime)
 public class WorldBenchmark {
 
     private final long seed = "this is a great seed".hashCode();
 
-    @Param({"3", "5"})
+    @Param({"5", "10"})
     private int size;
 
     @Benchmark
     public void measureGenerate() {
         final WorldHandler worldHandler = new WorldHandler(seed, size);
-        worldHandler.generateParallel();
+        worldHandler.generate();
     }
 }

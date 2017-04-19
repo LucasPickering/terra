@@ -32,4 +32,5 @@ Use `F3` to enable debug mode.
 For running in IntelliJ, install the JMH plugin. Then, on Windows, you have to set the TMP
 environment variable so that JMH can properly acquire its lock. To do this, edit the configuration
 of your benchmark and add the environment variable TMP with a writeable directory as its value
-(such as `C:\Users\<user>\AppData\Local\Temp`).
+(such as `C:\Users\<user>\AppData\Local\Temp`). In IntelliJ, this can be done in a menu in the Run
+Configuration.
