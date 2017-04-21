@@ -94,12 +94,10 @@ public class Cluster extends TileSet {
                 // Grab one of those unchecked tiles
                 final Tile tile = GeneralFuncs.firstFromCollection(uncheckedTiles);
 
-                // For each tile adjacent to that one...
-                for (final Tile adjTile : tiles.getAdjacentTiles(tile.pos()).values()) {
-                    // If this adjacent tile has the same pos/neg state, and it's not already in
-                    // the cluster...
-                    if (predicate.test(adjTile) == isPositive && !cluster.contains(adjTile)) {
-                        // Add the tile to the cluster
+                // For each unclustered tile adjacent to this one...
+                for (final Tile adjTile : unclusteredTiles.getAdjacentTiles(tile.pos()).values()) {
+                    // If this adjacent tile has the same pos/neg state as the cluster, add it
+                    if (predicate.test(adjTile) == isPositive) {
                         addToCluster(adjTile, cluster, uncheckedTiles, unclusteredTiles);
                     }
                 }
