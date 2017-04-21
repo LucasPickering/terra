@@ -13,7 +13,7 @@ import me.lucaspickering.utils.Pair;
  */
 abstract class NoiseGenerator implements Generator {
 
-    private static final double VALUE_RANGE = 128.0;
+    private static final double VALUE_RANGE = 256.0;
 
     final Perlin noiseGenerator;
 

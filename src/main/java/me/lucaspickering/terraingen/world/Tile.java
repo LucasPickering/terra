@@ -18,7 +18,7 @@ public class Tile implements HexPointable {
 
     private static final String INFO_STRING =
         "Biome: %s%nElevation: %d%nHumidity: %d%%";
-    private static final String DEBUG_INFO_STRING = "%nPos: %s%nChunk: %s%nWater: %.2f/%.2f%n";
+    private static final String DEBUG_INFO_STRING = "%nPos: %s%nChunk: %s%nWater: %.2f;%.2f%n";
 
     public enum RiverConnection {
         ENTRY, EXIT
@@ -107,8 +107,10 @@ public class Tile implements HexPointable {
     }
 
     public void addWater(double water) {
-        waterLevel += water;
-        totalWaterTraversed += water;
+        if (!biome.isWater()) {
+            waterLevel += water;
+            totalWaterTraversed += water;
+        }
     }
 
     public void removeWater(double water) {

@@ -61,7 +61,7 @@ public class FreshWaterGenerator implements Generator {
     }
 
     /**
-     * Moves all the water on the given tile to tiels that are adjacent to and at a lower
+     * Moves all the water on the given tile to tiles that are adjacent to and at a lower
      * elevation than that tile.
      *
      * @param allTiles used to find adjacent tiles
@@ -73,10 +73,10 @@ public class FreshWaterGenerator implements Generator {
             .filter(adj -> adj.elevation() < tile.elevation())
             .collect(Collectors.toCollection(TileSet::new));
 
-        // If there are any lower tiles to pass water onto, so that
+        // If there are any lower tiles to pass water onto, do that
         if (lowerTiles.size() > 0) {
             final double totalElevDiff = lowerTiles.stream()
-                .mapToInt(Tile::elevation)
+                .mapToInt(t -> Math.abs(tile.elevation() - t.elevation()))
                 .sum();
             // Amount of water to pass on to each lower tile
             final double waterToSpread = tile.getWaterLevel();
