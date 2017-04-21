@@ -19,9 +19,9 @@ public class ContinentClusterer implements Generator {
 
     @Override
     public void generate(World world, Random random) {
-        // Cluster tiles based on whether they're above sea level or not
+        // Cluster tiles based on whether they're land or not
         final List<Cluster> continentClusters =
-            world.getTiles().cluster(tile -> tile.biome().isLand()).first();
+            Cluster.cluster(world.getTiles(), tile -> tile.biome().isLand()).first();
 
         final List<Continent> continents = world.getContinents();
         final HexPointMap<Tile, Continent> tilesToContinents = world.getTilesToContinents();

@@ -25,8 +25,8 @@ public class WaterPainter implements Generator {
     @Override
     public void generate(World world, Random random) {
         // Get clusters of tiles that are at or below sea level
-        final List<Cluster> clusters = world.getTiles()
-            .cluster(t -> t.elevation() < World.SEA_LEVEL).first();
+        final List<Cluster> clusters =
+            Cluster.cluster(world.getTiles(), t -> t.elevation() < World.SEA_LEVEL).first();
 
         for (Cluster cluster : clusters) {
             final int size = cluster.size();

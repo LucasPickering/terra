@@ -80,7 +80,7 @@ public class HexPointMap<K extends HexPointable, V> extends AbstractMap<K, V> {
         map = new TreeMap<>(); // Uses HexPoint's compareTo method for ordering
     }
 
-    private HexPointMap(Map<HexPoint, Pair<K, V>> map) {
+    protected HexPointMap(Map<HexPoint, Pair<K, V>> map) {
         this.map = map;
     }
 
