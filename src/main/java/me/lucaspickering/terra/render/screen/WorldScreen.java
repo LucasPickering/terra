@@ -48,10 +48,15 @@ public class WorldScreen extends Screen {
 
     // We frequently have to use float arrays for color purposes, so just allocate one
     private final float[] colorArray = new float[WorldScreenHelper.COLOR_SIZE];
+
+    // CHUNK VBO FIELDS
+    private int chunkVertexHandle;
     private final HexPointMap<Chunk, Integer> chunkColorHandles = new HexPointMap<>();
     private final int[] startingIndices = new int[Chunk.TOTAL_TILES];
     private final int[] sizes = new int[Chunk.TOTAL_TILES];
-    private int vertexHandle;
+
+    private int hexVertexHandle;
+    private int mouseOverColorHandle;
 
     public WorldScreen(WorldHandler worldHandler) {
         Objects.requireNonNull(worldHandler);
@@ -66,13 +71,14 @@ public class WorldScreen extends Screen {
     }
 
     private void initVbos() {
-        initVertexVbo();
+        initChunkVertexVbo();
         for (Chunk chunk : worldHandler.getWorld().getChunks()) {
             initChunkVbo(chunk);
         }
+        initHexVbos(); // Init single-tile VBOs, such as mouse-over highlight
     }
 
-    private void initVertexVbo() {
+    private void initChunkVertexVbo() {
         // Allocate the vertex buffer
         final DoubleBuffer vertexBuffer = BufferUtils.createDoubleBuffer(
             WorldScreenHelper.VERTEX_SIZE * WorldScreenHelper.NUM_VERTICES * Chunk.TOTAL_TILES);
@@ -91,8 +97,8 @@ public class WorldScreen extends Screen {
         vertexBuffer.flip();
 
         // Bind the buffer to the GL
-        vertexHandle = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexHandle);
+        chunkVertexHandle = GL15.glGenBuffers();
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, chunkVertexHandle);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexBuffer, GL15.GL_STATIC_DRAW);
         GL30.glBindVertexArray(0);
 
@@ -111,7 +117,7 @@ public class WorldScreen extends Screen {
         final FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(
             WorldScreenHelper.COLOR_SIZE * WorldScreenHelper.NUM_VERTICES * Chunk.TOTAL_TILES);
 
-        // Bind the color buffer to GL
+        // Bind the color buffer to the GL
         final int colorHandle = GL15.glGenBuffers();
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorHandle);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_DYNAMIC_DRAW);
@@ -120,6 +126,38 @@ public class WorldScreen extends Screen {
         // Put the handle in the map, then populate the buffer with the correct colors
         chunkColorHandles.put(chunk, colorHandle);
         updateChunkColors(chunk, colorHandle);
+    }
+
+    private void initHexVbos() {
+        // Allocate the buffers
+        final DoubleBuffer vertexBuffer = BufferUtils.createDoubleBuffer(
+            WorldScreenHelper.VERTEX_SIZE * WorldScreenHelper.NUM_VERTICES);
+        final FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(
+            4 * WorldScreenHelper.NUM_VERTICES);
+
+        // Populate the buffer with each vertex
+        float[] f = Colors.MOUSE_OVER.getColorComponents(null);
+        for (Point vertex : WorldScreenHelper.TILE_VERTICES) {
+            vertexBuffer.put(vertex.x());
+            vertexBuffer.put(vertex.y());
+            colorBuffer.put(f);
+        }
+        vertexBuffer.flip();
+        colorBuffer.flip();
+
+        // Bind the buffer to the GL
+        hexVertexHandle = GL15.glGenBuffers();
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, chunkVertexHandle);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexBuffer, GL15.GL_STATIC_DRAW);
+        GL30.glBindVertexArray(0);
+
+        // Allocate the color buffer
+
+        // Bind the color buffer for the mouse highlight overlay to the GL
+        mouseOverColorHandle = GL15.glGenBuffers();
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, mouseOverColorHandle);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_STATIC_DRAW);
+        GL30.glBindVertexArray(0);
     }
 
     @Override
@@ -139,6 +177,8 @@ public class WorldScreen extends Screen {
         for (Map.Entry<Chunk, Integer> entry : chunkColorHandles.entrySet()) {
             drawChunk(entry.getKey(), entry.getValue());
         }
+
+        drawMouseOverHighlight();
 
         GL11.glPopMatrix();
 
@@ -168,17 +208,42 @@ public class WorldScreen extends Screen {
         }
     }
 
+    private void drawMouseOverHighlight() {
+        final Point tilePos = WorldScreenHelper.tileToPixel(mouseOverTile.pos());
+        GL11.glPushMatrix();
+        GL11.glTranslated(tilePos.x(), tilePos.y(), 0.0);
+
+        // Set up the vertex buffer
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, hexVertexHandle);
+        GL11.glVertexPointer(WorldScreenHelper.VERTEX_SIZE, GL11.GL_DOUBLE, 0, 0L);
+
+        // Set up the color buffer
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, mouseOverColorHandle);
+        GL11.glColorPointer(WorldScreenHelper.COLOR_SIZE, GL11.GL_FLOAT, 0, 0L);
+
+        GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+        GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
+
+        // Draw all tiles in the chunk
+        GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, 0, 6);
+
+        GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
+        GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
+
+        GL11.glPopMatrix();
+    }
+
     private void changeMouseOverTile(Tile newMouseOverTile) {
         // Set the old tile's color back to normal
         if (mouseOverTile != null) {
-            setTileColor(mouseOverTile, getTileColor(mouseOverTile));
+//            setTileColor(mouseOverTile, getTileColor(mouseOverTile));
         }
 
         // If the mouse is over a new tile now, change its color
         if (newMouseOverTile != null) {
             final Color tileColor = Funcs.overlayColors(Colors.MOUSE_OVER,
                                                         getTileColor(newMouseOverTile));
-            setTileColor(newMouseOverTile, tileColor);
+//            setTileColor(newMouseOverTile, tileColor);
         }
 
         mouseOverTile = newMouseOverTile; // Make the switch
@@ -201,7 +266,7 @@ public class WorldScreen extends Screen {
         GL11.glTranslated(chunkPos.x(), chunkPos.y(), 0.0);
 
         // Set up the vertex buffer
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexHandle);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, chunkVertexHandle);
         GL11.glVertexPointer(WorldScreenHelper.VERTEX_SIZE, GL11.GL_DOUBLE, 0, 0L);
 
         // Set up the color buffer
