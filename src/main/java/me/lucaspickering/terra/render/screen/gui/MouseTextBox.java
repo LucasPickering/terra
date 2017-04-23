@@ -19,9 +19,7 @@ public class MouseTextBox extends TextBox {
         super(text, Point.ZERO, HorizAlignment.LEFT, VertAlignment.BOTTOM);
     }
 
-    @Override
-    public void draw(Point mousePos) {
-        // These will get changed if the box extends off the screen, to make it fit
+    public void updatePosition(Point mousePos) {
         int x = OFFSET_X;
         int y = OFFSET_Y;
         HorizAlignment horizAlign = HorizAlignment.LEFT;
@@ -38,12 +36,8 @@ public class MouseTextBox extends TextBox {
             y *= -1;
             vertAlign = VertAlignment.TOP;
         }
-
-        // Set some parameters
         setPos(mousePos.plus(x, y));
         setHorizAlign(horizAlign);
         setVertAlign(vertAlign);
-
-        super.draw(mousePos); // Draw the box
     }
 }

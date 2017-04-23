@@ -133,21 +133,21 @@ public class WorldScreen extends Screen {
         final DoubleBuffer vertexBuffer = BufferUtils.createDoubleBuffer(
             WorldScreenHelper.VERTEX_SIZE * WorldScreenHelper.NUM_VERTICES);
         final FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(
-            4 * WorldScreenHelper.NUM_VERTICES);
+            WorldScreenHelper.COLOR_SIZE * WorldScreenHelper.NUM_VERTICES);
 
         // Populate the buffer with each vertex
-        float[] f = Colors.MOUSE_OVER.getColorComponents(null);
+        Colors.MOUSE_OVER.getColorComponents(colorArray);
         for (Point vertex : WorldScreenHelper.TILE_VERTICES) {
             vertexBuffer.put(vertex.x());
             vertexBuffer.put(vertex.y());
-            colorBuffer.put(f);
+            colorBuffer.put(colorArray);
         }
         vertexBuffer.flip();
         colorBuffer.flip();
 
         // Bind the buffer to the GL
         hexVertexHandle = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, chunkVertexHandle);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, hexVertexHandle);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexBuffer, GL15.GL_STATIC_DRAW);
         GL30.glBindVertexArray(0);
 
@@ -167,7 +167,7 @@ public class WorldScreen extends Screen {
             lastMouseDragPos = null; // No longer dragging
         }
 
-        processMouse(mousePos); // Update state based on mouse position
+        updateMouseOver(mousePos); // Update state based on mouse position
 
         GL11.glPushMatrix();
         GL11.glTranslated(worldCenter.x(), worldCenter.y(), 0.0);
@@ -178,34 +178,49 @@ public class WorldScreen extends Screen {
             drawChunk(entry.getKey(), entry.getValue());
         }
 
-        drawMouseOverHighlight();
+        if (mouseOverTile != null) {
+            drawMouseOverHighlight();
+        }
 
         GL11.glPopMatrix();
 
         super.draw(mousePos); // Draw GUI elements
     }
 
-    private void processMouse(Point mousePos) {
+    /**
+     * Updates state based on the current mouse position. The mouse-over tile is updated, the
+     * world is shifted if the user is dragging the mouse, etc.
+     *
+     * @param mousePos the current position of the mouse
+     */
+    private void updateMouseOver(Point mousePos) {
         // If the mouse is being dragged, shift the world center based on it.
         // Otherwise, draw info for the tile that the mouse is currently over.
         if (lastMouseDragPos != null) {
-            mouseOverTile = null; // While dragging,
+            mouseOverTile = null; // No highlight while dragging
             // Shift the world
             final Point diff = mousePos.minus(lastMouseDragPos);
             worldCenter = worldCenter.plus(diff);
             lastMouseDragPos = mousePos; // Update the mouse pos
         } else {
-            // Update which tile the mouse is over, update state if that value changed since last
-            // frame, then update the text for the tile.
-            final Tile newMouseOverTile = calcTileUnderMouse(mousePos);
-            if (newMouseOverTile != mouseOverTile) {
-                changeMouseOverTile(newMouseOverTile);
-            }
+            // Update which tile the mouse is over
+            mouseOverTile = calcTileUnderMouse(mousePos);
             if (mouseOverTile != null) {
                 // Draw the overlay then set text for the info box
                 mouseOverTileInfo.setText(mouseOverTile.info());
             }
         }
+        mouseOverTileInfo.setVisible(mouseOverTile != null);
+        mouseOverTileInfo.updatePosition(mousePos);
+    }
+
+    private Tile calcTileUnderMouse(Point mousePos) {
+        // Shift and scale the mouse pos to align with the world
+        final Point fixedMousePos = mousePos.minus(worldCenter).scale(1.0 / worldScale);
+
+        // Get the tile that the mouse is over and return it
+        final HexPoint mouseOverPos = WorldScreenHelper.pixelToTile(fixedMousePos);
+        return worldHandler.getWorld().getTiles().getByPoint(mouseOverPos);
     }
 
     private void drawMouseOverHighlight() {
@@ -225,38 +240,12 @@ public class WorldScreen extends Screen {
         GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
 
         // Draw all tiles in the chunk
-        GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, 0, 6);
+        GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, 0, WorldScreenHelper.NUM_VERTICES);
 
         GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
         GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
 
         GL11.glPopMatrix();
-    }
-
-    private void changeMouseOverTile(Tile newMouseOverTile) {
-        // Set the old tile's color back to normal
-        if (mouseOverTile != null) {
-//            setTileColor(mouseOverTile, getTileColor(mouseOverTile));
-        }
-
-        // If the mouse is over a new tile now, change its color
-        if (newMouseOverTile != null) {
-            final Color tileColor = Funcs.overlayColors(Colors.MOUSE_OVER,
-                                                        getTileColor(newMouseOverTile));
-//            setTileColor(newMouseOverTile, tileColor);
-        }
-
-        mouseOverTile = newMouseOverTile; // Make the switch
-        mouseOverTileInfo.setVisible(mouseOverTile != null);
-    }
-
-    private Tile calcTileUnderMouse(Point mousePos) {
-        // Shift and scale the mouse pos to align with the world
-        final Point fixedMousePos = mousePos.minus(worldCenter).scale(1.0 / worldScale);
-
-        // Get the tile that the mouse is over and return it
-        final HexPoint mouseOverPos = WorldScreenHelper.pixelToTile(fixedMousePos);
-        return worldHandler.getWorld().getTiles().getByPoint(mouseOverPos);
     }
 
     private void drawChunk(Chunk chunk, int colorHandle) {
