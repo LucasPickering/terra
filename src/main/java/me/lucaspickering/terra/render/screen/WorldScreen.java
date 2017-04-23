@@ -151,8 +151,6 @@ public class WorldScreen extends Screen {
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexBuffer, GL15.GL_STATIC_DRAW);
         GL30.glBindVertexArray(0);
 
-        // Allocate the color buffer
-
         // Bind the color buffer for the mouse highlight overlay to the GL
         mouseOverColorHandle = GL15.glGenBuffers();
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, mouseOverColorHandle);
@@ -299,25 +297,6 @@ public class WorldScreen extends Screen {
             updateColor(getTileColor(tile), offset);
             offset += WorldScreenHelper.COLOR_SIZE_BYTES * WorldScreenHelper.NUM_VERTICES;
         }
-    }
-
-    /**
-     * Sets the color of the given tile to be the given value. This finds the VBO that the given
-     * tile belongs to, and modifies its color buffer to contain the given color.
-     *
-     * @param tile  the tile whose color will be changed
-     * @param color the new color for the tile
-     */
-    private void setTileColor(Tile tile, Color color) {
-        // Find the handle for the appropriate color VBO and bind it
-        final HexPoint chunkPos = Chunk.getChunkPosForTile(tile.pos());
-        final int colorHandle = chunkColorHandles.getByPoint(chunkPos);
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorHandle);
-
-        final HexPoint relPos = Chunk.getRelativeTilePos(tile.pos());
-        final long offset = (relPos.x() * Chunk.SIDE_LENGTH + relPos.y()) *
-                            WorldScreenHelper.NUM_VERTICES * WorldScreenHelper.COLOR_SIZE_BYTES;
-        updateColor(color, offset);
     }
 
     /**

@@ -3,7 +3,6 @@ package me.lucaspickering.terra.render;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL15;
 
 import java.awt.Color;
 import java.awt.FontFormatException;
@@ -52,10 +51,6 @@ public class Renderer {
                 e.printStackTrace();
             }
         }
-    }
-
-    public int initVbos() {
-        return GL15.glGenBuffers();
     }
 
     /**
