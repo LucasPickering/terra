@@ -10,11 +10,12 @@ import java.util.stream.Collectors;
 import me.lucaspickering.terra.world.generate.BeachGenerator;
 import me.lucaspickering.terra.world.generate.BiomePainter;
 import me.lucaspickering.terra.world.generate.ContinentClusterer;
-import me.lucaspickering.terra.world.generate.FreshWaterGenerator;
 import me.lucaspickering.terra.world.generate.Generator;
 import me.lucaspickering.terra.world.generate.NoiseElevationGenerator;
 import me.lucaspickering.terra.world.generate.NoiseHumidityGenerator;
 import me.lucaspickering.terra.world.generate.WaterPainter;
+import me.lucaspickering.terra.world.step.FreshWaterStepper;
+import me.lucaspickering.terra.world.step.Stepper;
 
 /**
  * A class with fields and methods that can entirely encapsulate a {@link World} and
@@ -32,8 +33,7 @@ public class WorldHandler {
         WATER_PAINTER(WaterPainter.class),
         BIOME_PAINTER(BiomePainter.class),
         CONTINENT_CLUSTERER(ContinentClusterer.class),
-        BEACH_GENERATOR(BeachGenerator.class),
-        FRESH_WATER_GENERATOR(FreshWaterGenerator.class);
+        BEACH_GENERATOR(BeachGenerator.class);
 
         private final Class<? extends Generator> clazz;
 
@@ -56,8 +56,9 @@ public class WorldHandler {
     private final long seed;
     private final int size; // Radius of the world
 
-    // Properties of the world
     private World world;
+    private Random random;
+    private Stepper stepper;
 
     public WorldHandler(long seed) {
         this(seed, DEFAULT_CHUNK_RADIUS);
@@ -73,20 +74,12 @@ public class WorldHandler {
     }
 
     /**
-     * Generates a new set of tiles to represent this world in parallel with the current thread.
-     * The generation process is executed in another thread, so this method will return
-     * immediately, before the generation is completed.
-     */
-    public void generateParallel() {
-        // Launch the generation process in a new thread
-        new Thread(this::generate).start();
-    }
-
-    /**
      * Generates a new set of tiles to represent this world. This method does not return until
      * the generation process is complete.
      */
     public void generate() {
+        random = new Random(seed); // Init the Random instance
+
         // Initialize generators outside the timer. This may get its own timer later?
         final List<Generator> generators = Arrays.stream(Generators.values())
             .map(Generators::makeGenerator)
@@ -103,11 +96,12 @@ public class WorldHandler {
         this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
         logger.log(Level.FINE, String.format("World generation took %d ms",
                                              System.currentTimeMillis() - startTime));
+
+        stepper = new FreshWaterStepper(this.world, random); // TODO remove placeholder
     }
 
     private void runGenerator(Generator generator, World world) {
         final long startTime = System.currentTimeMillis();
-        final Random random = new Random(seed);
         generator.generate(world, random);
         final long runTime = System.currentTimeMillis() - startTime;
         logger.log(Level.FINER, String.format("Generator stage %s took %d ms",
@@ -122,5 +116,14 @@ public class WorldHandler {
      */
     public World getWorld() {
         return world;
+    }
+
+    /**
+     * Advances the current {@link Stepper} by one step.
+     *
+     * @throws NullPointerException if there is no active {@link Stepper}
+     */
+    public void step() {
+        stepper.step();
     }
 }

@@ -1,4 +1,4 @@
-package me.lucaspickering.terra.world.generate;
+package me.lucaspickering.terra.world.step;
 
 import java.util.List;
 import java.util.Random;
@@ -21,15 +21,19 @@ import me.lucaspickering.terra.world.util.TileSet;
  * threshold, that tile becomes a river</li>
  * </ul>
  */
-public class FreshWaterGenerator implements Generator {
+public class FreshWaterStepper extends Stepper {
 
     private static final double RAINFALL = 0.5;
     private static final double LAKE_THRESHOLD = 1.0;
     private static final double RIVER_THRESHOLD = 10.0;
 
+    public FreshWaterStepper(World world, Random random) {
+        super(world, random);
+    }
+
     @Override
-    public void generate(World world, Random random) {
-        final TileSet worldTiles = world.getTiles();
+    public void step() {
+        final TileSet worldTiles = getWorld().getTiles();
 
         // Sort all land tiles by descending elevation
         final List<Tile> elevSortedTiles = worldTiles.stream()
@@ -40,21 +44,24 @@ public class FreshWaterGenerator implements Generator {
         // Initialize each land tile to some water value then trickle the water downhill
         elevSortedTiles.forEach(t -> t.addWater(RAINFALL));
         for (Tile tile : elevSortedTiles) {
-            spreadWaterDownhill(worldTiles, tile);
+            spreadWater(worldTiles, tile);
         }
 
         // Convert all appropriate tiles to lakes
-//        for (Tile tile : elevSortedTiles) {
-//            if (tile.getWaterLevel() >= LAKE_THRESHOLD) {
-//                tile.setBiome(Biome.LAKE);
-//            }
-//        }
+        // TODO
 
         // Add rivers based on water traversal patterns
         // TODO
     }
 
-    private void foo(TileSet tiles, Tile tile) {
+    /**
+     * Moves all the water on the given tile to tiles that are adjacent to and at a lower
+     * elevation than that tile.
+     *
+     * @param tiles used to find adjacent tiles
+     * @param tile  the tile to spread water from
+     */
+    private void spreadWater(TileSet tiles, Tile tile) {
         final double waterElev = tile.getWaterElevation();
         // Get all tiles adjacent to this one with a lower water elevation
         final TileSet lowerTiles = tiles.getAdjacentTiles(tile.pos()).values().stream()
@@ -64,43 +71,13 @@ public class FreshWaterGenerator implements Generator {
         // If there are any lower tiles to pass water onto, do that
         if (lowerTiles.size() > 0) {
             final double totalElevDiff = lowerTiles.stream()
-                .mapToInt(t -> Math.abs(tile.elevation() - t.elevation()))
+                .mapToDouble(t -> Math.abs(waterElev - t.getWaterElevation()))
                 .sum();
             // Amount of water to pass on to each lower tile
             final double waterToSpread = tile.getWaterLevel();
             for (Tile adjTile : lowerTiles) {
-                // Runoff is distributed proportional to elevation difference
-                final double runoffPercentage = (tile.elevation() - adjTile.elevation()) /
-                                                totalElevDiff;
-                adjTile.addWater(waterToSpread * runoffPercentage);
-            }
-            tile.clearWater(); // Remove all water from this tile
-        }
-    }
-
-    /**
-     * Moves all the water on the given tile to tiles that are adjacent to and at a lower
-     * elevation than that tile.
-     *
-     * @param allTiles used to find adjacent tiles
-     * @param tile     the tile to spread water from
-     */
-    private void spreadWaterDownhill(TileSet allTiles, Tile tile) {
-        // Get all tiles adjacent to this one with a lower elevation
-        final TileSet lowerTiles = allTiles.getAdjacentTiles(tile.pos()).values().stream()
-            .filter(adj -> adj.elevation() < tile.elevation())
-            .collect(Collectors.toCollection(TileSet::new));
-
-        // If there are any lower tiles to pass water onto, do that
-        if (lowerTiles.size() > 0) {
-            final double totalElevDiff = lowerTiles.stream()
-                .mapToInt(t -> Math.abs(tile.elevation() - t.elevation()))
-                .sum();
-            // Amount of water to pass on to each lower tile
-            final double waterToSpread = tile.getWaterLevel();
-            for (Tile adjTile : lowerTiles) {
-                // Runoff is distributed proportional to elevation difference
-                final double runoffPercentage = (tile.elevation() - adjTile.elevation()) /
+                // Runoff is distributed proportional to water elevation difference
+                final double runoffPercentage = (waterElev - adjTile.getWaterElevation()) /
                                                 totalElevDiff;
                 adjTile.addWater(waterToSpread * runoffPercentage);
             }

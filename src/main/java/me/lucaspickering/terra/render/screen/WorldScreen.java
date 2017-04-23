@@ -352,6 +352,12 @@ public class WorldScreen extends Screen {
             .plus(WorldScreenHelper.SCREEN_CENTER);
     }
 
+    private void stepWorld() {
+        // Step then refresh the world
+        worldHandler.step();
+        updateAllTileColors();
+    }
+
     @Override
     public void onKey(KeyEvent event) {
         if (event.action == GLFW.GLFW_RELEASE) {
@@ -362,7 +368,10 @@ public class WorldScreen extends Screen {
                     break;
                 case GLFW.GLFW_KEY_R:
                     // Re-generate the world
-                    worldHandler.generateParallel();
+                    worldHandler.generate();
+                    break;
+                case GLFW.GLFW_KEY_RIGHT:
+                    stepWorld();
                     break;
             }
 
