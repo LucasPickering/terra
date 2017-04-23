@@ -34,9 +34,9 @@ public class World {
      * tiles in one chunk, then moves onto the next chunk, and so on. Tiles cannot be added or
      * removed from this set.
      */
-    private class WorldTiles extends TileSet {
+    private class ChunkedTileSet extends TileSet {
 
-        private WorldTiles() {
+        private ChunkedTileSet() {
             // Give the super class a null map to make sure we don't rely on that map for any
             // operations. If we did, it would just be empty anyway, which could cause spoopy bugs.
             super((Map<HexPoint, Tile>) null);
@@ -167,7 +167,7 @@ public class World {
     public static final int SEA_LEVEL = 0;
 
     private final HexPointSet<Chunk> chunks;
-    private final WorldTiles worldTiles = new WorldTiles();
+    private final ChunkedTileSet worldTiles = new ChunkedTileSet();
     private final List<Continent> continents;
     private final HexPointMap<Tile, Continent> tilesToContinents;
 

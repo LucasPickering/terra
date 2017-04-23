@@ -27,24 +27,29 @@ public class FreshWaterStepper extends Stepper {
     private static final double LAKE_THRESHOLD = 1.0;
     private static final double RIVER_THRESHOLD = 10.0;
 
+    private final TileSet landTiles;
+
     public FreshWaterStepper(World world, Random random) {
         super(world, random);
+
+        landTiles = world.getTiles().stream()
+            .filter(t -> t.biome().isLand())
+            .collect(Collectors.toCollection(TileSet::new));
+
+        // Init each land tile with some rainwater
+        landTiles.forEach(t -> t.addWater(RAINFALL)); // Init each tile with some water
     }
 
     @Override
     public void step() {
-        final TileSet worldTiles = getWorld().getTiles();
-
         // Sort all land tiles by descending elevation
-        final List<Tile> elevSortedTiles = worldTiles.stream()
-            .filter(t -> t.biome().isLand()) // Filter out water tiles
+        final List<Tile> elevSortedTiles = landTiles.stream()
             .sorted((t1, t2) -> Integer.compare(t2.elevation(), t1.elevation())) // Sort by elev
             .collect(Collectors.toList());
 
-        // Initialize each land tile to some water value then trickle the water downhill
-        elevSortedTiles.forEach(t -> t.addWater(RAINFALL));
+        // Trickle the water downhill
         for (Tile tile : elevSortedTiles) {
-            spreadWater(worldTiles, tile);
+            spreadWater(tile);
         }
 
         // Convert all appropriate tiles to lakes
@@ -55,16 +60,16 @@ public class FreshWaterStepper extends Stepper {
     }
 
     /**
-     * Moves all the water on the given tile to tiles that are adjacent to and at a lower
-     * elevation than that tile.
+     * Moves all the water on the given tile to tiles that are adjacent to with a lower water
+     * elevation.
      *
-     * @param tiles used to find adjacent tiles
-     * @param tile  the tile to spread water from
+     * @param tile the tile to spread water from
      */
-    private void spreadWater(TileSet tiles, Tile tile) {
+    private void spreadWater(Tile tile) {
         final double waterElev = tile.getWaterElevation();
         // Get all tiles adjacent to this one with a lower water elevation
-        final TileSet lowerTiles = tiles.getAdjacentTiles(tile.pos()).values().stream()
+        final TileSet lowerTiles = getWorld().getTiles().getAdjacentTiles(tile.pos())
+            .values().stream()
             .filter(adj -> adj.getWaterElevation() < waterElev)
             .collect(Collectors.toCollection(TileSet::new));
 
