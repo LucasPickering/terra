@@ -18,7 +18,7 @@ public class Tile implements HexPointable {
 
     private static final String INFO_STRING =
         "Biome: %s%nElevation: %d%nHumidity: %d%%";
-    private static final String DEBUG_INFO_STRING = "%nPos: %s%nChunk: %s%nWater: %.2f;%.2f%n";
+    private static final String DEBUG_INFO_STRING = "%nPos: %s%nChunk: %s%nWater: %.2f|%.2f%n";
 
     public enum RiverConnection {
         ENTRY, EXIT
@@ -104,6 +104,16 @@ public class Tile implements HexPointable {
 
     public double getWaterLevel() {
         return waterLevel;
+    }
+
+    /**
+     * Gets the elevation of the top of the water on this tile. In other words, the elevation of
+     * this tile plus the water level.
+     *
+     * @return elevation plus water level
+     */
+    public double getWaterElevation() {
+        return elevation + waterLevel;
     }
 
     public void addWater(double water) {
