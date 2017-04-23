@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import me.lucaspickering.terra.world.Biome;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.util.TileSet;
@@ -45,11 +44,11 @@ public class FreshWaterGenerator implements Generator {
         }
 
         // Convert all appropriate tiles to lakes
-        for (Tile tile : elevSortedTiles) {
-            if (tile.getWaterLevel() >= LAKE_THRESHOLD) {
-                tile.setBiome(Biome.LAKE);
-            }
-        }
+//        for (Tile tile : elevSortedTiles) {
+//            if (tile.getWaterLevel() >= LAKE_THRESHOLD) {
+//                tile.setBiome(Biome.LAKE);
+//            }
+//        }
 
         // Add rivers based on water traversal patterns
         // TODO

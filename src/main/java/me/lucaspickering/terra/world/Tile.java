@@ -11,10 +11,13 @@ import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
 import me.lucaspickering.terra.world.util.HexPointable;
+import me.lucaspickering.utils.range.DoubleRange;
+import me.lucaspickering.utils.range.Range;
 
 public class Tile implements HexPointable {
 
-    public static final int NUM_SIDES = Direction.values().length;
+    // Only used for coloring, these values aren't enforced anywhere
+    private static final Range<Double> WATER_LEVEL_RANGE = new DoubleRange(0.0, 10.0);
 
     private static final String INFO_STRING =
         "Biome: %s%nElevation: %d%nHumidity: %d%%";
@@ -154,22 +157,28 @@ public class Tile implements HexPointable {
     public final Color getColor(TileColorMode colorMode) {
         switch (colorMode) {
             case ELEVATION:
-                return colorMode.interpolateColor(elevation(), World.ELEVATION_RANGE);
+                return colorMode.interpolateColor(elevation, World.ELEVATION_RANGE);
             case HUMIDITY:
                 // Water tiles are always blue
-                if (biome().isWater()) {
+                if (biome.isWater()) {
                     return Color.BLUE;
                 }
-                return colorMode.interpolateColor(humidity(), World.HUMIDITY_RANGE);
+                return colorMode.interpolateColor(humidity, World.HUMIDITY_RANGE);
+            case WATER_LEVEL:
+                // Water tiles are always blue
+                if (biome.isWater()) {
+                    return Color.BLACK;
+                }
+                return colorMode.interpolateColor(waterLevel, WATER_LEVEL_RANGE);
             case BIOME:
-                return biome().color();
+                return biome.color();
             case COMPOSITE:
                 final Color elevColor = getColor(TileColorMode.ELEVATION);
                 float elevBrightness = Funcs.getColorBrightness(elevColor);
                 elevBrightness = (float) Math.pow(elevBrightness, 0.75); // Make it brighter
 
                 // Scale this biome color's brightness by the brightness of the elevation color
-                final Color biomeColor = getColor(TileColorMode.BIOME);
+                final Color biomeColor = biome.color();
                 return new Color((int) (biomeColor.getRed() * elevBrightness),
                                  (int) (biomeColor.getGreen() * elevBrightness),
                                  (int) (biomeColor.getBlue() * elevBrightness));

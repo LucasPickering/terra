@@ -20,7 +20,7 @@ For each of those, clone the git repo and run `mvn clean install` to build and i
 
 ## JVM Parameters
 ### Debug Mode
-Use `F3` to enable debug mode.
+Use `F9` to enable debug mode.
 
 ### Debug Logging
 `-Djava.util.logging.config.file="src/test/resources/logging.properties"`

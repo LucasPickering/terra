@@ -13,6 +13,7 @@ public enum TileColorMode {
 
     ELEVATION(Color.BLACK, Color.WHITE),
     HUMIDITY(Color.WHITE, Color.GREEN),
+    WATER_LEVEL(Color.WHITE, Color.BLUE),
     BIOME(),
     COMPOSITE();
 

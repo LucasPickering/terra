@@ -54,15 +54,16 @@ class WorldScreenHelper {
         new HashMap<Integer, TileColorMode>() {{
             put(GLFW.GLFW_KEY_F1, TileColorMode.ELEVATION);
             put(GLFW.GLFW_KEY_F2, TileColorMode.HUMIDITY);
-            put(GLFW.GLFW_KEY_F3, TileColorMode.BIOME);
-            put(GLFW.GLFW_KEY_F4, TileColorMode.COMPOSITE);
+            put(GLFW.GLFW_KEY_F3, TileColorMode.WATER_LEVEL);
+            put(GLFW.GLFW_KEY_F4, TileColorMode.BIOME);
+            put(GLFW.GLFW_KEY_F5, TileColorMode.COMPOSITE);
         }};
 
     // Assign a key to each tile overlay
     static final Map<Integer, TileOverlay> KEY_TO_TILE_OVERLAY =
         new HashMap<Integer, TileOverlay>() {{
-            put(GLFW.GLFW_KEY_F5, TileOverlay.CONTINENT);
-            put(GLFW.GLFW_KEY_F6, TileOverlay.CHUNK);
+            put(GLFW.GLFW_KEY_F6, TileOverlay.CONTINENT);
+            put(GLFW.GLFW_KEY_F7, TileOverlay.CHUNK);
         }};
 
     /**
