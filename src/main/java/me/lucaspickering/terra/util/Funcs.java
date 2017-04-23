@@ -10,15 +10,10 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-import me.lucaspickering.terra.Main;
 import me.lucaspickering.utils.MathFuncs;
 import me.lucaspickering.utils.range.IntRange;
 import me.lucaspickering.utils.range.Range;
-import static org.lwjgl.BufferUtils.createByteBuffer;
 
 public class Funcs {
 
@@ -28,8 +23,9 @@ public class Funcs {
         // This should never be instantiated
     }
 
-    public static String getResource(String path, String fileName) {
-        return Main.class.getResource(String.format(path, fileName)).getPath();
+    public static InputStream getResource(String resourcePath, String fileName) {
+        final String resource = String.format(resourcePath, fileName);
+        return Funcs.class.getClassLoader().getResourceAsStream(resource);
     }
 
     private static ByteBuffer resizeBuffer(ByteBuffer buffer, int newCapacity) {
@@ -48,32 +44,22 @@ public class Funcs {
      * @return the resource data
      * @throws IOException if an IO error occurs
      */
-    public static ByteBuffer ioResourceToByteBuffer(String resourcePath, String fileName,
-                                                    int bufferSize) throws IOException {
+    public static ByteBuffer resourceToByteBuffer(String resourcePath, String fileName,
+                                                  int bufferSize) throws IOException {
         ByteBuffer buffer;
-        final String resource = String.format(resourcePath, fileName);
-        final java.nio.file.Path path = Paths.get(resource);
-        if (Files.isReadable(path)) {
-            try (SeekableByteChannel fc = Files.newByteChannel(path)) {
-                buffer = BufferUtils.createByteBuffer((int) fc.size() + 1);
-                while (fc.read(buffer) != -1) {
-                }
-            }
-        } else {
-            try (
-                InputStream source = Funcs.class.getClassLoader().getResourceAsStream(resource);
-                ReadableByteChannel rbc = Channels.newChannel(source)
-            ) {
-                buffer = createByteBuffer(bufferSize);
+        try (
+            InputStream source = getResource(resourcePath, fileName);
+            ReadableByteChannel rbc = Channels.newChannel(source)
+        ) {
+            buffer = BufferUtils.createByteBuffer(bufferSize);
 
-                while (true) {
-                    int bytes = rbc.read(buffer);
-                    if (bytes == -1) {
-                        break;
-                    }
-                    if (buffer.remaining() == 0) {
-                        buffer = resizeBuffer(buffer, buffer.capacity() * 2);
-                    }
+            while (true) {
+                int bytes = rbc.read(buffer);
+                if (bytes == -1) {
+                    break;
+                }
+                if (buffer.remaining() == 0) {
+                    buffer = resizeBuffer(buffer, buffer.capacity() * 2);
                 }
             }
         }

@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL12;
 import java.awt.Color;
 import java.awt.FontFormatException;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.EnumMap;
@@ -41,7 +40,6 @@ public class Renderer {
 
     public Renderer() {
 
-
         // Load all fonts
         for (Font font : Font.values()) {
             try {
@@ -61,8 +59,8 @@ public class Renderer {
      */
     public Texture loadTexture(String name) {
         try {
-            BufferedImage image = ImageIO.read(new File(Funcs.getResource(Constants.TEXTURE_PATH,
-                                                                          name)));
+            final BufferedImage image = ImageIO.read(Funcs.getResource(Constants.TEXTURE_PATH,
+                                                                       name));
             final Texture texture = new Texture(loadTextureFromImage(image));
             textures.put(name, texture);
             return texture;
@@ -111,8 +109,7 @@ public class Renderer {
 
         // Send texel data to OpenGL
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, image.getWidth(), image.getHeight(),
-                          0,
-                          GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+                          0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
 
         // Return the texture ID so we can bind it later again
         return textureID;
@@ -214,7 +211,8 @@ public class Renderer {
 
     /**
      * Draw the given text in the given font, at the given position.
-     *  @param font       the font/size to draw the string in
+     *
+     * @param font       the font/size to draw the string in
      * @param text       the text to draw
      * @param x          the x position to draw at
      * @param y          the y position to draw at

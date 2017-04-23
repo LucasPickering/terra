@@ -42,9 +42,9 @@ public class TrueTypeFont {
         final STBTTBakedChar.Buffer cdata = STBTTBakedChar.malloc(CHAR_DATA_SIZE);
 
         try {
-            final ByteBuffer ttf = Funcs.ioResourceToByteBuffer(Constants.FONT_PATH,
-                                                                font.getFontName(),
-                                                                TTF_BUFFER_SIZE);
+            final ByteBuffer ttf = Funcs.resourceToByteBuffer(Constants.FONT_PATH,
+                                                              font.getFontName(),
+                                                              TTF_BUFFER_SIZE);
 
             final ByteBuffer bitmap = BufferUtils.createByteBuffer(BITMAP_SIZE * BITMAP_SIZE);
             STBTruetype.stbtt_BakeFontBitmap(ttf, getFontHeight(), bitmap, BITMAP_SIZE, BITMAP_SIZE,

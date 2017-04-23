@@ -160,12 +160,12 @@ public class WorldScreen extends Screen {
 
     @Override
     public void draw(Point mousePos) {
-        // Mouse pos is null when being rendered in the background
+        // Mouse pos is null when being rendered in the background (behind a menu)
         if (mousePos == null) {
             lastMouseDragPos = null; // No longer dragging
+        } else {
+            updateMouseOver(mousePos); // Update state based on mouse position
         }
-
-        updateMouseOver(mousePos); // Update state based on mouse position
 
         GL11.glPushMatrix();
         GL11.glTranslated(worldCenter.x(), worldCenter.y(), 0.0);
