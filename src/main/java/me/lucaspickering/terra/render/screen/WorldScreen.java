@@ -352,6 +352,11 @@ public class WorldScreen extends Screen {
             .plus(WorldScreenHelper.SCREEN_CENTER);
     }
 
+    private void regenerateWorld() {
+        worldHandler.generate();
+        updateAllTileColors();
+    }
+
     private void stepWorld() {
         // Step then refresh the world
         worldHandler.step();
@@ -367,8 +372,7 @@ public class WorldScreen extends Screen {
                     setNextScreen(new PauseScreen(this)); // Open the pause menu
                     break;
                 case GLFW.GLFW_KEY_R:
-                    // Re-generate the world
-                    worldHandler.generate();
+                    regenerateWorld();
                     break;
                 case GLFW.GLFW_KEY_RIGHT:
                     stepWorld();

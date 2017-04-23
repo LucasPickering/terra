@@ -1,5 +1,6 @@
 package me.lucaspickering.terra.world.step;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -27,28 +28,25 @@ public class FreshWaterStepper extends Stepper {
     private static final double LAKE_THRESHOLD = 1.0;
     private static final double RIVER_THRESHOLD = 10.0;
 
-    private final TileSet landTiles;
+    private final List<Tile> sortedTiles;
 
     public FreshWaterStepper(World world, Random random) {
         super(world, random);
 
-        landTiles = world.getTiles().stream()
-            .filter(t -> t.biome().isLand())
-            .collect(Collectors.toCollection(TileSet::new));
+        // Sort all land tiles by ascending elevation
+        sortedTiles = world.getTiles().stream()
+            .filter(t -> t.biome().isLand()) // Filter out water tiles
+            .sorted(Comparator.comparingInt(Tile::elevation)) // Sort by ascending elev
+            .collect(Collectors.toList());
 
         // Init each land tile with some rainwater
-        landTiles.forEach(t -> t.addWater(RAINFALL)); // Init each tile with some water
+        sortedTiles.forEach(t -> t.addWater(RAINFALL)); // Init each tile with some water
     }
 
     @Override
     public void step() {
-        // Sort all land tiles by descending elevation
-        final List<Tile> elevSortedTiles = landTiles.stream()
-            .sorted((t1, t2) -> Integer.compare(t2.elevation(), t1.elevation())) // Sort by elev
-            .collect(Collectors.toList());
-
         // Trickle the water downhill
-        for (Tile tile : elevSortedTiles) {
+        for (Tile tile : sortedTiles) {
             spreadWater(tile);
         }
 

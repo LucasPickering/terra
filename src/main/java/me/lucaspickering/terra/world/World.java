@@ -105,7 +105,7 @@ public class World {
                 // If the other tile is in the same chunk as the given tile, we already have that
                 // chunk on-hand so just look it up from there. Otherwise, look it up normally,
                 // which means it looks up the chunk, then the tile.
-                if (Chunk.getChunkPosForTile(tilePos).equals(hostChunk.getPos())) {
+                if (Chunk.getChunkPosForTile(otherPoint).equals(hostChunk.getPos())) {
                     otherTile = hostChunk.getTiles().getByPoint(otherPoint);
                 } else {
                     otherTile = getByPoint(otherPoint);
