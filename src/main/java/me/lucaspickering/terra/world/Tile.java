@@ -17,7 +17,7 @@ import me.lucaspickering.utils.range.Range;
 public class Tile implements HexPointable {
 
     // Only used for coloring, these values aren't enforced anywhere
-    private static final Range<Double> WATER_LEVEL_RANGE = new DoubleRange(0.0, 10.0);
+    private static final Range<Double> WATER_LEVEL_RANGE = new DoubleRange(0.0, 50.0);
 
     private static final String INFO_STRING =
         "Biome: %s%nElevation: %d%nHumidity: %d%%";
@@ -165,11 +165,14 @@ public class Tile implements HexPointable {
                 }
                 return colorMode.interpolateColor(humidity, World.HUMIDITY_RANGE);
             case WATER_LEVEL:
-                // Water tiles are always blue
+                // Water tiles are always black
                 if (biome.isWater()) {
                     return Color.BLACK;
                 }
-                return colorMode.interpolateColor(waterLevel, WATER_LEVEL_RANGE);
+                if (waterLevel < 0.01) {
+                    return Color.WHITE;
+                }
+                return colorMode.interpolateColor(getWaterElevation(), WATER_LEVEL_RANGE);
             case BIOME:
                 return biome.color();
             case COMPOSITE:

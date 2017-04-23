@@ -13,7 +13,7 @@ import me.lucaspickering.terra.world.generate.ContinentClusterer;
 import me.lucaspickering.terra.world.generate.Generator;
 import me.lucaspickering.terra.world.generate.NoiseElevationGenerator;
 import me.lucaspickering.terra.world.generate.NoiseHumidityGenerator;
-import me.lucaspickering.terra.world.generate.WaterPainter;
+import me.lucaspickering.terra.world.generate.OceanGenerator;
 import me.lucaspickering.terra.world.step.FreshWaterStepper;
 import me.lucaspickering.terra.world.step.Stepper;
 
@@ -30,7 +30,7 @@ public class WorldHandler {
 
         ELEV_GENERATOR(NoiseElevationGenerator.class),
         HUMID_GENERATOR(NoiseHumidityGenerator.class),
-        WATER_PAINTER(WaterPainter.class),
+        OCEAN_GENERATOR(OceanGenerator.class),
         BIOME_PAINTER(BiomePainter.class),
         CONTINENT_CLUSTERER(ContinentClusterer.class),
         BEACH_GENERATOR(BeachGenerator.class);
