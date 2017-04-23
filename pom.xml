@@ -1,7 +1,7 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.lucaspickering</groupId>
-    <artifactId>Terrain-Gen</artifactId>
+    <artifactId>Terra</artifactId>
     <version>1.0.0</version>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -50,7 +50,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>me.lucaspickering.terraingen.TerrainGen</mainClass>
+                            <mainClass>me.lucaspickering.terra.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
