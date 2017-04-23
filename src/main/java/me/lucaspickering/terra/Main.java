@@ -28,7 +28,7 @@ import me.lucaspickering.utils.Point;
 
 public class Main {
 
-    private static final Main TERRAIN_GEN = new Main();
+    private static final Main MAIN = new Main();
 
     private final Logger logger;
     private final long seed;
@@ -52,11 +52,11 @@ public class Main {
     private int fps; // Current framerate
 
     public static void main(String[] args) {
-        TERRAIN_GEN.run();
+        MAIN.run();
     }
 
     public static Main instance() {
-        return TERRAIN_GEN;
+        return MAIN;
     }
 
     private Main() {
@@ -114,7 +114,7 @@ public class Main {
             initWindow(); // Initialize the window
             gameLoop(); // Run the game
         } catch (Exception e) {
-            System.err.println("Error in Terrain Gen:");
+            System.err.println("Error in Terra:");
             e.printStackTrace();
         } finally {
             tearDown(); // Shutdown
@@ -166,7 +166,7 @@ public class Main {
         setWindowSize(vidmode.width() / 2, vidmode.height() / 2);
 
         // Create the window
-        window = GLFW.glfwCreateWindow(windowWidth, windowHeight, "Terrain Gen", MemoryUtil.NULL,
+        window = GLFW.glfwCreateWindow(windowWidth, windowHeight, "Terra", MemoryUtil.NULL,
                                        MemoryUtil.NULL);
         if (window == MemoryUtil.NULL) {
             throw new RuntimeException("Failed to create the GLFW window");

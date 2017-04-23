@@ -1,4 +1,4 @@
-# Terrain Generation
+# Terra
 Generate terrain and civilizations.
   
 Uses the Lightweight Java Game Library.  
