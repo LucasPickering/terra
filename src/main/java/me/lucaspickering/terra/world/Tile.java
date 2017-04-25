@@ -120,6 +120,10 @@ public class Tile implements HexPointable {
     }
 
     public void addWater(double water) {
+        if (water < 0.0) {
+            throw new IllegalArgumentException(String.format("Water must be positive, was [%f]",
+                                                             water));
+        }
         if (!biome.isWater()) {
             waterLevel += water;
             totalWaterTraversed += water;
@@ -127,6 +131,10 @@ public class Tile implements HexPointable {
     }
 
     public void removeWater(double water) {
+        if (water < 0.0) {
+            throw new IllegalArgumentException(String.format("Water must be positive, was [%f]",
+                                                             water));
+        }
         if (water > waterLevel) {
             throw new IllegalArgumentException(String.format(
                 "Cannot remove [%f] water from tile; only [%f] is available", water, waterLevel));
