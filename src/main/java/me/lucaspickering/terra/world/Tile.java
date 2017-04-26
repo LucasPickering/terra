@@ -17,7 +17,7 @@ import me.lucaspickering.utils.range.Range;
 public class Tile implements HexPointable {
 
     // Only used for coloring, these values aren't enforced anywhere
-    private static final Range<Double> WATER_LEVEL_RANGE = new DoubleRange(0.0, 50.0);
+    private static final Range<Double> WATER_LEVEL_RANGE = new DoubleRange(0.0, 10.0);
 
     private static final String INFO_STRING =
         "Biome: %s%nElevation: %d%nHumidity: %d%%";
@@ -119,7 +119,7 @@ public class Tile implements HexPointable {
         return elevation + waterLevel;
     }
 
-    public void addWater(double water) {
+    public double addWater(double water) {
         if (water < 0.0) {
             throw new IllegalArgumentException(String.format("Water must be positive, was [%f]",
                                                              water));
@@ -127,19 +127,23 @@ public class Tile implements HexPointable {
         if (!biome.isWater()) {
             waterLevel += water;
             totalWaterTraversed += water;
+            return water;
         }
+        return 0.0;
     }
 
-    public void removeWater(double water) {
+    public double removeWater(double water) {
         if (water < 0.0) {
             throw new IllegalArgumentException(String.format("Water must be positive, was [%f]",
                                                              water));
         }
-        if (water > waterLevel) {
-            throw new IllegalArgumentException(String.format(
-                "Cannot remove [%f] water from tile; only [%f] is available", water, waterLevel));
-        }
-        waterLevel -= water;
+//        if (water > waterLevel) {
+//            throw new IllegalArgumentException(String.format(
+//                "Cannot remove [%f] water from tile; only [%f] is available", water, waterLevel));
+//        }
+        final double toRemove = Math.min(waterLevel, water);
+        waterLevel -= toRemove;
+        return toRemove;
     }
 
     public void clearWater() {
@@ -177,10 +181,7 @@ public class Tile implements HexPointable {
                 if (biome.isWater()) {
                     return Color.BLACK;
                 }
-                if (waterLevel < 0.01) {
-                    return Color.WHITE;
-                }
-                return colorMode.interpolateColor(getWaterElevation(), WATER_LEVEL_RANGE);
+                return colorMode.interpolateColor(getWaterLevel(), WATER_LEVEL_RANGE);
             case BIOME:
                 return biome.color();
             case COMPOSITE:

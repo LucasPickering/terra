@@ -1,10 +1,12 @@
 package me.lucaspickering.terra.world.step;
 
-import java.util.Comparator;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import me.lucaspickering.terra.world.Continent;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.util.TileSet;
@@ -27,6 +29,7 @@ public class FreshWaterStepper extends Stepper {
     private static final double RAINFALL = 0.5;
     private static final double LAKE_THRESHOLD = 1.0;
     private static final double RIVER_THRESHOLD = 10.0;
+    private static final double WATER_STEP = 0.1;
 
     private final List<Tile> sortedTiles;
 
@@ -36,7 +39,7 @@ public class FreshWaterStepper extends Stepper {
         // Sort all land tiles by ascending elevation
         sortedTiles = world.getTiles().stream()
             .filter(t -> t.biome().isLand()) // Filter out water tiles
-            .sorted(Comparator.comparingInt(Tile::elevation)) // Sort by ascending elev
+            .sorted((t1, t2) -> Integer.compare(t2.elevation(), t1.elevation())) // Sort - desc elev
             .collect(Collectors.toList());
 
         // Init each land tile with some rainwater
@@ -45,10 +48,7 @@ public class FreshWaterStepper extends Stepper {
 
     @Override
     public void step() {
-        // Trickle the water downhill
-        for (Tile tile : sortedTiles) {
-            spreadWater(tile);
-        }
+        getWorld().getContinents().parallelStream().forEach(this::spreadForContinent);
 
         // Convert all appropriate tiles to lakes
         // TODO
@@ -57,34 +57,105 @@ public class FreshWaterStepper extends Stepper {
         // TODO
     }
 
-    /**
-     * Moves all the water on the given tile to tiles that are adjacent to with a lower water
-     * elevation.
-     *
-     * @param tile the tile to spread water from
-     */
-    private void spreadWater(Tile tile) {
-        final double waterElev = tile.getWaterElevation();
+    private void spreadForContinent(Continent continent) {
+        final List<Tile> sortedTiles = continent.getTiles().stream()
+            .sorted((t1, t2) -> Double.compare(t2.getWaterElevation(),
+                                               t1.getWaterElevation())) // Sort by desc water elev
+//            .sorted((t1, t2) -> Integer.compare(t2.elevation(),
+//                                                t1.elevation())) // Sort by desc elev
+            .collect(Collectors.toList());
+        for (Tile tile : sortedTiles) {
+            equalizeWater(tile);
+        }
+    }
+
+    private void equalizeWater(Tile tile) {
+        final double midWaterLevel = tile.getWaterLevel();
+        final double midWaterElev = tile.getWaterElevation();
+        final Collection<Tile> adjTiles =
+            getWorld().getTiles().getAdjacentTiles(tile.pos()).values();
+
+        // If this tile is adjacent to a water tile, just dump all our water in there
+        for (Tile adjTile : adjTiles) {
+            if (adjTile.biome().isWater()) {
+                tile.clearWater();
+                return; // No more water to spread
+            }
+        }
+
         // Get all tiles adjacent to this one with a lower water elevation
-        final TileSet lowerTiles = getWorld().getTiles().getAdjacentTiles(tile.pos())
-            .values().stream()
-            .filter(adj -> adj.getWaterElevation() < waterElev)
+        final TileSet lowerTiles = adjTiles.stream()
+            .filter(adj -> adj.getWaterElevation() < midWaterElev)
             .collect(Collectors.toCollection(TileSet::new));
+
+        final double targetWaterElev = getTargetWaterElev(tile, lowerTiles);
 
         // If there are any lower tiles to pass water onto, do that
         if (lowerTiles.size() > 0) {
-            final double totalElevDiff = lowerTiles.stream()
-                .mapToDouble(t -> Math.abs(waterElev - t.getWaterElevation()))
-                .sum();
-            // Amount of water to pass on to each lower tile
-            final double waterToSpread = tile.getWaterLevel();
-            for (Tile adjTile : lowerTiles) {
-                // Runoff is distributed proportional to water elevation difference
-                final double runoffPercentage = (waterElev - adjTile.getWaterElevation()) /
-                                                totalElevDiff;
-                adjTile.addWater(waterToSpread * runoffPercentage);
+            double totalWaterChanged = 0.0; // TODO remove
+            double waterNeeded = 0.0;
+
+            for (Tile workingTile : lowerTiles) {
+                final double diff = targetWaterElev - workingTile.getWaterElevation();
+                waterNeeded += diff;
             }
-            tile.clearWater(); // Remove all water from this tile
+
+            // If we need more water to equalize than is available on this tile, just distribute
+            // all the water on this tile evenly and let the other tiles deal with equalization
+            if (waterNeeded > midWaterLevel) {
+                for (Tile workingTile : lowerTiles) {
+                    totalWaterChanged += workingTile.addWater(midWaterLevel / lowerTiles.size());
+                }
+            } else {
+                // Modify the water level on each tile to match the target water elevation
+                for (Tile workingTile : lowerTiles) {
+                    final double diff = targetWaterElev - workingTile.getWaterElevation();
+                    if (diff > 0.0) {
+                        totalWaterChanged += workingTile.addWater(diff);
+                    }
+                    if (diff < 0.0) {
+                        totalWaterChanged -= tile.removeWater(-diff);
+                    }
+                }
+            }
+
+            // Remove water from this tile to make it hit the target elevation. If the target is
+            // lower than this tile's elevation, just remove all the water
+            totalWaterChanged -= tile.removeWater(midWaterElev - targetWaterElev);
+
+            if (Math.abs(totalWaterChanged) > 0.01) {
+                System.out.printf("Unaccounted water: [%f] change for [%s]%n",
+                                  totalWaterChanged, tile);
+            }
         }
+    }
+
+    private double getTargetWaterElev(Tile center, TileSet adjTiles) {
+        // Calculate the average water elevation across the center tile and its adjacents
+        final double totalWaterElev = adjTiles.stream()
+                                          .mapToDouble(Tile::getWaterElevation)
+                                          .sum() + center.getWaterElevation();
+        final double targetWaterElev = totalWaterElev / (adjTiles.size() + 1);
+
+        // Remove any tiles that are too high to get water on them. Move their water onto the
+        // center tile.
+        boolean changed = false;
+        final Iterator<Tile> iter = adjTiles.iterator();
+        while (iter.hasNext()) {
+            final Tile adjTile = iter.next();
+            if (adjTile.elevation() > targetWaterElev) {
+                center.addWater(adjTile.getWaterLevel());
+                adjTile.clearWater();
+                iter.remove();
+                changed = true;
+            }
+        }
+
+        // If we removed any tiles from the set, then try again with fewer tiles. Otherwise,
+        // our answer is valid so return it.
+        if (changed) {
+            return getTargetWaterElev(center, adjTiles);
+        }
+        return targetWaterElev;
     }
 }
