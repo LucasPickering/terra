@@ -50,7 +50,10 @@ public class FreshWaterStepper extends Stepper {
 
     @Override
     public void step() {
+        final long startTime = System.currentTimeMillis();
         world().getContinents().stream().forEach(this::spreadForContinent);
+        final long elapsedTime = System.currentTimeMillis() - startTime;
+        logger().log(Level.FINE, String.format("Runoff iteration took %d ms", elapsedTime));
 
         // Convert all appropriate tiles to lakes
         // TODO
@@ -147,16 +150,14 @@ public class FreshWaterStepper extends Stepper {
                 final double diff = targetWaterElev - adjTile.getWaterElevation();
                 if (diff > 0.0) {
                     totalWaterChanged += adjTile.addWater(diff);
-                }
-                if (diff < 0.0) {
-                    totalWaterChanged -= tile.removeWater(-diff);
+                } else if (diff < 0.0) {
+                    totalWaterChanged -= adjTile.removeWater(-diff);
                 }
             }
         }
 
         // Remove water from this tile to make it hit the target elevation
-        final double toRemove = tile.getWaterElevation() - targetWaterElev;
-        totalWaterChanged -= tile.removeWater(toRemove);
+        totalWaterChanged -= tile.removeWater(tile.getWaterElevation() - targetWaterElev);
 
         if (Math.abs(totalWaterChanged) > TOLERABLE_CHANGE_THRESHOLD) {
             throw new IllegalStateException(String.format("Intolerable water change [%f] for [%s]",

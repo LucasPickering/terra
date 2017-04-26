@@ -119,6 +119,14 @@ public class Tile implements HexPointable {
         return elevation + waterLevel;
     }
 
+    /**
+     * Adds the given amount of water to this tile. If this tile is a water biome, (e.g. ocean),
+     * no water is added. This also adds to the total amount of water that has traversed this tile.
+     *
+     * @param water the amount of water to add (non-negative)
+     * @return the amount of water added
+     * @throws IllegalArgumentException if {@code water} is negative
+     */
     public double addWater(double water) {
         if (water < 0.0) {
             throw new IllegalArgumentException(String.format("Water must be positive, was [%f]",
@@ -132,6 +140,14 @@ public class Tile implements HexPointable {
         return 0.0;
     }
 
+    /**
+     * Removes the given amount of water from this tile. If there isn't enough water on this tile
+     * to remove the requested amount, the water level is reduced to zero.
+     *
+     * @param water the amount of water to remove (non-negative)
+     * @return the amount of water removed
+     * @throws IllegalArgumentException if {@code water} is negative
+     */
     public double removeWater(double water) {
         if (water < 0.0) {
             throw new IllegalArgumentException(String.format("Water must be positive, was [%f]",
@@ -146,8 +162,15 @@ public class Tile implements HexPointable {
         return toRemove;
     }
 
-    public void clearWater() {
+    /**
+     * Sets this tile's water level to zero.
+     *
+     * @return the amount of water removed from this tile (i.e. its previous water level)
+     */
+    public double clearWater() {
+        final double remove = waterLevel;
         waterLevel = 0.0;
+        return remove;
     }
 
     public double getTotalWaterTraversed() {
