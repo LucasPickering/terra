@@ -43,7 +43,7 @@ public class NoiseHumidityGenerator extends NoiseGenerator {
                                                                     e.getValue(),
                                                                     noiseRange));
 
-        LOGGER.log(Level.FINEST, String.format("Noise range: %s", noiseRange));
+        LOGGER.log(Level.FINER, String.format("Noise range: %s", noiseRange));
     }
 
     private void setHumidity(Tile tile, double noise, Range<Double> noiseRange) {

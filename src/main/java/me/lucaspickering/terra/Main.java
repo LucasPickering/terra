@@ -66,7 +66,7 @@ public class Main {
         logger = Logger.getLogger(getClass().getName());
 
         seed = initRandomSeed();
-        logger.log(Level.CONFIG, "Random seed: " + seed);
+        logger.log(Level.INFO, "Random seed: " + seed);
 
         // Init event handlers
         keyHandler = new GLFWKeyCallback() {
@@ -140,7 +140,7 @@ public class Main {
     }
 
     private void initWindow() {
-        logger.log(Level.FINE, "Initializing window...");
+        logger.log(Level.INFO, "Initializing window...");
 
         // There is a bug in certain parts of AWT that causes the program to hang when
         // initialized on MacOS. This prevents those parts from being initialized.

@@ -278,7 +278,7 @@ public class WorldScreen extends Screen {
             updateChunkColors(entry.getKey(), entry.getValue());
         }
         final long endTime = System.currentTimeMillis();
-        logger.log(Level.FINEST, String.format("Color update took %d ms", endTime - startTime));
+        logger.log(Level.FINER, String.format("Color update took %d ms", endTime - startTime));
     }
 
     /**

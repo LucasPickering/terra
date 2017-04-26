@@ -69,8 +69,6 @@ public class WorldHandler {
         this.logger = Logger.getLogger(getClass().getName());
         this.seed = seed;
         this.size = size;
-
-        logger.log(Level.FINE, String.format("Using seed '%d'", seed));
     }
 
     /**
@@ -94,7 +92,7 @@ public class WorldHandler {
         }
 
         this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
-        logger.log(Level.FINE, String.format("World generation took %d ms",
+        logger.log(Level.INFO, String.format("World generation took %d ms",
                                              System.currentTimeMillis() - startTime));
 
         stepper = new FreshWaterStepper(this.world, random); // TODO remove placeholder
@@ -104,7 +102,7 @@ public class WorldHandler {
         final long startTime = System.currentTimeMillis();
         generator.generate(world, random);
         final long runTime = System.currentTimeMillis() - startTime;
-        logger.log(Level.FINER, String.format("Generator stage %s took %d ms",
+        logger.log(Level.FINE, String.format("Generator stage %s took %d ms",
                                               generator.getClass().getSimpleName(), runTime));
     }
 
