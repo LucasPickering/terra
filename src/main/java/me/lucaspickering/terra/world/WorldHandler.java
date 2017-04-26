@@ -92,8 +92,8 @@ public class WorldHandler {
         }
 
         this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
-        logger.log(Level.INFO, String.format("World generation took %d ms",
-                                             System.currentTimeMillis() - startTime));
+        final long elapsedTime = System.currentTimeMillis() - startTime; // Stop the timer
+        logger.log(Level.INFO, String.format("World generation took %d ms", elapsedTime));
 
         stepper = new FreshWaterStepper(this.world, random); // TODO remove placeholder
     }

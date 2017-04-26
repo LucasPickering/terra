@@ -111,7 +111,8 @@ public class Main {
 
     private void run() {
         try {
-            initWindow(); // Initialize the window
+            initWindow();
+            initGame();
             gameLoop(); // Run the game
         } catch (Exception e) {
             System.err.println("Error in Terra:");
@@ -139,6 +140,9 @@ public class Main {
         }
     }
 
+    /**
+     * Inits the GLFW window and OpenGL stuff
+     */
     private void initWindow() {
         logger.log(Level.INFO, "Initializing window...");
 
@@ -191,11 +195,17 @@ public class Main {
         GLFW.glfwSetCursorPosCallback(window, cursorPosHandler);
         GLFW.glfwSetFramebufferSizeCallback(window, windowResizeHandler);
 
+        lastFpsUpdate = GLFW.glfwGetTime(); // Set this for FPS calculation
+    }
+
+    /**
+     * Initializes game stuff, i.e. anything that's not OpenGL/GLFW
+     */
+    private void initGame() {
         renderer = new Renderer();
         final WorldHandler worldHandler = new WorldHandler(getSeed());
         worldHandler.generate(); // Generate a world
         currentScreen = new WorldScreen(worldHandler); // Initialize the current screen
-        lastFpsUpdate = GLFW.glfwGetTime(); // Set this for FPS calculation
     }
 
     private void gameLoop() {

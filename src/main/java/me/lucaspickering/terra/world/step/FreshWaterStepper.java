@@ -50,7 +50,7 @@ public class FreshWaterStepper extends Stepper {
 
     @Override
     public void step() {
-        world().getContinents().parallelStream().forEach(this::spreadForContinent);
+        world().getContinents().stream().forEach(this::spreadForContinent);
 
         // Convert all appropriate tiles to lakes
         // TODO
@@ -167,8 +167,8 @@ public class FreshWaterStepper extends Stepper {
     private void logStatus(Tile tile, TileSet adjTiles, double targetWaterElev) {
         // Log the center tile
         logger().log(Level.FINEST, String.format(
-            "Center tile: [%s]%nElevation: [%d]%nWater Level: [%f]%nWater Elev: [%f]",
-            tile, tile.elevation(), tile.getWaterLevel(), tile.getWaterElevation()));
+            "Center tile: [%s];Elevation: [%d];Water Level: [%f];Water Elev: [%f]",
+            tile.pos(), tile.elevation(), tile.getWaterLevel(), tile.getWaterElevation()));
 
         // Log the target water level that was calculated
         logger().log(Level.FINEST, String.format("Calculated target water level: [%f]",
@@ -177,10 +177,9 @@ public class FreshWaterStepper extends Stepper {
         // Log each adjacent tile
         for (Tile adjTile : adjTiles) {
             logger().log(Level.FINEST, String.format(
-                "Adj. tile: [%s]%nElevation: [%d]%nWater Level: [%f]%nWater Elev: [%f]",
-                adjTile, adjTile.elevation(), adjTile.getWaterLevel(),
+                "  Adj. tile: [%s];Elevation: [%d];Water Level: [%f];Water Elev: [%f]",
+                adjTile.pos(), adjTile.elevation(), adjTile.getWaterLevel(),
                 adjTile.getWaterElevation()));
         }
-        logger().log(Level.FINEST, ""); // Blank line for separation
     }
 }
