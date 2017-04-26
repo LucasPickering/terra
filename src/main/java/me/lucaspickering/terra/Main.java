@@ -115,7 +115,7 @@ public class Main {
             initGame();
             gameLoop(); // Run the game
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error in Terra:", e);
+            handleFatalException(e);
         } finally {
             tearDown(); // Shutdown
         }
@@ -228,6 +228,10 @@ public class Main {
 
             updateFPS(); // Update the FPS counter
         }
+    }
+
+    private void handleFatalException(Exception e) {
+        logger.log(Level.SEVERE, "Fatal exception:", e);
     }
 
     private void tearDown() {
