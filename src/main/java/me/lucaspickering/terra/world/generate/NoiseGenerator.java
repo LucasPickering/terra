@@ -11,13 +11,13 @@ import me.lucaspickering.utils.Pair;
 /**
  * A generator that uses a noise function to generate some type of values.
  */
-abstract class NoiseGenerator implements Generator {
+abstract class NoiseGenerator extends AbstractGenerator {
 
     private static final double VALUE_RANGE = 256.0;
 
     final Perlin noiseGenerator;
 
-    public NoiseGenerator(Perlin noiseGenerator) {
+    protected NoiseGenerator(Perlin noiseGenerator) {
         this.noiseGenerator = noiseGenerator;
     }
 

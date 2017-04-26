@@ -13,7 +13,7 @@ import me.lucaspickering.terra.world.Tile;
  * Turns all land tiles that border ocean/coast and that are below some elevation threshold into
  * beach.
  */
-public class BeachGenerator implements Generator {
+public class BeachGenerator extends AbstractGenerator {
 
     // Any tile <= this elevation that borders ocean will become beach
     private static final int MAX_BEACH_ELEV = 5;

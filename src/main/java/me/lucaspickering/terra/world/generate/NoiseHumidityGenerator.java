@@ -5,7 +5,6 @@ import com.flowpowered.noise.module.source.Perlin;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import me.lucaspickering.terra.Main;
 import me.lucaspickering.terra.world.Tile;
@@ -18,8 +17,6 @@ import me.lucaspickering.utils.range.Range;
  * Uses a noise function to generate humidity values for each tile.
  */
 public class NoiseHumidityGenerator extends NoiseGenerator {
-
-    private static final Logger LOGGER = Logger.getLogger(NoiseHumidityGenerator.class.getName());
 
     public NoiseHumidityGenerator() {
         super(new Perlin());
@@ -43,7 +40,7 @@ public class NoiseHumidityGenerator extends NoiseGenerator {
                                                                     e.getValue(),
                                                                     noiseRange));
 
-        LOGGER.log(Level.FINER, String.format("Noise range: %s", noiseRange));
+        logger().log(Level.FINER, String.format("Noise range: %s", noiseRange));
     }
 
     private void setHumidity(Tile tile, double noise, Range<Double> noiseRange) {

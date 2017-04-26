@@ -5,7 +5,6 @@ import com.flowpowered.noise.module.source.Perlin;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import me.lucaspickering.terra.Main;
 import me.lucaspickering.terra.world.Tile;
@@ -18,8 +17,6 @@ import me.lucaspickering.utils.range.Range;
  * Uses a noise function (Perlin) to generate elevation and humidity values for each tile.
  */
 public class NoiseElevationGenerator extends NoiseGenerator {
-
-    private static final Logger LOGGER = Logger.getLogger(NoiseElevationGenerator.class.getName());
 
     public NoiseElevationGenerator() {
         super(new Perlin());
@@ -42,7 +39,7 @@ public class NoiseElevationGenerator extends NoiseGenerator {
                                                                      e.getValue(),
                                                                      noiseRange));
 
-        LOGGER.log(Level.FINER, String.format("Noise range: %s", noiseRange));
+        logger().log(Level.FINER, String.format("Noise range: %s", noiseRange));
     }
 
     private void setElevation(Tile tile, double noise, Range<Double> noiseRange) {

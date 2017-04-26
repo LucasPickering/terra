@@ -15,7 +15,7 @@ import me.lucaspickering.terra.world.util.HexPointMap;
  * change anymore. It should obviously be done before any operations that rely on having accurate
  * continent clusters.
  */
-public class ContinentClusterer implements Generator {
+public class ContinentClusterer extends AbstractGenerator {
 
     @Override
     public void generate(World world, Random random) {

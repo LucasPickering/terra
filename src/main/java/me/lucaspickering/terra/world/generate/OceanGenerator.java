@@ -15,7 +15,7 @@ import me.lucaspickering.utils.GeneralFuncs;
  * an ocean. Otherwise, it has a random chance to become an ocean, with that chance being
  * proportional to its size.
  */
-public class OceanGenerator implements Generator {
+public class OceanGenerator extends AbstractGenerator {
 
     private static final int MIN_OCEAN_SIZE = 50; // Minimum size to be considered an ocean
     private static final int MIN_COAST_DEPTH = -5; // Everything in an ocean >= this is coast

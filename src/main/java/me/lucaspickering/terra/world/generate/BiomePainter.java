@@ -15,7 +15,7 @@ import me.lucaspickering.terra.world.World;
  * ocean, lake) later on, and can have the elevation adjusted. This is a very early step in the
  * generation process.
  */
-public class BiomePainter implements Generator {
+public class BiomePainter extends AbstractGenerator {
 
     // Basically a typedef, for convenience
     private interface BiomeFunction extends BiPredicate<Integer, Double> {
