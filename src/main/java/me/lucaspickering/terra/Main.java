@@ -115,8 +115,7 @@ public class Main {
             initGame();
             gameLoop(); // Run the game
         } catch (Exception e) {
-            System.err.println("Error in Terra:");
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error in Terra:", e);
         } finally {
             tearDown(); // Shutdown
         }
