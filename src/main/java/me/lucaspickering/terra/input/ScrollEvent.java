@@ -1,4 +1,4 @@
-package me.lucaspickering.terra.render.event;
+package me.lucaspickering.terra.input;
 
 import me.lucaspickering.utils.Point;
 

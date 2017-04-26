@@ -1,10 +1,10 @@
-package me.lucaspickering.terra.render.event;
+package me.lucaspickering.terra.input;
 
 public abstract class Event {
 
     public final long window;
 
-    Event(long window) {
+    protected Event(long window) {
         this.window = window;
     }
 }

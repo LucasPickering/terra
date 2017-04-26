@@ -1,12 +1,7 @@
 package me.lucaspickering.terra;
 
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.glfw.GLFWScrollCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
@@ -16,10 +11,8 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import me.lucaspickering.terra.input.InputHandler;
 import me.lucaspickering.terra.render.Renderer;
-import me.lucaspickering.terra.render.event.KeyEvent;
-import me.lucaspickering.terra.render.event.MouseButtonEvent;
-import me.lucaspickering.terra.render.event.ScrollEvent;
 import me.lucaspickering.terra.render.screen.Screen;
 import me.lucaspickering.terra.render.screen.WorldScreen;
 import me.lucaspickering.terra.util.Colors;
@@ -34,19 +27,13 @@ public class Main {
     private final long seed;
     private boolean debug; // True if we are in debug mode
 
-    // These event handlers are initialized at the bottom
-    private final GLFWKeyCallback keyHandler;
-    private final GLFWMouseButtonCallback mouseButtonHandler;
-    private final GLFWScrollCallback scrollHandler;
-    private final GLFWCursorPosCallback cursorPosHandler;
-    private final GLFWFramebufferSizeCallback windowResizeHandler;
+    private final InputHandler inputHandler;
 
     private long window;
     private Renderer renderer;
     private Screen currentScreen;
     private int windowWidth;
     private int windowHeight;
-    private Point mousePos = Point.ZERO;
     private double lastFpsUpdate; // Time of the last FPS update, in seconds
     private int framesSinceCheck; // Number of frames since the last FPS update
     private int fps; // Current framerate
@@ -68,45 +55,7 @@ public class Main {
         seed = initRandomSeed();
         logger.log(Level.INFO, "Random seed: " + seed);
 
-        // Init event handlers
-        keyHandler = new GLFWKeyCallback() {
-            @Override
-            public void invoke(long window, int key, int scancode, int action, int mods) {
-                currentScreen.onKey(new KeyEvent(window, key, scancode, action, mods));
-            }
-        };
-        mouseButtonHandler = new GLFWMouseButtonCallback() {
-            @Override
-            public void invoke(long window, int button, int action, int mods) {
-                if (currentScreen.contains(mousePos)) {
-                    currentScreen.onClick(new MouseButtonEvent(window, button, action, mods,
-                                                               mousePos));
-                }
-            }
-        };
-        scrollHandler = new GLFWScrollCallback() {
-            @Override
-            public void invoke(long window, double xOffset, double yOffset) {
-                if (currentScreen.contains(mousePos)) {
-                    currentScreen.onScroll(new ScrollEvent(window, xOffset, yOffset, mousePos));
-                }
-            }
-        };
-        cursorPosHandler = new GLFWCursorPosCallback() {
-            @Override
-            public void invoke(long window, double xPos, double yPos) {
-                // Scale the cursor coordinates to fit the coords that everything is drawn at.
-                mousePos = new Point((int) (xPos * Renderer.RES_WIDTH / windowWidth),
-                                     (int) (yPos * Renderer.RES_HEIGHT / windowHeight));
-            }
-        };
-        windowResizeHandler = new GLFWFramebufferSizeCallback() {
-            @Override
-            public void invoke(long window, int width, int height) {
-                setWindowSize(width, height);
-                GL11.glViewport(0, 0, windowWidth, windowHeight);
-            }
-        };
+        inputHandler = new InputHandler(this);
     }
 
     private void run() {
@@ -166,7 +115,8 @@ public class Main {
 
         // Set default size to half the monitor resolution
         final GLFWVidMode vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
-        setWindowSize(vidmode.width() / 2, vidmode.height() / 2);
+        windowWidth = vidmode.width() / 2;
+        windowHeight = vidmode.height() / 2;
 
         // Create the window
         window = GLFW.glfwCreateWindow(windowWidth, windowHeight, "Terra", MemoryUtil.NULL,
@@ -188,13 +138,11 @@ public class Main {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         // Initialize input handlers
-        GLFW.glfwSetKeyCallback(window, keyHandler);
-        GLFW.glfwSetMouseButtonCallback(window, mouseButtonHandler);
-        GLFW.glfwSetScrollCallback(window, scrollHandler);
-        GLFW.glfwSetCursorPosCallback(window, cursorPosHandler);
-        GLFW.glfwSetFramebufferSizeCallback(window, windowResizeHandler);
-
-        lastFpsUpdate = GLFW.glfwGetTime(); // Set this for FPS calculation
+        GLFW.glfwSetKeyCallback(window, inputHandler::onKey);
+        GLFW.glfwSetMouseButtonCallback(window, inputHandler::onMouseButton);
+        GLFW.glfwSetScrollCallback(window, inputHandler::onScroll);
+        GLFW.glfwSetCursorPosCallback(window, inputHandler::onCursorPos);
+        GLFW.glfwSetFramebufferSizeCallback(window, inputHandler::onWindowResize);
     }
 
     /**
@@ -211,7 +159,7 @@ public class Main {
         while (!GLFW.glfwWindowShouldClose(window)) {
             GLFW.glfwPollEvents(); // Poll for events (key, mouse, etc.)
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); // Clear framebuffer
-            currentScreen.draw(mousePos);
+            currentScreen.draw(inputHandler.getMousePos());
             GLFW.glfwSwapBuffers(window); // Swap the color buffers
 
             // If the current screen says to change to another screen, do that
@@ -240,12 +188,6 @@ public class Main {
             renderer.deleteTexturesAndFonts(); // Free up texture memory
         }
 
-        // Release callbacks
-        keyHandler.free();
-        mouseButtonHandler.free();
-        cursorPosHandler.free();
-        windowResizeHandler.free();
-
         GLFW.glfwDestroyWindow(window); // Destroy the window
         GLFW.glfwTerminate(); // Terminate GLFW
         GLFW.glfwSetErrorCallback(null).free(); // Need to wipe this out
@@ -258,20 +200,17 @@ public class Main {
         GLFW.glfwSetWindowShouldClose(window, true);
     }
 
-    private void setWindowSize(int width, int height) {
-        windowWidth = width;
-        windowHeight = height;
-    }
-
     private void updateFPS() {
-        // If it's been more than a second since the last loop...
-        if (GLFW.glfwGetTime() - lastFpsUpdate >= 1.0) {
+        framesSinceCheck++;
+
+        // If it's been at least a second since the last loop...
+        final double time = GLFW.glfwGetTime();
+        if (time - lastFpsUpdate >= 1.0) {
             // Recalculate fps
             fps = framesSinceCheck;
             framesSinceCheck = 0;
-            lastFpsUpdate++;
+            lastFpsUpdate = time;
         }
-        framesSinceCheck++;
     }
 
     public boolean getDebug() {
@@ -292,5 +231,20 @@ public class Main {
 
     public int getFps() {
         return fps;
+    }
+
+    public void resizeWindow(int width, int height) {
+        windowWidth = width;
+        windowHeight = height;
+        GL11.glViewport(0, 0, windowWidth, windowHeight);
+    }
+
+    public Screen getCurrentScreen() {
+        return currentScreen;
+    }
+
+    public Point scaleMousePos(double xPos, double yPos) {
+        return new Point(xPos * Renderer.RES_WIDTH / windowWidth,
+                         yPos * Renderer.RES_HEIGHT / windowHeight);
     }
 }

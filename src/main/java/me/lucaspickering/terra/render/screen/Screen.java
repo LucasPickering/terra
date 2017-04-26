@@ -9,11 +9,12 @@ import java.util.List;
 import java.util.Objects;
 
 import me.lucaspickering.terra.Main;
+import me.lucaspickering.terra.input.ButtonAction;
+import me.lucaspickering.terra.input.KeyEvent;
+import me.lucaspickering.terra.input.MouseButtonEvent;
+import me.lucaspickering.terra.input.ScrollEvent;
 import me.lucaspickering.terra.render.Font;
 import me.lucaspickering.terra.render.Renderer;
-import me.lucaspickering.terra.render.event.KeyEvent;
-import me.lucaspickering.terra.render.event.MouseButtonEvent;
-import me.lucaspickering.terra.render.event.ScrollEvent;
 import me.lucaspickering.terra.render.screen.gui.GuiElement;
 import me.lucaspickering.utils.Point;
 
@@ -44,7 +45,7 @@ public abstract class Screen implements ScreenElement {
             .forEach(element -> drawElement(mousePos, element)); // Draw each element
 
         // If debug mode is enabled, draw debug info
-        if (getMain().getDebug()) {
+        if (main.getDebug()) {
             drawDebugInfo();
         }
 
@@ -61,11 +62,11 @@ public abstract class Screen implements ScreenElement {
     }
 
     private void drawDebugInfo() {
-        final String debugString = String.format(DEBUG_FORMAT, getMain().getFps());
+        final String debugString = String.format(DEBUG_FORMAT, main().getFps());
         renderer().drawString(Font.DEBUG, debugString, 10, 10); // Draw FPS
     }
 
-    public final Main getMain() {
+    protected final Main main() {
         return main;
     }
 
@@ -130,11 +131,11 @@ public abstract class Screen implements ScreenElement {
      * @param event the event that occurred
      */
     public void onKey(KeyEvent event) {
-        if (event.action == GLFW.GLFW_RELEASE) {
+        if (event.action == ButtonAction.RELEASE) {
             switch (event.key) {
                 case GLFW.GLFW_KEY_F9:
                     // Toggle debug mode
-                    final Main main = getMain();
+                    final Main main = main();
                     main.setDebug(!main.getDebug());
                     break;
             }
@@ -148,7 +149,7 @@ public abstract class Screen implements ScreenElement {
      */
     public void onClick(MouseButtonEvent event) {
         // Call onElementClicked for all GUI elements that contain the cursor
-        if (event.button == GLFW.GLFW_MOUSE_BUTTON_1 && event.action == GLFW.GLFW_RELEASE) {
+        if (event.button == GLFW.GLFW_MOUSE_BUTTON_1 && event.action == ButtonAction.RELEASE) {
             guiElements.stream()
                 .filter(element -> element.isEnabled() && element.contains(event.mousePos))
                 .forEach(element -> onElementClicked(event, element));

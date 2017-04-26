@@ -11,10 +11,11 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import me.lucaspickering.terra.input.ButtonAction;
+import me.lucaspickering.terra.input.KeyEvent;
+import me.lucaspickering.terra.input.MouseButtonEvent;
+import me.lucaspickering.terra.input.ScrollEvent;
 import me.lucaspickering.terra.render.VertexBufferObject;
-import me.lucaspickering.terra.render.event.KeyEvent;
-import me.lucaspickering.terra.render.event.MouseButtonEvent;
-import me.lucaspickering.terra.render.event.ScrollEvent;
 import me.lucaspickering.terra.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terra.util.Colors;
 import me.lucaspickering.terra.util.Funcs;
@@ -331,7 +332,7 @@ public class WorldScreen extends Screen {
 
     @Override
     public void onKey(KeyEvent event) {
-        if (event.action == GLFW.GLFW_RELEASE) {
+        if (event.action == ButtonAction.RELEASE) {
             final int key = event.key;
             switch (key) {
                 case GLFW.GLFW_KEY_ESCAPE:
@@ -367,10 +368,10 @@ public class WorldScreen extends Screen {
     public void onClick(MouseButtonEvent event) {
         switch (event.button) {
             case GLFW.GLFW_MOUSE_BUTTON_1:
-                if (event.action == GLFW.GLFW_PRESS) {
+                if (event.action == ButtonAction.PRESS) {
                     lastMouseDragPos = event.mousePos;
                     mouseDownTime = System.currentTimeMillis();
-                } else if (event.action == GLFW.GLFW_RELEASE) {
+                } else if (event.action == ButtonAction.RELEASE) {
                     // If the elapsed time between mouse down and up is below a threshold, call it a click
                     if (System.currentTimeMillis() - mouseDownTime
                         <= WorldScreenHelper.MAX_CLICK_TIME) {
