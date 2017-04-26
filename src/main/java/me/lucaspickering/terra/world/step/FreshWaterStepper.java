@@ -167,17 +167,17 @@ public class FreshWaterStepper extends Stepper {
     private void logStatus(Tile tile, TileSet adjTiles, double targetWaterElev) {
         // Log the center tile
         logger().log(Level.FINEST, String.format(
-            "Center tile: [%s];Elevation: [%d];Water Level: [%f];Water Elev: [%f]",
+            "Center tile: [%s]  Elevation: [%d]  Water Level: [%f]  Water Elev: [%f]",
             tile.pos(), tile.elevation(), tile.getWaterLevel(), tile.getWaterElevation()));
 
         // Log the target water level that was calculated
-        logger().log(Level.FINEST, String.format("Calculated target water level: [%f]",
+        logger().log(Level.FINEST, String.format("  Calculated target water level: [%f]",
                                                  targetWaterElev));
 
         // Log each adjacent tile
         for (Tile adjTile : adjTiles) {
             logger().log(Level.FINEST, String.format(
-                "  Adj. tile: [%s];Elevation: [%d];Water Level: [%f];Water Elev: [%f]",
+                "  Adj. tile: [%s]  Elevation: [%d]  Water Level: [%f]  Water Elev: [%f]",
                 adjTile.pos(), adjTile.elevation(), adjTile.getWaterLevel(),
                 adjTile.getWaterElevation()));
         }
