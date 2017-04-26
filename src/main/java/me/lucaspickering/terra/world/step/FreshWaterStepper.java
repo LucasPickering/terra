@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import me.lucaspickering.terra.world.Continent;
@@ -29,26 +30,27 @@ public class FreshWaterStepper extends Stepper {
     private static final double RAINFALL = 0.5;
     private static final double LAKE_THRESHOLD = 1.0;
     private static final double RIVER_THRESHOLD = 10.0;
-    private static final double WATER_STEP = 0.1;
-
-    private final List<Tile> sortedTiles;
+    private static final double TOLERABLE_CHANGE_THRESHOLD = 0.01;
 
     public FreshWaterStepper(World world, Random random) {
         super(world, random);
+        initWaterLevels();
+    }
 
-        // Sort all land tiles by ascending elevation
-        sortedTiles = world.getTiles().stream()
-            .filter(t -> t.biome().isLand()) // Filter out water tiles
-            .sorted((t1, t2) -> Integer.compare(t2.elevation(), t1.elevation())) // Sort - desc elev
-            .collect(Collectors.toList());
-
-        // Init each land tile with some rainwater
-        sortedTiles.forEach(t -> t.addWater(RAINFALL)); // Init each tile with some water
+    /**
+     * Initializes each land to a default water level.
+     */
+    private void initWaterLevels() {
+        for (Continent continent : world().getContinents()) {
+            for (Tile tile : continent.getTiles()) {
+                tile.addWater(RAINFALL);
+            }
+        }
     }
 
     @Override
     public void step() {
-        getWorld().getContinents().parallelStream().forEach(this::spreadForContinent);
+        world().getContinents().parallelStream().forEach(this::spreadForContinent);
 
         // Convert all appropriate tiles to lakes
         // TODO
@@ -70,10 +72,8 @@ public class FreshWaterStepper extends Stepper {
     }
 
     private void equalizeWater(Tile tile) {
-        final double midWaterLevel = tile.getWaterLevel();
-        final double midWaterElev = tile.getWaterElevation();
         final Collection<Tile> adjTiles =
-            getWorld().getTiles().getAdjacentTiles(tile.pos()).values();
+            world().getTiles().getAdjacentTiles(tile.pos()).values();
 
         // If this tile is adjacent to a water tile, just dump all our water in there
         for (Tile adjTile : adjTiles) {
@@ -85,56 +85,24 @@ public class FreshWaterStepper extends Stepper {
 
         // Get all tiles adjacent to this one with a lower water elevation
         final TileSet lowerTiles = adjTiles.stream()
-            .filter(adj -> adj.getWaterElevation() < midWaterElev)
+            .filter(adj -> adj.getWaterElevation() < tile.getWaterElevation())
             .collect(Collectors.toCollection(TileSet::new));
 
         final double targetWaterElev = getTargetWaterElev(tile, lowerTiles);
 
+        logStatus(tile, lowerTiles, targetWaterElev); // Log for debugging
+
         // If there are any lower tiles to pass water onto, do that
         if (lowerTiles.size() > 0) {
-            double totalWaterChanged = 0.0; // TODO remove
-            double waterNeeded = 0.0;
-
-            for (Tile workingTile : lowerTiles) {
-                final double diff = targetWaterElev - workingTile.getWaterElevation();
-                waterNeeded += diff;
-            }
-
-            // If we need more water to equalize than is available on this tile, just distribute
-            // all the water on this tile evenly and let the other tiles deal with equalization
-            if (waterNeeded > midWaterLevel) {
-                for (Tile workingTile : lowerTiles) {
-                    totalWaterChanged += workingTile.addWater(midWaterLevel / lowerTiles.size());
-                }
-            } else {
-                // Modify the water level on each tile to match the target water elevation
-                for (Tile workingTile : lowerTiles) {
-                    final double diff = targetWaterElev - workingTile.getWaterElevation();
-                    if (diff > 0.0) {
-                        totalWaterChanged += workingTile.addWater(diff);
-                    }
-                    if (diff < 0.0) {
-                        totalWaterChanged -= tile.removeWater(-diff);
-                    }
-                }
-            }
-
-            // Remove water from this tile to make it hit the target elevation. If the target is
-            // lower than this tile's elevation, just remove all the water
-            totalWaterChanged -= tile.removeWater(midWaterElev - targetWaterElev);
-
-            if (Math.abs(totalWaterChanged) > 0.01) {
-                System.out.printf("Unaccounted water: [%f] change for [%s]%n",
-                                  totalWaterChanged, tile);
-            }
+            setWaterLevels(tile, lowerTiles, targetWaterElev);
         }
     }
 
-    private double getTargetWaterElev(Tile center, TileSet adjTiles) {
+    private double getTargetWaterElev(Tile tile, TileSet adjTiles) {
         // Calculate the average water elevation across the center tile and its adjacents
         final double totalWaterElev = adjTiles.stream()
                                           .mapToDouble(Tile::getWaterElevation)
-                                          .sum() + center.getWaterElevation();
+                                          .sum() + tile.getWaterElevation();
         final double targetWaterElev = totalWaterElev / (adjTiles.size() + 1);
 
         // Remove any tiles that are too high to get water on them. Move their water onto the
@@ -144,7 +112,7 @@ public class FreshWaterStepper extends Stepper {
         while (iter.hasNext()) {
             final Tile adjTile = iter.next();
             if (adjTile.elevation() > targetWaterElev) {
-                center.addWater(adjTile.getWaterLevel());
+                tile.addWater(adjTile.getWaterLevel());
                 adjTile.clearWater();
                 iter.remove();
                 changed = true;
@@ -154,8 +122,65 @@ public class FreshWaterStepper extends Stepper {
         // If we removed any tiles from the set, then try again with fewer tiles. Otherwise,
         // our answer is valid so return it.
         if (changed) {
-            return getTargetWaterElev(center, adjTiles);
+            return getTargetWaterElev(tile, adjTiles);
         }
         return targetWaterElev;
+    }
+
+    private void setWaterLevels(Tile tile, TileSet adjTiles, double targetWaterElev) {
+        double totalWaterChanged = 0.0; // Used to ensure that no water gets added or removed
+
+        // Water needed to equalize across all adjacent tiles
+        final double waterNeeded = adjTiles.stream()
+            .mapToDouble(t -> targetWaterElev - t.getWaterElevation())
+            .sum();
+
+        // If we need more water to equalize than is available on this tile, just distribute
+        // all the water on this tile evenly and let the other tiles deal with equalization
+        if (waterNeeded > tile.getWaterLevel()) {
+            for (Tile adjTile : adjTiles) {
+                totalWaterChanged += adjTile.addWater(tile.getWaterLevel() / adjTiles.size());
+            }
+        } else {
+            // Modify the water level on each tile to match the target water elevation
+            for (Tile adjTile : adjTiles) {
+                final double diff = targetWaterElev - adjTile.getWaterElevation();
+                if (diff > 0.0) {
+                    totalWaterChanged += adjTile.addWater(diff);
+                }
+                if (diff < 0.0) {
+                    totalWaterChanged -= tile.removeWater(-diff);
+                }
+            }
+        }
+
+        // Remove water from this tile to make it hit the target elevation
+        final double toRemove = tile.getWaterElevation() - targetWaterElev;
+        totalWaterChanged -= tile.removeWater(toRemove);
+
+        if (Math.abs(totalWaterChanged) > TOLERABLE_CHANGE_THRESHOLD) {
+            throw new IllegalStateException(String.format("Intolerable water change [%f] for [%s]",
+                                                          totalWaterChanged, tile));
+        }
+    }
+
+    private void logStatus(Tile tile, TileSet adjTiles, double targetWaterElev) {
+        // Log the center tile
+        logger().log(Level.FINEST, String.format(
+            "Center tile: [%s]%nElevation: [%d]%nWater Level: [%f]%nWater Elev: [%f]",
+            tile, tile.elevation(), tile.getWaterLevel(), tile.getWaterElevation()));
+
+        // Log the target water level that was calculated
+        logger().log(Level.FINEST, String.format("Calculated target water level: [%f]",
+                                                 targetWaterElev));
+
+        // Log each adjacent tile
+        for (Tile adjTile : adjTiles) {
+            logger().log(Level.FINEST, String.format(
+                "Adj. tile: [%s]%nElevation: [%d]%nWater Level: [%f]%nWater Elev: [%f]",
+                adjTile, adjTile.elevation(), adjTile.getWaterLevel(),
+                adjTile.getWaterElevation()));
+        }
+        logger().log(Level.FINEST, ""); // Blank line for separation
     }
 }
