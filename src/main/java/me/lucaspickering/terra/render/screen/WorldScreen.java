@@ -1,20 +1,17 @@
 package me.lucaspickering.terra.render.screen;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL30;
 
 import java.awt.Color;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import me.lucaspickering.terra.render.VertexBufferObject;
 import me.lucaspickering.terra.render.event.KeyEvent;
 import me.lucaspickering.terra.render.event.MouseButtonEvent;
 import me.lucaspickering.terra.render.event.ScrollEvent;
@@ -46,17 +43,14 @@ public class WorldScreen extends Screen {
 
     private final Logger logger;
 
-    // We frequently have to use float arrays for color purposes, so just allocate one
-    private final float[] colorArray = new float[WorldScreenHelper.COLOR_SIZE];
-
     // CHUNK VBO FIELDS
-    private int chunkVertexHandle;
-    private final HexPointMap<Chunk, Integer> chunkColorHandles = new HexPointMap<>();
+    private int chunkVertexHandle = -1; // -1 indicates it hasn't been set yet
+    private final HexPointMap<Chunk, VertexBufferObject> chunkVbos = new HexPointMap<>();
     private final int[] startingIndices = new int[Chunk.TOTAL_TILES];
     private final int[] sizes = new int[Chunk.TOTAL_TILES];
 
     private int hexVertexHandle;
-    private int mouseOverColorHandle;
+    private VertexBufferObject mouseOverVbo;
 
     public WorldScreen(WorldHandler worldHandler) {
         Objects.requireNonNull(worldHandler);
@@ -71,91 +65,77 @@ public class WorldScreen extends Screen {
     }
 
     private void initVbos() {
-        initChunkVertexVbo();
-        for (Chunk chunk : worldHandler.getWorld().getChunks()) {
-            initChunkVbo(chunk);
-        }
-        initHexVbos(); // Init single-tile VBOs, such as mouse-over highlight
-    }
-
-    private void initChunkVertexVbo() {
-        // Allocate the vertex buffer
-        final DoubleBuffer vertexBuffer = BufferUtils.createDoubleBuffer(
-            WorldScreenHelper.VERTEX_SIZE * WorldScreenHelper.NUM_VERTICES * Chunk.TOTAL_TILES);
-
-        // Populate the buffer with each vertex for each tile
-        for (int x = 0; x < Chunk.SIDE_LENGTH; x++) {
-            for (int y = 0; y < Chunk.SIDE_LENGTH; y++) {
-                final Point tileCenter = WorldScreenHelper.tileToPixel(new HexPoint(x, y));
-                for (Point vertex : WorldScreenHelper.TILE_VERTICES) {
-                    // Shift this vertex by the tile's center, and add it to the buffer
-                    vertexBuffer.put(tileCenter.x() + vertex.x());
-                    vertexBuffer.put(tileCenter.y() + vertex.y());
-                }
-            }
-        }
-        vertexBuffer.flip();
-
-        // Bind the buffer to the GL
-        chunkVertexHandle = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, chunkVertexHandle);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexBuffer, GL15.GL_STATIC_DRAW);
-        GL30.glBindVertexArray(0);
-
         // Populate the array that tells GL which vertex to start at for each polygon, and
         // another that tells it how big (in vertices) each polygon is.
         for (int i = 0; i < Chunk.TOTAL_TILES; i++) {
             startingIndices[i] = i * WorldScreenHelper.NUM_VERTICES;
             sizes[i] = WorldScreenHelper.NUM_VERTICES;
         }
+
+        for (Chunk chunk : worldHandler.getWorld().getChunks()) {
+            initChunkVbo(chunk);
+        }
+
+        initHexVbos(); // Init single-tile VBOs, such as mouse-over highlight
     }
 
     private void initChunkVbo(Chunk chunk) {
+        // Save this chunk's position on the screen
         chunk.setScreenPos(WorldScreenHelper.chunkToPixel(chunk.getPos()));
 
-        // Allocate the color buffer
-        final FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(
-            WorldScreenHelper.COLOR_SIZE * WorldScreenHelper.NUM_VERTICES * Chunk.TOTAL_TILES);
+        // Create a VBO for the chunk
+        final VertexBufferObject vbo = new VertexBufferObject.Builder()
+            .setNumVertices(WorldScreenHelper.NUM_VERTICES * Chunk.TOTAL_TILES)
+            .setDrawFunction(() -> GL14.glMultiDrawArrays(GL11.GL_TRIANGLE_FAN,
+                                                          startingIndices, sizes))
+            .build();
 
-        // Bind the color buffer to the GL
-        final int colorHandle = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorHandle);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_DYNAMIC_DRAW);
-        GL30.glBindVertexArray(0);
+        // If this is the first chunk VBO to be initialized, we need to create the vertex VBO.
+        // Otherwise, use the pre-existing VBO.
+        if (chunkVertexHandle == -1) {
+            // Add vertices for each tile in the chunk
+            for (int x = 0; x < Chunk.SIDE_LENGTH; x++) {
+                for (int y = 0; y < Chunk.SIDE_LENGTH; y++) {
+                    final Point tileCenter = WorldScreenHelper.tileToPixel(new HexPoint(x, y));
+                    for (Point vertex : WorldScreenHelper.TILE_VERTICES) {
+                        // Shift this vertex by the tile's center, and add it to the VBO
+                        vbo.addVertex(tileCenter.plus(vertex));
+                    }
+                }
+            }
+            vbo.bindVertexBuffer(GL15.GL_STATIC_DRAW);
+            chunkVertexHandle = vbo.getVertexHandle();
+        } else {
+            // The vertex VBO was initialized already, just use its handle
+            vbo.setVertexHandle(chunkVertexHandle);
+        }
+
+        vbo.bindColorBuffer(GL15.GL_DYNAMIC_DRAW); // Bind the color buffer now and populate later
 
         // Put the handle in the map, then populate the buffer with the correct colors
-        chunkColorHandles.put(chunk, colorHandle);
-        updateChunkColors(chunk, colorHandle);
+        chunkVbos.put(chunk, vbo);
+        updateChunkColors(chunk, vbo);
     }
 
     private void initHexVbos() {
-        // Allocate the buffers
-        final DoubleBuffer vertexBuffer = BufferUtils.createDoubleBuffer(
-            WorldScreenHelper.VERTEX_SIZE * WorldScreenHelper.NUM_VERTICES);
-        final FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(
-            WorldScreenHelper.COLOR_SIZE * WorldScreenHelper.NUM_VERTICES);
+        // Initialize the mouse-over VBO
+        mouseOverVbo = new VertexBufferObject.Builder()
+            .setNumVertices(WorldScreenHelper.NUM_VERTICES)
+            .setColorMode(VertexBufferObject.ColorMode.RGBA)
+            .setDrawFunction(() -> GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, 0,
+                                                     WorldScreenHelper.NUM_VERTICES))
+            .build();
 
-        // Populate the buffer with each vertex
-        Colors.MOUSE_OVER.getColorComponents(colorArray);
+        // Add each vertex in the tile, with corresponding color
         for (Point vertex : WorldScreenHelper.TILE_VERTICES) {
-            vertexBuffer.put(vertex.x());
-            vertexBuffer.put(vertex.y());
-            colorBuffer.put(colorArray);
+            mouseOverVbo.addVertex(vertex);
+            mouseOverVbo.addColor(Colors.MOUSE_OVER);
         }
-        vertexBuffer.flip();
-        colorBuffer.flip();
 
-        // Bind the buffer to the GL
-        hexVertexHandle = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, hexVertexHandle);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexBuffer, GL15.GL_STATIC_DRAW);
-        GL30.glBindVertexArray(0);
+        mouseOverVbo.bindVertexBuffer(GL15.GL_STATIC_DRAW);
+        mouseOverVbo.bindColorBuffer(GL15.GL_STATIC_DRAW);
 
-        // Bind the color buffer for the mouse highlight overlay to the GL
-        mouseOverColorHandle = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, mouseOverColorHandle);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, GL15.GL_STATIC_DRAW);
-        GL30.glBindVertexArray(0);
+        hexVertexHandle = mouseOverVbo.getVertexHandle(); // Save this for future hexagons
     }
 
     @Override
@@ -172,7 +152,7 @@ public class WorldScreen extends Screen {
         GL11.glScaled(worldScale, worldScale, 1.0);
 
         // Draw each chunk
-        for (Map.Entry<Chunk, Integer> entry : chunkColorHandles.entrySet()) {
+        for (Map.Entry<Chunk, VertexBufferObject> entry : chunkVbos.entrySet()) {
             drawChunk(entry.getKey(), entry.getValue());
         }
 
@@ -226,55 +206,24 @@ public class WorldScreen extends Screen {
         GL11.glPushMatrix();
         GL11.glTranslated(tilePos.x(), tilePos.y(), 0.0);
 
-        // Set up the vertex buffer
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, hexVertexHandle);
-        GL11.glVertexPointer(WorldScreenHelper.VERTEX_SIZE, GL11.GL_DOUBLE, 0, 0L);
-
-        // Set up the color buffer
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, mouseOverColorHandle);
-        GL11.glColorPointer(WorldScreenHelper.COLOR_SIZE, GL11.GL_FLOAT, 0, 0L);
-
-        GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-        GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
-
-        // Draw all tiles in the chunk
-        GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, 0, WorldScreenHelper.NUM_VERTICES);
-
-        GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
-        GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
+        mouseOverVbo.draw();
 
         GL11.glPopMatrix();
     }
 
-    private void drawChunk(Chunk chunk, int colorHandle) {
+    private void drawChunk(Chunk chunk, VertexBufferObject vbo) {
         // Translate to this chunk's pixel position
-        final Point chunkPos = chunk.getScreenPos();
         GL11.glPushMatrix();
-        GL11.glTranslated(chunkPos.x(), chunkPos.y(), 0.0);
+        GL11.glTranslated(chunk.getScreenPos().x(), chunk.getScreenPos().y(), 0.0);
 
-        // Set up the vertex buffer
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, chunkVertexHandle);
-        GL11.glVertexPointer(WorldScreenHelper.VERTEX_SIZE, GL11.GL_DOUBLE, 0, 0L);
-
-        // Set up the color buffer
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorHandle);
-        GL11.glColorPointer(WorldScreenHelper.COLOR_SIZE, GL11.GL_FLOAT, 0, 0L);
-
-        GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-        GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
-
-        // Draw all tiles in the chunk
-        GL14.glMultiDrawArrays(GL11.GL_TRIANGLE_FAN, startingIndices, sizes);
-
-        GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
-        GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
+        vbo.draw();
 
         GL11.glPopMatrix();
     }
 
     private void updateAllTileColors() {
         final long startTime = System.currentTimeMillis();
-        for (Map.Entry<Chunk, Integer> entry : chunkColorHandles.entrySet()) {
+        for (Map.Entry<Chunk, VertexBufferObject> entry : chunkVbos.entrySet()) {
             updateChunkColors(entry.getKey(), entry.getValue());
         }
         final long endTime = System.currentTimeMillis();
@@ -282,38 +231,22 @@ public class WorldScreen extends Screen {
     }
 
     /**
-     * Updates the color of each tile in the given chunk. The chunk's VBO handles are passed so
-     * that they don't have to be looked up. This is generally going to be called from iteration
-     * over all chunks, so the handles should be readily available and lookup can be avoided.
+     * Updates the color of each tile in the given chunk. The chunk's VBO is passed so it doesn't
+     * have to be looked up. This is generally going to be called from iteration over all chunks,
+     * so the VBO should be readily available and lookup can be avoided.
      *
-     * @param chunk       the chunk to update
-     * @param colorHandle the handle for the given chunk's color VBO
+     * @param chunk the chunk to update
+     * @param vbo   the vbo for this chunk
      */
-    private void updateChunkColors(Chunk chunk, int colorHandle) {
+    private void updateChunkColors(Chunk chunk, VertexBufferObject vbo) {
         // Bind the handle for the color buffer
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorHandle);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.getColorHandle());
         long offset = 0;
         for (Tile tile : chunk.getTiles()) {
-            updateColor(getTileColor(tile), offset);
-            offset += WorldScreenHelper.COLOR_SIZE_BYTES * WorldScreenHelper.NUM_VERTICES;
-        }
-    }
-
-    /**
-     * Updates the color at the given offset in the buffer that is currently bound. The color buffer
-     * MUST be bound before calling this(using {@link GL15#glBindBuffer(int, int)}, or it will not
-     * work.
-     *
-     * @param color  the new color
-     * @param offset the byte offset for the tile whose color you want to change
-     */
-    private void updateColor(Color color, long offset) {
-        color.getColorComponents(colorArray);
-
-        // Change the color for each vertex of this tile
-        for (int i = 0; i < WorldScreenHelper.NUM_VERTICES; i++) {
-            GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset, colorArray);
-            offset += WorldScreenHelper.COLOR_SIZE_BYTES; // Move up to the next color
+            final Color color = getTileColor(tile);
+            for (int i = 0; i < WorldScreenHelper.NUM_VERTICES; i++) {
+                offset += vbo.setVertexColor(offset, color);
+            }
         }
     }
 
