@@ -18,6 +18,7 @@ public class Tile implements HexPointable {
 
     // Only used for coloring, these values aren't enforced anywhere
     private static final Range<Double> WATER_LEVEL_RANGE = new DoubleRange(0.0, 10.0);
+    private static final Range<Double> WATER_TRAVERSED_RANGE = new DoubleRange(0.0, 20.0);
 
     private static final String INFO_STRING =
         "Biome: %s%nElevation: %d%nHumidity: %d%%";
@@ -173,7 +174,7 @@ public class Tile implements HexPointable {
         return remove;
     }
 
-    public double getTotalWaterTraversed() {
+    public double getWaterTraversed() {
         return totalWaterTraversed;
     }
 
@@ -205,6 +206,12 @@ public class Tile implements HexPointable {
                     return Color.BLACK;
                 }
                 return colorMode.interpolateColor(getWaterLevel(), WATER_LEVEL_RANGE);
+            case WATER_TRAVERSED:
+                // Water tiles are always black
+                if (biome.isWater()) {
+                    return Color.BLACK;
+                }
+                return colorMode.interpolateColor(getWaterTraversed(), WATER_TRAVERSED_RANGE);
             case BIOME:
                 return biome.color();
             case COMPOSITE:

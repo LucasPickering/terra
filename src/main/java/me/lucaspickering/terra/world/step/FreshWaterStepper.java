@@ -30,7 +30,7 @@ public class FreshWaterStepper extends Stepper {
     private static final double RAINFALL = 0.5;
     private static final double LAKE_THRESHOLD = 1.0;
     private static final double RIVER_THRESHOLD = 10.0;
-    private static final double TOLERABLE_CHANGE_THRESHOLD = 0.01;
+    private static final double TOLERABLE_CHANGE_THRESHOLD = 0.001;
 
     public FreshWaterStepper(World world, Random random) {
         super(world, random);
@@ -54,12 +54,6 @@ public class FreshWaterStepper extends Stepper {
         world().getContinents().stream().forEach(this::spreadForContinent);
         final long elapsedTime = System.currentTimeMillis() - startTime;
         logger().log(Level.FINE, String.format("Runoff iteration took %d ms", elapsedTime));
-
-        // Convert all appropriate tiles to lakes
-        // TODO
-
-        // Add rivers based on water traversal patterns
-        // TODO
     }
 
     private void spreadForContinent(Continent continent) {
@@ -159,6 +153,7 @@ public class FreshWaterStepper extends Stepper {
         // Remove water from this tile to make it hit the target elevation
         totalWaterChanged -= tile.removeWater(tile.getWaterElevation() - targetWaterElev);
 
+        // Ensure that no water entered or left the system
         if (Math.abs(totalWaterChanged) > TOLERABLE_CHANGE_THRESHOLD) {
             throw new IllegalStateException(String.format("Intolerable water change [%f] for [%s]",
                                                           totalWaterChanged, tile));
