@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Properties;
 
 import me.lucaspickering.utils.MathFuncs;
 import me.lucaspickering.utils.range.IntRange;
@@ -132,5 +133,24 @@ public class Funcs {
         alpha = BYTE_RANGE.coerce(alpha);
 
         return new Color(red, green, blue, alpha);
+    }
+
+    /**
+     * Loads the config file with the given name. The given string should be the name of the file
+     * with no path or extension. Its name will be inserted into {@link Constants#CFG_PATH} to
+     * get the file path.
+     *
+     * @param configFile the name of the config file
+     * @return the values of the file
+     */
+    @NotNull
+    public static Properties loadProperties(String configFile) {
+        final Properties prop = new Properties();
+        try (InputStream inputStream = Funcs.getResource(Constants.CFG_PATH, configFile)) {
+            prop.load(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading config file " + configFile, e);
+        }
+        return prop;
     }
 }

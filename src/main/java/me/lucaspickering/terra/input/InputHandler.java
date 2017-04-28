@@ -1,16 +1,30 @@
 package me.lucaspickering.terra.input;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Logger;
+
 import me.lucaspickering.terra.Main;
 import me.lucaspickering.terra.render.screen.Screen;
+import me.lucaspickering.terra.util.Constants;
+import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.utils.Point;
 
 public class InputHandler {
 
+    private final Logger logger = Logger.getLogger(getClass().getName());
     private final Main main;
+    private final Map<Integer, String> inputMapping = new HashMap<>();
     private Point mousePos = Point.ZERO;
 
     public InputHandler(Main main) {
         this.main = main;
+    }
+
+    private void loadConfig() {
+        final Properties prop = Funcs.loadProperties(Constants.CFG_KEYS);
+        
     }
 
     public Point getMousePos() {
