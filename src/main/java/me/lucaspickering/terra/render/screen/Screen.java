@@ -132,8 +132,8 @@ public abstract class Screen implements ScreenElement {
      */
     public void onKey(KeyEvent event) {
         if (event.action == ButtonAction.RELEASE) {
-            switch (event.key) {
-                case GLFW.GLFW_KEY_F9:
+            switch (event.command) {
+                case WORLD_DEBUG:
                     // Toggle debug mode
                     final Main main = main();
                     main.setDebug(!main.getDebug());

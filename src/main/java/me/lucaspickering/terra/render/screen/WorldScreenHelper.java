@@ -1,13 +1,8 @@
 package me.lucaspickering.terra.render.screen;
 
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import me.lucaspickering.terra.render.Renderer;
-import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
 import me.lucaspickering.utils.Point;
@@ -44,28 +39,6 @@ class WorldScreenHelper {
     // Each side of the tile is rendered by forming a triangle between it and the center, so
     // there's three vertices for each side of the tile.
     static final int NUM_VERTICES = WorldScreenHelper.TILE_VERTICES.length;
-    static final int VERTEX_SIZE = 2;
-    static final int COLOR_SIZE = 3; // RGB
-
-    static final int COLOR_SIZE_BYTES = COLOR_SIZE * Float.BYTES;
-
-    // Bind a key to each tile color mode
-    static final Map<Integer, TileColorMode> KEY_TO_TILE_COLOR_MODE =
-        new HashMap<Integer, TileColorMode>() {{
-            put(GLFW.GLFW_KEY_F1, TileColorMode.ELEVATION);
-            put(GLFW.GLFW_KEY_F2, TileColorMode.HUMIDITY);
-            put(GLFW.GLFW_KEY_F3, TileColorMode.WATER_LEVEL);
-            put(GLFW.GLFW_KEY_F4, TileColorMode.WATER_TRAVERSED);
-            put(GLFW.GLFW_KEY_F5, TileColorMode.BIOME);
-            put(GLFW.GLFW_KEY_F6, TileColorMode.COMPOSITE);
-        }};
-
-    // Assign a key to each tile overlay
-    static final Map<Integer, TileOverlay> KEY_TO_TILE_OVERLAY =
-        new HashMap<Integer, TileOverlay>() {{
-            put(GLFW.GLFW_KEY_F10, TileOverlay.CONTINENT);
-            put(GLFW.GLFW_KEY_F11, TileOverlay.CHUNK);
-        }};
 
     /**
      * Converts a {@link HexPoint} in to a {@link Point} on the screen.

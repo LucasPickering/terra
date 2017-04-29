@@ -1,6 +1,5 @@
 package me.lucaspickering.terra.render.screen;
 
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import me.lucaspickering.terra.input.ButtonAction;
@@ -53,8 +52,8 @@ public class PauseScreen extends Screen {
     @Override
     public void onKey(KeyEvent event) {
         if (event.action == ButtonAction.RELEASE) {
-            switch (event.key) {
-                case GLFW.GLFW_KEY_ESCAPE:
+            switch (event.command) {
+                case GAME_MENU:
                     returnToWorld();
                     break;
             }

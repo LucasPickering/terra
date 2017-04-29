@@ -333,32 +333,40 @@ public class WorldScreen extends Screen {
     @Override
     public void onKey(KeyEvent event) {
         if (event.action == ButtonAction.RELEASE) {
-            final int key = event.key;
-            switch (key) {
-                case GLFW.GLFW_KEY_ESCAPE:
+            switch (event.command) {
+                case GAME_MENU:
                     setNextScreen(new PauseScreen(this)); // Open the pause menu
                     break;
-                case GLFW.GLFW_KEY_R:
+                case WORLD_REGEN:
                     regenerateWorld();
                     break;
-                case GLFW.GLFW_KEY_RIGHT:
+                case WORLD_NEXT_STEP:
                     stepWorld();
                     break;
-            }
-
-            // Check if the key is assigned to a tile color mode
-            final TileColorMode
-                keyTileColorMode =
-                WorldScreenHelper.KEY_TO_TILE_COLOR_MODE.get(key);
-            if (keyTileColorMode != null) {
-                setTileColorMode(keyTileColorMode);
-            }
-
-            // Check if the key is assigned to a tile overlay
-            final WorldScreenHelper.TileOverlay keyTileOverlay =
-                WorldScreenHelper.KEY_TO_TILE_OVERLAY.get(key);
-            if (keyTileOverlay != null) {
-                setTileOverlay(keyTileOverlay);
+                case WORLD_TILE_COLOR_ELEVATION:
+                    setTileColorMode(TileColorMode.ELEVATION);
+                    break;
+                case WORLD_TILE_COLOR_HUMIDITY:
+                    setTileColorMode(TileColorMode.HUMIDITY);
+                    break;
+                case WORLD_TILE_COLOR_WATER_LEVEL:
+                    setTileColorMode(TileColorMode.WATER_LEVEL);
+                    break;
+                case WORLD_TILE_COLOR_WATER_TRAVERSED:
+                    setTileColorMode(TileColorMode.WATER_TRAVERSED);
+                    break;
+                case WORLD_TILE_COLOR_BIOME:
+                    setTileColorMode(TileColorMode.BIOME);
+                    break;
+                case WORLD_TILE_COLOR_COMPOSITE:
+                    setTileColorMode(TileColorMode.COMPOSITE);
+                    break;
+                case WORLD_TILE_OVERLAY_CONTINENTS:
+                    setTileOverlay(WorldScreenHelper.TileOverlay.CONTINENT);
+                    break;
+                case WORLD_TILE_OVERLAY_CHUNKS:
+                    setTileOverlay(WorldScreenHelper.TileOverlay.CHUNK);
+                    break;
             }
         }
         super.onKey(event);

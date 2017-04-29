@@ -16,7 +16,7 @@ public class InputHandler {
 
     private final Logger logger = Logger.getLogger(getClass().getName());
     private final Main main;
-    private final Map<Integer, Command> inputMapping = new HashMap<>();
+    private final Map<Integer, Command> keyMapping = new HashMap<>();
     private Point mousePos = Point.ZERO;
 
     public InputHandler(Main main) {
@@ -26,22 +26,23 @@ public class InputHandler {
 
     private void loadConfig() {
         final Properties prop = Funcs.loadProperties(Constants.CFG_KEYS);
-        logger.log(Level.INFO, "Loaded key config");
 
-        // Process the input from the properties class
+        // Process the input from the config file
+        Command.values(); // Force the Commands class to initialize now (I know this is ugly)
         for (String propName : prop.stringPropertyNames()) {
             final String propValue = prop.getProperty(propName);
             addInputMapping(propName, propValue);
         }
+        logger.log(Level.INFO, "Loaded input config");
     }
 
     /**
      * Adds a mapping between the input with the given name and the command with the given name.
      *
-     * @param input         the name of the input (e.g. "f" for the F key)
      * @param commandString the name of the command (e.g. "game.menu")
+     * @param input         the name of the input (e.g. "f" for the F key)
      */
-    private void addInputMapping(String input, String commandString) {
+    private void addInputMapping(String commandString, String input) {
         // Note that each if statement here checks an invalid condition - success requires that
         // every if condition FAILS
         final KeyMapping keyMap = KeyMapping.getByName(input);
@@ -81,7 +82,7 @@ public class InputHandler {
                 commandName, groupName, input));
         }
 
-        inputMapping.put(keyMap.getCode(), command);
+        keyMapping.put(keyMap.getCode(), command);
         logger.log(Level.FINE, String.format("Mapping key [%s] to command [%s]",
                                              keyMap, input));
     }
@@ -91,9 +92,14 @@ public class InputHandler {
     }
 
     public void onKey(long window, int key, int scancode, int action, int mods) {
-        final KeyEvent event = new KeyEvent(window, key, scancode,
-                                            ButtonAction.getByGlfwCode(action), mods);
-        main.getCurrentScreen().onKey(event);
+        final Command command = keyMapping.get(key);
+
+        // If this key is bound to a command, send an event to the game
+        if (command != null) {
+            final KeyEvent event = new KeyEvent(window, command,
+                                                ButtonAction.getByGlfwCode(action), mods);
+            main.getCurrentScreen().onKey(event);
+        }
     }
 
     public void onMouseButton(long window, int button, int action, int mods) {
