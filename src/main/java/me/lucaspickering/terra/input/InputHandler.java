@@ -16,7 +16,7 @@ public class InputHandler {
 
     private final Logger logger = Logger.getLogger(getClass().getName());
     private final Main main;
-    private final Map<Integer, String> inputMapping = new HashMap<>();
+    private final Map<Integer, Command> inputMapping = new HashMap<>();
     private Point mousePos = Point.ZERO;
 
     public InputHandler(Main main) {
@@ -31,17 +31,59 @@ public class InputHandler {
         // Process the input from the properties class
         for (String propName : prop.stringPropertyNames()) {
             final String propValue = prop.getProperty(propName);
-            final KeyMapping keyMap = KeyMapping.getByName(propValue);
-            if (keyMap != null) {
-                logger.log(Level.FINE, String.format("Mapping key [%s] to action [%s]",
-                                                     keyMap, propName));
-                inputMapping.put(keyMap.getCode(), propName);
-
-            } else {
-                logger.log(Level.WARNING, String.format("Unknown key [%s] for action [%s]",
-                                                        propValue, propName));
-            }
+            addInputMapping(propName, propValue);
         }
+    }
+
+    /**
+     * Adds a mapping between the input with the given name and the command with the given name.
+     *
+     * @param input         the name of the input (e.g. "f" for the F key)
+     * @param commandString the name of the command (e.g. "game.menu")
+     */
+    private void addInputMapping(String input, String commandString) {
+        // Note that each if statement here checks an invalid condition - success requires that
+        // every if condition FAILS
+        final KeyMapping keyMap = KeyMapping.getByName(input);
+
+        // Check that the input name is valid
+        if (keyMap == null) {
+            logger.log(Level.WARNING, String.format("Unknown input [%s] for command [%s]",
+                                                    input, commandString));
+            return;
+        }
+
+        final String[] commandParts = commandString.split("\\.", 2); // Split on '.' into two parts
+
+        // Check if the split failed. If it did, the command is malformed.
+        if (commandParts.length != 2) {
+            logger.log(Level.WARNING, String.format("Malformed command [%s] for input [%s]",
+                                                    commandString, input));
+            return;
+        }
+
+        final String groupName = commandParts[0];
+        final String commandName = commandParts[1];
+        final CommandGroup group = CommandGroup.getByString(groupName);
+
+        // Check if the command group name is valid
+        if (group == null) {
+            logger.log(Level.WARNING, String.format("Unknown command group [%s] for input [%s]",
+                                                    groupName, commandString));
+            return;
+        }
+
+        final Command command = group.getCommandByName(commandName);
+
+        if (command == null) {
+            logger.log(Level.WARNING, String.format(
+                "Unknown command [%s] for group [%s] on input [%s]",
+                commandName, groupName, input));
+        }
+
+        inputMapping.put(keyMap.getCode(), command);
+        logger.log(Level.FINE, String.format("Mapping key [%s] to command [%s]",
+                                             keyMap, input));
     }
 
     public Point getMousePos() {
