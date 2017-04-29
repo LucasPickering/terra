@@ -3,8 +3,8 @@ package me.lucaspickering.terra.input;
 public enum Command {
 
     GAME_MENU(CommandGroup.GAME, "menu"),
+    GAME_DEBUG(CommandGroup.GAME, "debug"),
 
-    WORLD_DEBUG(CommandGroup.WORLD, "debug"),
     WORLD_REGEN(CommandGroup.WORLD, "regenerate"),
     WORLD_NEXT_STEP(CommandGroup.WORLD, "nextStep"),
     WORLD_TILE_COLOR_ELEVATION(CommandGroup.WORLD, "tileColorElevation"),

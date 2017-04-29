@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 
-import me.lucaspickering.terra.Main;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.util.TileSet;
@@ -20,7 +19,6 @@ public class NoiseElevationGenerator extends NoiseGenerator {
 
     public NoiseElevationGenerator() {
         super(new Perlin());
-        noiseGenerator.setSeed((int) Main.instance().getSeed());
         noiseGenerator.setFrequency(3.5);
         noiseGenerator.setLacunarity(2.5);
         noiseGenerator.setPersistence(0.5);
@@ -29,6 +27,7 @@ public class NoiseElevationGenerator extends NoiseGenerator {
 
     @Override
     public void generate(World world, Random random) {
+        noiseGenerator.setSeed((int) world.getSeed());
         final TileSet worldTiles = world.getTiles();
 
         final Map<Tile, Double> noises = super.generateNoises(worldTiles);

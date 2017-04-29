@@ -25,7 +25,6 @@ public class Main {
 
     private final Logger logger;
     private final long seed;
-    private boolean debug; // True if we are in debug mode
 
     private final InputHandler inputHandler;
 
@@ -34,16 +33,13 @@ public class Main {
     private Screen currentScreen;
     private int windowWidth;
     private int windowHeight;
-    private double lastFpsUpdate; // Time of the last FPS update, in seconds
-    private int framesSinceCheck; // Number of frames since the last FPS update
-    private int fps; // Current framerate
 
     public static void main(String[] args) {
         MAIN.run();
     }
 
-    public static Main instance() {
-        return MAIN;
+    public static Renderer renderer() {
+        return MAIN.renderer;
     }
 
     private Main() {
@@ -150,7 +146,7 @@ public class Main {
      */
     private void initGame() {
         renderer = new Renderer();
-        final WorldHandler worldHandler = new WorldHandler(getSeed());
+        final WorldHandler worldHandler = new WorldHandler(seed);
         worldHandler.generate(); // Generate a world
         currentScreen = new WorldScreen(worldHandler); // Initialize the current screen
     }
@@ -173,8 +169,6 @@ public class Main {
             if (currentScreen.shouldExit()) {
                 exitGame();
             }
-
-            updateFPS(); // Update the FPS counter
         }
     }
 
@@ -198,39 +192,6 @@ public class Main {
      */
     private void exitGame() {
         GLFW.glfwSetWindowShouldClose(window, true);
-    }
-
-    private void updateFPS() {
-        framesSinceCheck++;
-
-        // If it's been at least a second since the last loop...
-        final double time = GLFW.glfwGetTime();
-        if (time - lastFpsUpdate >= 1.0) {
-            // Recalculate fps
-            fps = framesSinceCheck;
-            framesSinceCheck = 0;
-            lastFpsUpdate = time;
-        }
-    }
-
-    public boolean getDebug() {
-        return debug;
-    }
-
-    public void setDebug(boolean debug) {
-        this.debug = debug;
-    }
-
-    public long getSeed() {
-        return seed;
-    }
-
-    public Renderer renderer() {
-        return renderer;
-    }
-
-    public int getFps() {
-        return fps;
     }
 
     public void resizeWindow(int width, int height) {

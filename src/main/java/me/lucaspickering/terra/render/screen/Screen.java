@@ -8,12 +8,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import me.lucaspickering.terra.Main;
 import me.lucaspickering.terra.input.ButtonAction;
 import me.lucaspickering.terra.input.KeyEvent;
 import me.lucaspickering.terra.input.MouseButtonEvent;
 import me.lucaspickering.terra.input.ScrollEvent;
-import me.lucaspickering.terra.render.Font;
 import me.lucaspickering.terra.render.Renderer;
 import me.lucaspickering.terra.render.screen.gui.GuiElement;
 import me.lucaspickering.utils.Point;
@@ -26,13 +24,14 @@ import me.lucaspickering.utils.Point;
  */
 public abstract class Screen implements ScreenElement {
 
-    private static final String DEBUG_FORMAT = "FPS: %d";
-
     protected final Point center = new Point(Renderer.RES_WIDTH / 2,
                                              Renderer.RES_HEIGHT / 2);
-    private final Main main = Main.instance();
     private List<GuiElement> guiElements = new LinkedList<>();
     private Screen nextScreen;
+    private double lastFpsUpdate; // Time of the last FPS update, in seconds
+    private int framesSinceCheck; // Number of frames since the last FPS update
+    private int fps; // Current framerate
+    private boolean debug;
     private boolean shouldExit; // Set to true to close the game
 
     @Override
@@ -44,13 +43,10 @@ public abstract class Screen implements ScreenElement {
             .filter(GuiElement::isVisible) // Only draw elements that are visible
             .forEach(element -> drawElement(mousePos, element)); // Draw each element
 
-        // If debug mode is enabled, draw debug info
-        if (main.getDebug()) {
-            drawDebugInfo();
-        }
-
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
+
+        updateFPS();
     }
 
     private void drawElement(Point mousePos, GuiElement element) {
@@ -61,13 +57,17 @@ public abstract class Screen implements ScreenElement {
         GL11.glPopMatrix();
     }
 
-    private void drawDebugInfo() {
-        final String debugString = String.format(DEBUG_FORMAT, main().getFps());
-        renderer().drawString(Font.DEBUG, debugString, 10, 10); // Draw FPS
-    }
+    private void updateFPS() {
+        framesSinceCheck++;
 
-    protected final Main main() {
-        return main;
+        // If it's been at least a second since the last loop...
+        final double time = GLFW.glfwGetTime();
+        if (time - lastFpsUpdate >= 1.0) {
+            // Recalculate fps
+            fps = framesSinceCheck;
+            framesSinceCheck = 0;
+            lastFpsUpdate = time;
+        }
     }
 
     /**
@@ -120,9 +120,16 @@ public abstract class Screen implements ScreenElement {
                && 0 <= p.y() && p.y() <= Renderer.RES_HEIGHT;
     }
 
-
     protected final void addGuiElement(GuiElement element) {
         guiElements.add(element);
+    }
+
+    protected final boolean getDebug() {
+        return debug;
+    }
+
+    protected final int getFps() {
+        return fps;
     }
 
     /**
@@ -133,10 +140,8 @@ public abstract class Screen implements ScreenElement {
     public void onKey(KeyEvent event) {
         if (event.action == ButtonAction.RELEASE) {
             switch (event.command) {
-                case WORLD_DEBUG:
-                    // Toggle debug mode
-                    final Main main = main();
-                    main.setDebug(!main.getDebug());
+                case GAME_DEBUG:
+                    debug = !debug; // Toggle debug mode
                     break;
             }
         }

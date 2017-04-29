@@ -166,12 +166,14 @@ public class World {
      */
     public static final int SEA_LEVEL = 0;
 
+    private final long seed;
     private final HexPointSet<Chunk> chunks;
     private final ChunkedTileSet worldTiles = new ChunkedTileSet();
     private final List<Continent> continents;
     private final HexPointMap<Tile, Continent> tilesToContinents;
 
-    public World(int chunkRadius) {
+    public World(long seed, int chunkRadius) {
+        this.seed = seed;
         chunks = initChunks(chunkRadius);
         continents = new ArrayList<>();
         tilesToContinents = new HexPointMap<>();
@@ -180,8 +182,9 @@ public class World {
     /**
      * Copy constructor.
      */
-    private World(HexPointSet<Chunk> chunks, List<Continent> continents,
+    private World(long seed, HexPointSet<Chunk> chunks, List<Continent> continents,
                   HexPointMap<Tile, Continent> tilesToContinents) {
+        this.seed = seed;
         this.chunks = chunks;
         this.continents = continents;
         this.tilesToContinents = tilesToContinents;
@@ -209,6 +212,10 @@ public class World {
         return result;
     }
 
+    public long getSeed() {
+        return seed;
+    }
+
     public HexPointSet<Chunk> getChunks() {
         return chunks;
     }
@@ -226,7 +233,8 @@ public class World {
     }
 
     public World immutableCopy() {
-        return new World(chunks.immutableCopy(), // NO DEEP COPY
+        return new World(seed,
+                         chunks.immutableCopy(), // NO DEEP COPY
                          Collections.unmodifiableList(continents), // NO DEEP COPY
                          tilesToContinents.immutableCopy()); // NO DEEP COPY
     }

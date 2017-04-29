@@ -5,7 +5,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 
-import me.lucaspickering.terra.Main;
 import me.lucaspickering.terra.util.Direction;
 import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.terra.world.util.Chunk;
@@ -229,11 +228,11 @@ public class Tile implements HexPointable {
         }
     }
 
-    public String info() {
+    public String info(boolean debug) {
         // If in debug mode, display extra debug info
         final String info = String.format(INFO_STRING, biome.displayName(), elevation(),
                                           (int) (humidity() * 100));
-        if (Main.instance().getDebug()) {
+        if (debug) {
             return info + String.format(DEBUG_INFO_STRING, pos, chunk.getPos(),
                                         waterLevel, totalWaterTraversed);
         }

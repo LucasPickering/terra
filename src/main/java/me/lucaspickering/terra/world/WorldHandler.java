@@ -84,7 +84,7 @@ public class WorldHandler {
             .collect(Collectors.toList());
 
         final long startTime = System.currentTimeMillis(); // We're timing this
-        final World world = new World(size);
+        final World world = new World(seed, size);
 
         // Apply each generator in sequence (this is the heavy lifting)
         for (Generator generator : generators) {
@@ -103,7 +103,7 @@ public class WorldHandler {
         generator.generate(world, random);
         final long runTime = System.currentTimeMillis() - startTime;
         logger.log(Level.FINE, String.format("Generator stage %s took %d ms",
-                                              generator.getClass().getSimpleName(), runTime));
+                                             generator.getClass().getSimpleName(), runTime));
     }
 
     /**

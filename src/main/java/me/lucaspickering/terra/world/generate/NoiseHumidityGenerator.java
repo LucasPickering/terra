@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 
-import me.lucaspickering.terra.Main;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.util.TileSet;
@@ -20,8 +19,6 @@ public class NoiseHumidityGenerator extends NoiseGenerator {
 
     public NoiseHumidityGenerator() {
         super(new Perlin());
-        final long seed = Main.instance().getSeed();
-        noiseGenerator.setSeed((int) (seed * seed)); // Square the seed to vary it
         noiseGenerator.setFrequency(8.0);
         noiseGenerator.setLacunarity(Perlin.DEFAULT_PERLIN_LACUNARITY);
         noiseGenerator.setPersistence(Perlin.DEFAULT_PERLIN_PERSISTENCE);
@@ -30,6 +27,9 @@ public class NoiseHumidityGenerator extends NoiseGenerator {
 
     @Override
     public void generate(World world, Random random) {
+        final long seed = world.getSeed();
+        noiseGenerator.setSeed((int) (seed * seed)); // Square the seed to vary it
+
         final TileSet worldTiles = world.getTiles();
 
         final Map<Tile, Double> noises = super.generateNoises(worldTiles);

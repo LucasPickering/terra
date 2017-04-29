@@ -27,6 +27,6 @@ public interface ScreenElement {
     boolean contains(Point p);
 
     default Renderer renderer() {
-        return Main.instance().renderer();
+        return Main.renderer();
     }
 }

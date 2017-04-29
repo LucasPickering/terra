@@ -15,6 +15,7 @@ import me.lucaspickering.terra.input.ButtonAction;
 import me.lucaspickering.terra.input.KeyEvent;
 import me.lucaspickering.terra.input.MouseButtonEvent;
 import me.lucaspickering.terra.input.ScrollEvent;
+import me.lucaspickering.terra.render.Font;
 import me.lucaspickering.terra.render.VertexBufferObject;
 import me.lucaspickering.terra.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terra.util.Colors;
@@ -163,6 +164,11 @@ public class WorldScreen extends Screen {
 
         GL11.glPopMatrix();
 
+        // If debug mode is enabled, draw debug info
+        if (getDebug()) {
+            drawDebugInfo();
+        }
+
         super.draw(mousePos); // Draw GUI elements
     }
 
@@ -186,7 +192,7 @@ public class WorldScreen extends Screen {
             mouseOverTile = calcTileUnderMouse(mousePos);
             if (mouseOverTile != null) {
                 // Draw the overlay then set text for the info box
-                mouseOverTileInfo.setText(mouseOverTile.info());
+                mouseOverTileInfo.setText(mouseOverTile.info(getDebug()));
             }
         }
         mouseOverTileInfo.setVisible(mouseOverTile != null);
@@ -220,6 +226,11 @@ public class WorldScreen extends Screen {
         vbo.draw();
 
         GL11.glPopMatrix();
+    }
+
+    private void drawDebugInfo() {
+        final String debugString = String.format(WorldScreenHelper.FPS_FORMAT, getFps());
+        renderer().drawString(Font.DEBUG, debugString, 10, 10); // Draw FPS
     }
 
     private void updateAllTileColors() {

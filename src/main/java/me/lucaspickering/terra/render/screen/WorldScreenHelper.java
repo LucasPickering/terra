@@ -31,6 +31,8 @@ class WorldScreenHelper {
     static final Point SCREEN_CENTER = new Point(Renderer.RES_WIDTH / 2,
                                                  Renderer.RES_HEIGHT / 2);
 
+    static final String FPS_FORMAT = "FPS: %d";
+
     // Maximum time a click can be held down to be considered a click and not a drag
     static final int MAX_CLICK_TIME = 250;
 
