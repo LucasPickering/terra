@@ -15,7 +15,7 @@ import me.lucaspickering.terra.world.World;
  * ocean, lake) later on, and can have the elevation adjusted. This is a very early step in the
  * generation process.
  */
-public class BiomePainter extends AbstractGenerator {
+public class BiomePainter extends Generator {
 
     // Basically a typedef, for convenience
     private interface BiomeFunction extends BiPredicate<Integer, Double> {
@@ -36,11 +36,14 @@ public class BiomePainter extends AbstractGenerator {
             put(Biome.PLAINS, (e, h) -> true); // Default case
         }};
 
-    @Override
+    public BiomePainter(World world, Random random) {
+        super(world, random);
+    }
 
-    public void generate(World world, Random random) {
+    @Override
+    public void generate() {
         // Compute the biome for each tile. This can be done in parallel.
-        world.getTiles().parallelStream()
+        world().getTiles().parallelStream()
             .filter(t -> !t.biome().isWater()) // Don't re-compute for water tiles
             .forEach(t -> t.setBiome(computeBiome(t)));
     }

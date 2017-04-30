@@ -17,8 +17,8 @@ import me.lucaspickering.utils.range.Range;
  */
 public class NoiseHumidityGenerator extends NoiseGenerator {
 
-    public NoiseHumidityGenerator() {
-        super(new Perlin());
+    public NoiseHumidityGenerator(World world, Random random) {
+        super(world, random, new Perlin());
         noiseGenerator.setFrequency(8.0);
         noiseGenerator.setLacunarity(Perlin.DEFAULT_PERLIN_LACUNARITY);
         noiseGenerator.setPersistence(Perlin.DEFAULT_PERLIN_PERSISTENCE);
@@ -26,11 +26,11 @@ public class NoiseHumidityGenerator extends NoiseGenerator {
     }
 
     @Override
-    public void generate(World world, Random random) {
-        final long seed = world.getSeed();
+    public void generate() {
+        final long seed = world().getSeed();
         noiseGenerator.setSeed((int) (seed * seed)); // Square the seed to vary it
 
-        final TileSet worldTiles = world.getTiles();
+        final TileSet worldTiles = world().getTiles();
 
         final Map<Tile, Double> noises = super.generateNoises(worldTiles);
         final Range<Double> noiseRange = new DoubleRange(noises.values());

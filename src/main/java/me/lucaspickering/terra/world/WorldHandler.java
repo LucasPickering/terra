@@ -1,11 +1,8 @@
 package me.lucaspickering.terra.world;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import me.lucaspickering.terra.world.generate.BeachGenerator;
 import me.lucaspickering.terra.world.generate.BiomePainter;
@@ -15,7 +12,6 @@ import me.lucaspickering.terra.world.generate.NoiseElevationGenerator;
 import me.lucaspickering.terra.world.generate.NoiseHumidityGenerator;
 import me.lucaspickering.terra.world.generate.OceanGenerator;
 import me.lucaspickering.terra.world.generate.RunoffGenerator;
-import me.lucaspickering.terra.world.step.FreshWaterStepper;
 import me.lucaspickering.terra.world.step.Stepper;
 
 /**
@@ -26,31 +22,6 @@ import me.lucaspickering.terra.world.step.Stepper;
  * This should be a singleton class.
  */
 public class WorldHandler {
-
-    private enum Generators {
-
-        ELEV_GENERATOR(NoiseElevationGenerator.class),
-        HUMID_GENERATOR(NoiseHumidityGenerator.class),
-        OCEAN_GENERATOR(OceanGenerator.class),
-        BIOME_PAINTER(BiomePainter.class),
-        CONTINENT_CLUSTERER(ContinentClusterer.class),
-        BEACH_GENERATOR(BeachGenerator.class),
-        RUNOFF_GENERATOR(RunoffGenerator.class);
-
-        private final Class<? extends Generator> clazz;
-
-        Generators(Class<? extends Generator> clazz) {
-            this.clazz = clazz;
-        }
-
-        private Generator makeGenerator() {
-            try {
-                return clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException("Error instantiating generator");
-            }
-        }
-    }
 
     private static final int DEFAULT_CHUNK_RADIUS = 3; // Default radius of the world, in chunks
 
@@ -80,29 +51,35 @@ public class WorldHandler {
     public void generate() {
         random = new Random(seed); // Init the Random instance
 
-        // Initialize generators outside the timer. This may get its own timer later?
-        final List<Generator> generators = Arrays.stream(Generators.values())
-            .map(Generators::makeGenerator)
-            .collect(Collectors.toList());
-
         final long startTime = System.currentTimeMillis(); // We're timing this
         final World world = new World(seed, size);
+        final Generator[] generators = makeGenerators(world, random); // Initialize the generators
 
         // Apply each generator in sequence (this is the heavy lifting)
         for (Generator generator : generators) {
-            runGenerator(generator, world);
+            runGenerator(generator);
         }
 
         this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
         final long elapsedTime = System.currentTimeMillis() - startTime; // Stop the timer
         logger.log(Level.INFO, String.format("World generation took %d ms", elapsedTime));
-
-        stepper = new FreshWaterStepper(this.world, random); // TODO remove placeholder
     }
 
-    private void runGenerator(Generator generator, World world) {
+    private Generator[] makeGenerators(World world, Random random) {
+        return new Generator[]{
+            new NoiseElevationGenerator(world, random),
+            new NoiseHumidityGenerator(world, random),
+            new OceanGenerator(world, random),
+            new BiomePainter(world, random),
+            new ContinentClusterer(world, random),
+            new BeachGenerator(world, random),
+            new RunoffGenerator(world, random)
+        };
+    }
+
+    private void runGenerator(Generator generator) {
         final long startTime = System.currentTimeMillis();
-        generator.generate(world, random);
+        generator.generate();
         final long runTime = System.currentTimeMillis() - startTime;
         logger.log(Level.FINE, String.format("Generator stage %s took %d ms",
                                              generator.getClass().getSimpleName(), runTime));

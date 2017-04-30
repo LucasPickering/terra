@@ -26,7 +26,7 @@ import me.lucaspickering.terra.world.util.TileSet;
  * threshold, that tile becomes a river</li>
  * </ul>
  */
-public class RunoffGenerator extends AbstractGenerator {
+public class RunoffGenerator extends Generator {
 
     private static final double RAINFALL = 0.5;
     private static final double LAKE_THRESHOLD = 3.0;
@@ -34,14 +34,19 @@ public class RunoffGenerator extends AbstractGenerator {
     private static final int ITERATIONS = 5;
     private static final double TOLERABLE_CHANGE_THRESHOLD = 0.001;
 
+    public RunoffGenerator(World world, Random random) {
+        super(world, random);
+    }
+
     @Override
-    public void generate(World world, Random random) {
-        initWaterLevels(world);
+    public void generate() {
+        final List<Continent> continents = world().getContinents();
+        initWaterLevels(world());
         for (int i = 0; i < ITERATIONS; i++) {
-            world.getContinents().parallelStream().forEach(c -> spreadForContinent(world, c));
+            continents.parallelStream().forEach(this::spreadForContinent);
         }
-        world.getContinents().parallelStream().forEach(this::generateLakes);
-        world.getContinents().parallelStream().forEach(this::generateRivers);
+        continents.parallelStream().forEach(this::generateLakes);
+        continents.parallelStream().forEach(this::generateRivers);
     }
 
     /**
@@ -67,7 +72,7 @@ public class RunoffGenerator extends AbstractGenerator {
         // TODO
     }
 
-    private void spreadForContinent(World world, Continent continent) {
+    private void spreadForContinent(Continent continent) {
         final List<Tile> sortedTiles = continent.getTiles().stream()
             .sorted((t1, t2) -> Double.compare(t2.getWaterElevation(),
                                                t1.getWaterElevation())) // Sort by desc water elev
@@ -75,12 +80,12 @@ public class RunoffGenerator extends AbstractGenerator {
 //                                                t1.elevation())) // Sort by desc elev
             .collect(Collectors.toList());
         for (Tile tile : sortedTiles) {
-            equalizeWater(world, tile);
+            equalizeWater(tile);
         }
     }
 
-    private void equalizeWater(World world, Tile tile) {
-        final Collection<Tile> adjTiles = world.getTiles().getAdjacentTiles(tile.pos()).values();
+    private void equalizeWater(Tile tile) {
+        final Collection<Tile> adjTiles = world().getTiles().getAdjacentTiles(tile.pos()).values();
 
         // If this tile is adjacent to a water tile, just dump all our water in there
         for (Tile adjTile : adjTiles) {

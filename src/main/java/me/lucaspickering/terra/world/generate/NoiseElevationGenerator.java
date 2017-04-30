@@ -17,8 +17,8 @@ import me.lucaspickering.utils.range.Range;
  */
 public class NoiseElevationGenerator extends NoiseGenerator {
 
-    public NoiseElevationGenerator() {
-        super(new Perlin());
+    public NoiseElevationGenerator(World world, Random random) {
+        super(world, random, new Perlin());
         noiseGenerator.setFrequency(3.5);
         noiseGenerator.setLacunarity(2.5);
         noiseGenerator.setPersistence(0.5);
@@ -26,9 +26,9 @@ public class NoiseElevationGenerator extends NoiseGenerator {
     }
 
     @Override
-    public void generate(World world, Random random) {
-        noiseGenerator.setSeed((int) world.getSeed());
-        final TileSet worldTiles = world.getTiles();
+    public void generate() {
+        noiseGenerator.setSeed((int) world().getSeed());
+        final TileSet worldTiles = world().getTiles();
 
         final Map<Tile, Double> noises = super.generateNoises(worldTiles);
         final Range<Double> noiseRange = new DoubleRange(noises.values());

@@ -2,7 +2,10 @@ package me.lucaspickering.terra.world.generate;
 
 import com.flowpowered.noise.module.source.Perlin;
 
+import java.util.Random;
+
 import me.lucaspickering.terra.world.Tile;
+import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.util.HexPoint;
 import me.lucaspickering.terra.world.util.HexPointMap;
 import me.lucaspickering.terra.world.util.TileSet;
@@ -11,13 +14,14 @@ import me.lucaspickering.utils.Pair;
 /**
  * A generator that uses a noise function to generate some type of values.
  */
-abstract class NoiseGenerator extends AbstractGenerator {
+abstract class NoiseGenerator extends Generator {
 
     private static final double VALUE_RANGE = 256.0;
 
-    final Perlin noiseGenerator;
+    protected final Perlin noiseGenerator;
 
-    protected NoiseGenerator(Perlin noiseGenerator) {
+    public NoiseGenerator(World world, Random random,Perlin noiseGenerator) {
+        super(world, random);
         this.noiseGenerator = noiseGenerator;
     }
 

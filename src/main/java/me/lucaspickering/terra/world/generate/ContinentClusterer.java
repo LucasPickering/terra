@@ -15,16 +15,20 @@ import me.lucaspickering.terra.world.util.HexPointMap;
  * change anymore. It should obviously be done before any operations that rely on having accurate
  * continent clusters.
  */
-public class ContinentClusterer extends AbstractGenerator {
+public class ContinentClusterer extends Generator {
+
+    public ContinentClusterer(World world, Random random) {
+        super(world, random);
+    }
 
     @Override
-    public void generate(World world, Random random) {
+    public void generate() {
         // Cluster tiles based on whether they're land or not
         final List<Cluster> continentClusters =
-            Cluster.cluster(world.getTiles(), tile -> tile.biome().isLand()).first();
+            Cluster.cluster(world().getTiles(), tile -> tile.biome().isLand()).first();
 
-        final List<Continent> continents = world.getContinents();
-        final HexPointMap<Tile, Continent> tilesToContinents = world.getTilesToContinents();
+        final List<Continent> continents = world().getContinents();
+        final HexPointMap<Tile, Continent> tilesToContinents = world().getTilesToContinents();
 
         // Clear the containers so they can be repopulated
         continents.clear();
