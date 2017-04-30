@@ -14,6 +14,7 @@ import me.lucaspickering.terra.world.generate.Generator;
 import me.lucaspickering.terra.world.generate.NoiseElevationGenerator;
 import me.lucaspickering.terra.world.generate.NoiseHumidityGenerator;
 import me.lucaspickering.terra.world.generate.OceanGenerator;
+import me.lucaspickering.terra.world.generate.RunoffGenerator;
 import me.lucaspickering.terra.world.step.FreshWaterStepper;
 import me.lucaspickering.terra.world.step.Stepper;
 
@@ -33,7 +34,8 @@ public class WorldHandler {
         OCEAN_GENERATOR(OceanGenerator.class),
         BIOME_PAINTER(BiomePainter.class),
         CONTINENT_CLUSTERER(ContinentClusterer.class),
-        BEACH_GENERATOR(BeachGenerator.class);
+        BEACH_GENERATOR(BeachGenerator.class),
+        RUNOFF_GENERATOR(RunoffGenerator.class);
 
         private final Class<? extends Generator> clazz;
 
