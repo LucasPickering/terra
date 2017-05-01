@@ -72,10 +72,7 @@ public class VertexBufferObject {
 
         public VertexBufferObject build() {
             if (drawFunction == null) {
-                throw new IllegalStateException("Must set darw function before building");
-            }
-            if (numVertices <= 0) {
-                throw new IllegalStateException("Must set number of vertices");
+                throw new IllegalStateException("Draw function cannot be null");
             }
             return new VertexBufferObject(numVertices, colorMode, drawFunction);
         }

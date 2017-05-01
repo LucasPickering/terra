@@ -15,8 +15,9 @@ class WorldScreenHelper {
         NONE, CONTINENT, CHUNK
     }
 
-    static final double TILE_WIDTH = 20.0; // Width of each tile, in pixels
-    static final double TILE_HEIGHT = Math.sqrt(3) * TILE_WIDTH / 2.0;
+    static final double TILE_RADIUS = 10.0; // Distance from the center of the tile to each VERTEX
+    static final double TILE_WIDTH = TILE_RADIUS * 2; // Width of each tile, in pixels
+    static final double TILE_HEIGHT = Math.sqrt(3) * TILE_RADIUS;
     static final Point[] TILE_VERTICES = {
         new Point(-TILE_WIDTH / 4, -TILE_HEIGHT / 2), // Top-left
         new Point(+TILE_WIDTH / 4, -TILE_HEIGHT / 2), // Top-right
@@ -24,6 +25,14 @@ class WorldScreenHelper {
         new Point(+TILE_WIDTH / 4, +TILE_HEIGHT / 2), // Bottom-right
         new Point(-TILE_WIDTH / 4, +TILE_HEIGHT / 2), // Bottom-left
         new Point(-TILE_WIDTH / 2, 0)                 // Left
+    };
+    static final Point[] TILE_SIDE_MIDPOINTS = {
+        new Point(0, -TILE_HEIGHT / 2),                         // North
+        new Point(+(3.0 / 8.0) * TILE_WIDTH, -TILE_HEIGHT / 4), // Northeast
+        new Point(+(3.0 / 8.0) * TILE_WIDTH, +TILE_HEIGHT / 4), // Southest
+        new Point(0, TILE_HEIGHT / 2),                          // South
+        new Point(-(3.0 / 8.0) * TILE_WIDTH, -TILE_HEIGHT / 4), // Southwest
+        new Point(-(3.0 / 8.0) * TILE_WIDTH, +TILE_HEIGHT / 4)  // Northwest
     };
 
     static final Range<Double> VALID_WORLD_SCALES = new DoubleRange(0.5, 10.0);

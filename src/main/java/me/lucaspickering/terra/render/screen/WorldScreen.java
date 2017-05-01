@@ -6,6 +6,8 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 
 import java.awt.Color;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -19,6 +21,7 @@ import me.lucaspickering.terra.render.Font;
 import me.lucaspickering.terra.render.VertexBufferObject;
 import me.lucaspickering.terra.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terra.util.Colors;
+import me.lucaspickering.terra.util.Direction;
 import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.terra.world.Continent;
 import me.lucaspickering.terra.world.Tile;
@@ -47,7 +50,8 @@ public class WorldScreen extends Screen {
 
     // CHUNK VBO FIELDS
     private int chunkVertexHandle = -1; // -1 indicates it hasn't been set yet
-    private final HexPointMap<Chunk, VertexBufferObject> chunkVbos = new HexPointMap<>();
+    private final HexPointMap<Chunk, VertexBufferObject> tileVbos = new HexPointMap<>();
+    private final HexPointMap<Chunk, VertexBufferObject> riverVbos = new HexPointMap<>();
     private final int[] startingIndices = new int[Chunk.TOTAL_TILES];
     private final int[] sizes = new int[Chunk.TOTAL_TILES];
 
@@ -75,13 +79,14 @@ public class WorldScreen extends Screen {
         }
 
         for (Chunk chunk : worldHandler.getWorld().getChunks()) {
-            initChunkVbo(chunk);
+            initTileVbo(chunk);
+            initRiverVbo(chunk);
         }
 
         initHexVbos(); // Init single-tile VBOs, such as mouse-over highlight
     }
 
-    private void initChunkVbo(Chunk chunk) {
+    private void initTileVbo(Chunk chunk) {
         // Save this chunk's position on the screen
         chunk.setScreenPos(WorldScreenHelper.chunkToPixel(chunk.getPos()));
 
@@ -115,8 +120,37 @@ public class WorldScreen extends Screen {
         vbo.bindColorBuffer(GL15.GL_DYNAMIC_DRAW); // Bind the color buffer now and populate later
 
         // Put the handle in the map, then populate the buffer with the correct colors
-        chunkVbos.put(chunk, vbo);
+        tileVbos.put(chunk, vbo);
         updateChunkColors(chunk, vbo);
+    }
+
+    private void initRiverVbo(Chunk chunk) {
+        final List<Point> vertices = new LinkedList<>();
+        for (Tile tile : chunk.getTiles()) {
+            final Point tileCenter =
+                WorldScreenHelper.tileToPixel(Chunk.getRelativeTilePos(tile.pos()));
+            for (Direction dir : Direction.values()) {
+                if (tile.getRiverConnection(dir) != null) {
+                    final Point midpoint = WorldScreenHelper.TILE_SIDE_MIDPOINTS[dir.ordinal()];
+                    vertices.add(tileCenter.plus(midpoint));
+                }
+            }
+        }
+
+        final VertexBufferObject vbo = new VertexBufferObject.Builder()
+            .setNumVertices(vertices.size())
+            .setDrawFunction(() -> GL11.glDrawArrays(GL11.GL_LINES, 0, vertices.size()))
+            .build();
+
+        for (Point vertex : vertices) {
+            vbo.addVertex(vertex);
+            vbo.addColor(Color.BLUE);
+        }
+
+        vbo.bindVertexBuffer(GL15.GL_STATIC_DRAW);
+        vbo.bindColorBuffer(GL15.GL_STATIC_DRAW);
+
+        riverVbos.put(chunk, vbo);
     }
 
     private void initHexVbos() {
@@ -154,7 +188,7 @@ public class WorldScreen extends Screen {
         GL11.glScaled(worldScale, worldScale, 1.0);
 
         // Draw each chunk
-        for (Map.Entry<Chunk, VertexBufferObject> entry : chunkVbos.entrySet()) {
+        for (Map.Entry<Chunk, VertexBufferObject> entry : tileVbos.entrySet()) {
             drawChunk(entry.getKey(), entry.getValue());
         }
 
@@ -224,6 +258,7 @@ public class WorldScreen extends Screen {
         GL11.glTranslated(chunk.getScreenPos().x(), chunk.getScreenPos().y(), 0.0);
 
         vbo.draw();
+        riverVbos.get(chunk).draw();
 
         GL11.glPopMatrix();
     }
@@ -235,7 +270,7 @@ public class WorldScreen extends Screen {
 
     private void updateAllTileColors() {
         final long startTime = System.currentTimeMillis();
-        for (Map.Entry<Chunk, VertexBufferObject> entry : chunkVbos.entrySet()) {
+        for (Map.Entry<Chunk, VertexBufferObject> entry : tileVbos.entrySet()) {
             updateChunkColors(entry.getKey(), entry.getValue());
         }
         final long endTime = System.currentTimeMillis();
