@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import me.lucaspickering.terra.util.Direction;
 import me.lucaspickering.terra.world.Biome;
 import me.lucaspickering.terra.world.Continent;
 import me.lucaspickering.terra.world.Tile;
@@ -69,7 +70,18 @@ public class RunoffGenerator extends Generator {
     }
 
     private void generateRivers(Continent continent) {
-        // TODO
+        final TileSet riverTiles = continent.getTiles().parallelStream()
+            .filter(t -> t.getWaterTraversed() >= RIVER_THRESHOLD)
+            .collect(Collectors.toCollection(TileSet::new));
+        final List<Tile> sortedRiverTiles = riverTiles.stream()
+            .sorted((t1, t2) -> Integer.compare(t2.elevation(), t1.elevation()))
+            .collect(Collectors.toList());
+
+        for (Tile tile : sortedRiverTiles) {
+            for (Direction dir : Direction.values()) {
+                tile.addRiverConnection(dir, Tile.RiverConnection.ENTRY);
+            }
+        }
     }
 
     private void spreadForContinent(Continent continent) {

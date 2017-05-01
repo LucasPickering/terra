@@ -132,6 +132,7 @@ public class WorldScreen extends Screen {
             for (Direction dir : Direction.values()) {
                 if (tile.getRiverConnection(dir) != null) {
                     final Point midpoint = WorldScreenHelper.TILE_SIDE_MIDPOINTS[dir.ordinal()];
+                    vertices.add(tileCenter);
                     vertices.add(tileCenter.plus(midpoint));
                 }
             }
@@ -139,7 +140,10 @@ public class WorldScreen extends Screen {
 
         final VertexBufferObject vbo = new VertexBufferObject.Builder()
             .setNumVertices(vertices.size())
-            .setDrawFunction(() -> GL11.glDrawArrays(GL11.GL_LINES, 0, vertices.size()))
+            .setDrawFunction(() -> {
+                GL11.glLineWidth(5f);
+                GL11.glDrawArrays(GL11.GL_LINES, 0, vertices.size());
+            })
             .build();
 
         for (Point vertex : vertices) {
