@@ -41,8 +41,7 @@ class WorldScreenHelper {
 
     // Change of tile size in pixels with each zoom level
     static final double ZOOM_STEP = 1.0;
-    // Each side of the tile is rendered by forming a triangle between it and the center, so
-    // there's three vertices for each side of the tile.
+
     static final int NUM_VERTICES = WorldScreenHelper.TILE_VERTICES.length;
 
     /**

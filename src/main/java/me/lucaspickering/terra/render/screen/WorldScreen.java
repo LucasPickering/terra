@@ -63,11 +63,11 @@ public class WorldScreen extends Screen {
             chunkVbos.put(chunk, new ChunkVbo(this, chunk));
         }
 
-        initHexVbos(); // Init single-tile VBOs, such as mouse-over highlight
+        initMouseOverVbo(); // Init VBO for mouse-over highlight
     }
 
 
-    private void initHexVbos() {
+    private void initMouseOverVbo() {
         // Initialize the mouse-over VBO
         mouseOverVbo = new VertexBufferObject.Builder()
             .setNumVertices(WorldScreenHelper.NUM_VERTICES)
