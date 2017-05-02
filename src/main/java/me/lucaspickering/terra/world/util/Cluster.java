@@ -2,14 +2,15 @@ package me.lucaspickering.terra.world.util;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.ToDoubleBiFunction;
 
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.utils.GeneralFuncs;
-import me.lucaspickering.utils.Pair;
 
 /**
  * A Cluster is a {@link TileSet}, where the tiles in the collection are assumed to form one
@@ -30,56 +31,45 @@ public class Cluster extends TileSet {
     }
 
     /**
-     * Clusters the tiles in the given set based on adjacency. Each tile in each cluster is
-     * adjacent to at least one other tile in the cluster, so that each cluster is one contiguous
-     * set of tiles. The clusters are also disjoint, so that no two clusters are adjacent to each
-     * other.
+     * Clusters the tiles in the given set into lists of clusters based on adjacency. For each
+     * tile in any given cluster, the following is true:
+     * <ul>
+     * <li>if it is not the only tile in the cluster, then it is adjacent to at least one other tile
+     * in the cluster</li>
+     * <li>it is in the same category as every other tile in the cluster, as defined by
+     * the given category function</li>
+     * </ul>
      *
-     * In other words, this groups all tiles in this collection into contiguous clusters that are
-     * each as large as possible.
+     * This means that each cluster is one contiguous set of tiles. No two clusters of the same
+     * category will be adjacent to each other, meaning that every cluster will be as large as
+     * possible.
+     *
+     * The returned map of clusters contains exactly one list of clusters for each category that
+     * exists among the given tiles.
      *
      * Each tile in the given set will be in EXACTLY ONE of the returned clusters.
      *
-     * @return the cluster
-     */
-    @NotNull
-    public static List<Cluster> cluster(@NotNull TileSet tiles) {
-        return cluster(tiles, tile -> true).first();
-    }
-
-    /**
-     * Clusters the tiles in the given set into two sets of clusters based on adjacency. Each tile
-     * in each cluster is adjacent to at least one other tile in the cluster, so that each
-     * cluster is one contiguous set of tiles.
+     * The category function should be stable, i.e. the same input always returns the same output.
      *
-     * The returned pair of clusters contains both the positive and negative clusters. For the
-     * positive clusters, each tile in each cluster <i>satisfies</i> the predicate. For the
-     * negative clusters, each tile in each cluster <i>does not satisy</i> the predicate. Two
-     * positive clusters cannot be adjacent to each other, and the same goes for negative
-     * clusters. This means that each cluster will be as large as possible.
-     *
-     * Each tile in the given map will be in EXACTLY ONE of the returned clusters.
-     *
-     * @param predicate the function used to determine if each tile should be clustered or not
+     * @param tiles        the set of tiles on which to operate
+     * @param categoryFunc the function used to determine if each tile should be clustered or not
      * @return the positive and negative clusters, in a pair (with positive first)
      */
     @NotNull
-    public static Pair<List<Cluster>, List<Cluster>> cluster(@NotNull TileSet tiles,
-                                                             @NotNull Predicate<Tile> predicate) {
+    public static <T> Map<T, List<Cluster>>
+    categoryCluster(@NotNull TileSet tiles, @NotNull Function<Tile, T> categoryFunc) {
         // Potential optimization?
         // First divide each tile into its own cluster, then iterate over all those clusters and
-        // begin joining clusters that have the same state (postive or negative) and have
-        // adjacent tiles.
+        // begin joining clusters that have the same category and have adjacent tiles.
 
         final TileSet unclusteredTiles = new TileSet(tiles); // Copy the input structure
-        final List<Cluster> posClusters = new LinkedList<>(); // These satisfy the predicate
-        final List<Cluster> negClusters = new LinkedList<>(); // These DON'T satisfy the predicate
+        final Map<T, List<Cluster>> result = new HashMap<>();
 
         // Each iteration of this loop creates a new cluster
         while (!unclusteredTiles.isEmpty()) {
             // Grab a tile to work with
             final Tile firstTile = GeneralFuncs.firstFromCollection(unclusteredTiles);
-            final boolean isPositive = predicate.test(firstTile); // Get its state (pos/neg)
+            final T category = categoryFunc.apply(firstTile); // Determine its category
 
             // Start building a cluster around this tile
             final Cluster cluster = new Cluster();
@@ -96,8 +86,8 @@ public class Cluster extends TileSet {
 
                 // For each unclustered tile adjacent to this one...
                 for (final Tile adjTile : unclusteredTiles.getAdjacentTiles(tile.pos()).values()) {
-                    // If this adjacent tile has the same pos/neg state as the cluster, add it
-                    if (predicate.test(adjTile) == isPositive) {
+                    // If this adjacent tile has the same category as the cluster, add it
+                    if (categoryFunc.apply(adjTile).equals(category)) {
                         addToCluster(adjTile, cluster, uncheckedTiles, unclusteredTiles);
                     }
                 }
@@ -105,14 +95,19 @@ public class Cluster extends TileSet {
                 uncheckedTiles.remove(tile); // We've now checked this tile
             }
 
-            if (isPositive) {
-                posClusters.add(cluster);
+            // Add this cluster to the list of clusters in this category. If there is no list for
+            // this category yet, make one and add it to the map.
+            final List<Cluster> clusterList;
+            if (result.containsKey(category)) {
+                clusterList = result.get(category);
             } else {
-                negClusters.add(cluster);
+                clusterList = new ArrayList<>();
+                result.put(category, clusterList);
             }
+            clusterList.add(cluster);
         }
 
-        return new Pair<>(posClusters, negClusters);
+        return result;
     }
 
     private static void addToCluster(Tile tile, Cluster cluster, TileSet uncheckedTiles,
@@ -144,8 +139,8 @@ public class Cluster extends TileSet {
      * @return the clusters
      */
     @NotNull
-    public List<Cluster> cluster(@NotNull ToDoubleBiFunction<Tile, Tile> similarityFunc,
-                                 double similarityThreshold) {
+    public List<Cluster> similarityCluster(@NotNull ToDoubleBiFunction<Tile, Tile> similarityFunc,
+                                           double similarityThreshold) {
         throw new UnsupportedOperationException(); // TODO implement if necessary
     }
 }

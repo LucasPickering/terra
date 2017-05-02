@@ -28,7 +28,7 @@ public class OceanGenerator extends Generator {
     public void generate() {
         // Get clusters of tiles that are at or below sea level
         final List<Cluster> clusters =
-            Cluster.cluster(world().getTiles(), t -> t.elevation() < World.SEA_LEVEL).first();
+            Cluster.categoryCluster(world().getTiles(), t -> t.elevation() < World.SEA_LEVEL).get(true);
 
         for (Cluster cluster : clusters) {
             // 1 tile has 0 chance, 2 tiles have 1/x chance, 3 tiles have 2/x chance, etc.
