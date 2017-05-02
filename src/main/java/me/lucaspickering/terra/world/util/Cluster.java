@@ -115,11 +115,18 @@ public class Cluster extends TileSet {
         return new Pair<>(posClusters, negClusters);
     }
 
+    private static void addToCluster(Tile tile, Cluster cluster, TileSet uncheckedTiles,
+                                     TileSet unclusteredTiles) {
+        cluster.add(tile);
+        uncheckedTiles.add(tile);
+        unclusteredTiles.remove(tile);
+    }
+
     /**
-     * Clusters the tiles in the given set into one or more clusters. Each tile in each cluster:
+     * Clusters the tiles in the given set into one or more clusters. Each tile in each cluster is:
      * <ul>
-     * <li>is adjacent to at least one other tile in its cluster</li>
-     * <li>is similar to at least one tile adjacent to it</li>
+     * <li>adjacent to at least one other tile in its cluster</li>
+     * <li>similar to at least one tile adjacent to it (see below for definition of "similar")</li>
      * </ul>
      *
      * Each cluster will be one contiguous set of tiles.
@@ -127,8 +134,11 @@ public class Cluster extends TileSet {
      * Two tiles are considered "similar" iff the similarity score between them, as determined by
      * the given similarity function, is GREATER THAN OR EQUAL TO the given similarity threshold.
      *
-     * @param similarityFunc      the function used to determine how similar two tiles are (should
-     *                            be commutative)
+     * The given similarity function must be commutative ({@code f(a, b) == f(b, a)}, always) and
+     * stable, i.e. {@code f(a, b)} always returns the same result, provided {@code a} and
+     * {@code b} do not change.
+     *
+     * @param similarityFunc      the function used to determine how similar two tiles are
      * @param similarityThreshold the minimum similarity score two tiles need in order to be
      *                            considered similar to each other
      * @return the clusters
@@ -137,12 +147,5 @@ public class Cluster extends TileSet {
     public List<Cluster> cluster(@NotNull ToDoubleBiFunction<Tile, Tile> similarityFunc,
                                  double similarityThreshold) {
         throw new UnsupportedOperationException(); // TODO implement if necessary
-    }
-
-    private static void addToCluster(Tile tile, Cluster cluster, TileSet uncheckedTiles,
-                                     TileSet unclusteredTiles) {
-        cluster.add(tile);
-        uncheckedTiles.add(tile);
-        unclusteredTiles.remove(tile);
     }
 }
