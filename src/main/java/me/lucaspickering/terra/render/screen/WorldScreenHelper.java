@@ -11,10 +11,6 @@ import me.lucaspickering.utils.range.Range;
 
 class WorldScreenHelper {
 
-    enum TileOverlay {
-        NONE, CONTINENT, CHUNK
-    }
-
     static final double TILE_RADIUS = 10.0; // Distance from the center of the tile to each VERTEX
     static final double TILE_WIDTH = TILE_RADIUS * 2; // Width of each tile, in pixels
     static final double TILE_HEIGHT = Math.sqrt(3) * TILE_RADIUS;

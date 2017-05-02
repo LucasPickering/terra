@@ -2,13 +2,8 @@ package me.lucaspickering.terra.render.screen;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 
-import java.awt.Color;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,11 +16,9 @@ import me.lucaspickering.terra.render.Font;
 import me.lucaspickering.terra.render.VertexBufferObject;
 import me.lucaspickering.terra.render.screen.gui.MouseTextBox;
 import me.lucaspickering.terra.util.Colors;
-import me.lucaspickering.terra.util.Direction;
-import me.lucaspickering.terra.util.Funcs;
-import me.lucaspickering.terra.world.Continent;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.TileColorMode;
+import me.lucaspickering.terra.world.TileOverlayMode;
 import me.lucaspickering.terra.world.WorldHandler;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
@@ -40,7 +33,7 @@ public class WorldScreen extends Screen {
     private double worldScale = 1.0;
 
     private TileColorMode tileColorMode = TileColorMode.COMPOSITE;
-    private WorldScreenHelper.TileOverlay tileOverlay = WorldScreenHelper.TileOverlay.NONE;
+    private TileOverlayMode tileOverlayMode = TileOverlayMode.NONE;
 
     private Point lastMouseDragPos; // The last position of the mouse while dragging, or null
     private Tile mouseOverTile; // The tile that the mouse is currently over
@@ -49,13 +42,8 @@ public class WorldScreen extends Screen {
     private final Logger logger;
 
     // CHUNK VBO FIELDS
-    private int chunkVertexHandle = -1; // -1 indicates it hasn't been set yet
-    private final HexPointMap<Chunk, VertexBufferObject> tileVbos = new HexPointMap<>();
-    private final HexPointMap<Chunk, VertexBufferObject> riverVbos = new HexPointMap<>();
-    private final int[] startingIndices = new int[Chunk.TOTAL_TILES];
-    private final int[] sizes = new int[Chunk.TOTAL_TILES];
+    private final HexPointMap<Chunk, ChunkVbo> chunkVbos = new HexPointMap<>();
 
-    private int hexVertexHandle;
     private VertexBufferObject mouseOverVbo;
 
     public WorldScreen(WorldHandler worldHandler) {
@@ -71,91 +59,14 @@ public class WorldScreen extends Screen {
     }
 
     private void initVbos() {
-        // Populate the array that tells GL which vertex to start at for each polygon, and
-        // another that tells it how big (in vertices) each polygon is.
-        for (int i = 0; i < Chunk.TOTAL_TILES; i++) {
-            startingIndices[i] = i * WorldScreenHelper.NUM_VERTICES;
-            sizes[i] = WorldScreenHelper.NUM_VERTICES;
-        }
-
+        // Init a VBO container for each chunk
         for (Chunk chunk : worldHandler.getWorld().getChunks()) {
-            initTileVbo(chunk);
-            initRiverVbo(chunk);
+            chunkVbos.put(chunk, new ChunkVbo(this, chunk));
         }
 
         initHexVbos(); // Init single-tile VBOs, such as mouse-over highlight
     }
 
-    private void initTileVbo(Chunk chunk) {
-        // Save this chunk's position on the screen
-        chunk.setScreenPos(WorldScreenHelper.chunkToPixel(chunk.getPos()));
-
-        // Create a VBO for the chunk
-        final VertexBufferObject vbo = new VertexBufferObject.Builder()
-            .setNumVertices(WorldScreenHelper.NUM_VERTICES * Chunk.TOTAL_TILES)
-            .setDrawFunction(() -> GL14.glMultiDrawArrays(GL11.GL_TRIANGLE_FAN,
-                                                          startingIndices, sizes))
-            .build();
-
-        // If this is the first chunk VBO to be initialized, we need to create the vertex VBO.
-        // Otherwise, use the pre-existing VBO.
-        if (chunkVertexHandle == -1) {
-            // Add vertices for each tile in the chunk
-            for (int x = 0; x < Chunk.SIDE_LENGTH; x++) {
-                for (int y = 0; y < Chunk.SIDE_LENGTH; y++) {
-                    final Point tileCenter = WorldScreenHelper.tileToPixel(new HexPoint(x, y));
-                    for (Point vertex : WorldScreenHelper.TILE_VERTICES) {
-                        // Shift this vertex by the tile's center, and add it to the VBO
-                        vbo.addVertex(tileCenter.plus(vertex));
-                    }
-                }
-            }
-            vbo.bindVertexBuffer(GL15.GL_STATIC_DRAW);
-            chunkVertexHandle = vbo.getVertexHandle();
-        } else {
-            // The vertex VBO was initialized already, just use its handle
-            vbo.setVertexHandle(chunkVertexHandle);
-        }
-
-        vbo.bindColorBuffer(GL15.GL_DYNAMIC_DRAW); // Bind the color buffer now and populate later
-
-        // Put the handle in the map, then populate the buffer with the correct colors
-        tileVbos.put(chunk, vbo);
-        updateChunkColors(chunk, vbo);
-    }
-
-    private void initRiverVbo(Chunk chunk) {
-        final List<Point> vertices = new LinkedList<>();
-        for (Tile tile : chunk.getTiles()) {
-            final Point tileCenter =
-                WorldScreenHelper.tileToPixel(Chunk.getRelativeTilePos(tile.pos()));
-            for (Direction dir : Direction.values()) {
-                if (tile.getRiverConnection(dir) != null) {
-                    final Point midpoint = WorldScreenHelper.TILE_SIDE_MIDPOINTS[dir.ordinal()];
-                    vertices.add(tileCenter);
-                    vertices.add(tileCenter.plus(midpoint));
-                }
-            }
-        }
-
-        final VertexBufferObject vbo = new VertexBufferObject.Builder()
-            .setNumVertices(vertices.size())
-            .setDrawFunction(() -> {
-                GL11.glLineWidth(5f);
-                GL11.glDrawArrays(GL11.GL_LINES, 0, vertices.size());
-            })
-            .build();
-
-        for (Point vertex : vertices) {
-            vbo.addVertex(vertex);
-            vbo.addColor(Color.BLUE);
-        }
-
-        vbo.bindVertexBuffer(GL15.GL_STATIC_DRAW);
-        vbo.bindColorBuffer(GL15.GL_STATIC_DRAW);
-
-        riverVbos.put(chunk, vbo);
-    }
 
     private void initHexVbos() {
         // Initialize the mouse-over VBO
@@ -174,8 +85,6 @@ public class WorldScreen extends Screen {
 
         mouseOverVbo.bindVertexBuffer(GL15.GL_STATIC_DRAW);
         mouseOverVbo.bindColorBuffer(GL15.GL_STATIC_DRAW);
-
-        hexVertexHandle = mouseOverVbo.getVertexHandle(); // Save this for future hexagons
     }
 
     @Override
@@ -192,8 +101,8 @@ public class WorldScreen extends Screen {
         GL11.glScaled(worldScale, worldScale, 1.0);
 
         // Draw each chunk
-        for (Map.Entry<Chunk, VertexBufferObject> entry : tileVbos.entrySet()) {
-            drawChunk(entry.getKey(), entry.getValue());
+        for (ChunkVbo vbo : chunkVbos.values()) {
+            vbo.draw();
         }
 
         if (mouseOverTile != null) {
@@ -256,17 +165,6 @@ public class WorldScreen extends Screen {
         GL11.glPopMatrix();
     }
 
-    private void drawChunk(Chunk chunk, VertexBufferObject vbo) {
-        // Translate to this chunk's pixel position
-        GL11.glPushMatrix();
-        GL11.glTranslated(chunk.getScreenPos().x(), chunk.getScreenPos().y(), 0.0);
-
-        vbo.draw();
-        riverVbos.get(chunk).draw();
-
-        GL11.glPopMatrix();
-    }
-
     private void drawDebugInfo() {
         final String debugString = String.format(WorldScreenHelper.FPS_FORMAT, getFps());
         renderer().drawString(Font.DEBUG, debugString, 10, 10); // Draw FPS
@@ -274,73 +172,15 @@ public class WorldScreen extends Screen {
 
     private void updateAllTileColors() {
         final long startTime = System.currentTimeMillis();
-        for (Map.Entry<Chunk, VertexBufferObject> entry : tileVbos.entrySet()) {
-            updateChunkColors(entry.getKey(), entry.getValue());
+        for (ChunkVbo vbo : chunkVbos.values()) {
+            vbo.updateColors();
         }
         final long endTime = System.currentTimeMillis();
         logger.log(Level.FINER, String.format("Color update took %d ms", endTime - startTime));
     }
 
-    /**
-     * Updates the color of each tile in the given chunk. The chunk's VBO is passed so it doesn't
-     * have to be looked up. This is generally going to be called from iteration over all chunks,
-     * so the VBO should be readily available and lookup can be avoided.
-     *
-     * @param chunk the chunk to update
-     * @param vbo   the vbo for this chunk
-     */
-    private void updateChunkColors(Chunk chunk, VertexBufferObject vbo) {
-        // Bind the handle for the color buffer
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.getColorHandle());
-        long offset = 0;
-        for (Tile tile : chunk.getTiles()) {
-            final Color color = getTileColor(tile);
-            for (int i = 0; i < WorldScreenHelper.NUM_VERTICES; i++) {
-                offset += vbo.setVertexColor(offset, color);
-            }
-        }
-    }
-
-    /**
-     * Gets the color of this tile, including the overlay color. The overlay color is mixed in
-     * according to its alpha value.
-     *
-     * @param tile the tile whose color we are calculating
-     * @return the calculated color of the given tile
-     */
-    private Color getTileColor(Tile tile) {
-        final Color baseColor = tile.getColor(tileColorMode);
-        final Color overlayColor = getTileOverlayColor(tile);
-
-        // If there is an overlay color, mix the two colors
-        if (overlayColor != null) {
-            return Funcs.overlayColors(overlayColor, baseColor);
-        }
-        return baseColor;
-    }
-
-    /**
-     * Gets the current overlay color for the given tile. This color is based on the current
-     * value of {@link #tileOverlay}. This should be added to the tile's base color to generate
-     * its displayed color.
-     *
-     * @param tile the tile whose color we are retrieving
-     * @return the overlay color, or {@code null} if this tile has no active overlay
-     */
-    private Color getTileOverlayColor(Tile tile) {
-        switch (tileOverlay) {
-            case CONTINENT:
-                final Continent continent =
-                    worldHandler.getWorld().getTilesToContinents().get(tile);
-                if (continent != null) {
-                    // Draw an overlay in the continent's color
-                    return continent.getOverlayColor();
-                }
-                break;
-            case CHUNK:
-                return tile.getChunk().getOverlayColor();
-        }
-        return null;
+    public TileColorMode getTileColorMode() {
+        return tileColorMode;
     }
 
     private void setTileColorMode(TileColorMode colorMode) {
@@ -348,12 +188,16 @@ public class WorldScreen extends Screen {
         updateAllTileColors();
     }
 
-    private void setTileOverlay(WorldScreenHelper.TileOverlay overlay) {
+    public TileOverlayMode getTileOverlayMode() {
+        return tileOverlayMode;
+    }
+
+    private void setTileOverlayMode(TileOverlayMode overlayMode) {
         // If this overlay is already enabled, disable it, otherwise switch to it
-        if (overlay == tileOverlay) {
-            tileOverlay = WorldScreenHelper.TileOverlay.NONE;
+        if (overlayMode == tileOverlayMode) {
+            tileOverlayMode = TileOverlayMode.NONE;
         } else {
-            tileOverlay = overlay;
+            tileOverlayMode = overlayMode;
         }
 
         updateAllTileColors();
@@ -412,10 +256,10 @@ public class WorldScreen extends Screen {
                     setTileColorMode(TileColorMode.COMPOSITE);
                     break;
                 case WORLD_TILE_OVERLAY_CONTINENTS:
-                    setTileOverlay(WorldScreenHelper.TileOverlay.CONTINENT);
+                    setTileOverlayMode(TileOverlayMode.CONTINENT);
                     break;
                 case WORLD_TILE_OVERLAY_CHUNKS:
-                    setTileOverlay(WorldScreenHelper.TileOverlay.CHUNK);
+                    setTileOverlayMode(TileOverlayMode.CHUNK);
                     break;
             }
         }

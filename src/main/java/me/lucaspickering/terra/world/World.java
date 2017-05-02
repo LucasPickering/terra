@@ -14,7 +14,6 @@ import java.util.Objects;
 import me.lucaspickering.terra.util.Direction;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
-import me.lucaspickering.terra.world.util.HexPointMap;
 import me.lucaspickering.terra.world.util.HexPointSet;
 import me.lucaspickering.terra.world.util.TileSet;
 import me.lucaspickering.utils.range.DoubleRange;
@@ -170,24 +169,20 @@ public class World {
     private final HexPointSet<Chunk> chunks;
     private final ChunkedTileSet worldTiles = new ChunkedTileSet();
     private final List<Continent> continents;
-    private final HexPointMap<Tile, Continent> tilesToContinents;
 
     public World(long seed, int chunkRadius) {
         this.seed = seed;
         chunks = initChunks(chunkRadius);
         continents = new ArrayList<>();
-        tilesToContinents = new HexPointMap<>();
     }
 
     /**
      * Copy constructor.
      */
-    private World(long seed, HexPointSet<Chunk> chunks, List<Continent> continents,
-                  HexPointMap<Tile, Continent> tilesToContinents) {
+    private World(long seed, HexPointSet<Chunk> chunks, List<Continent> continents) {
         this.seed = seed;
         this.chunks = chunks;
         this.continents = continents;
-        this.tilesToContinents = tilesToContinents;
     }
 
     /**
@@ -228,14 +223,9 @@ public class World {
         return continents;
     }
 
-    public HexPointMap<Tile, Continent> getTilesToContinents() {
-        return tilesToContinents;
-    }
-
     public World immutableCopy() {
         return new World(seed,
                          chunks.immutableCopy(), // NO DEEP COPY
-                         Collections.unmodifiableList(continents), // NO DEEP COPY
-                         tilesToContinents.immutableCopy()); // NO DEEP COPY
+                         Collections.unmodifiableList(continents)); // NO DEEP COPY
     }
 }

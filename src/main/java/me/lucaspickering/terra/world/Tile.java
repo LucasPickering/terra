@@ -19,8 +19,7 @@ public class Tile implements HexPointable {
     private static final Range<Double> WATER_LEVEL_RANGE = new DoubleRange(0.0, 10.0);
     private static final Range<Double> WATER_TRAVERSED_RANGE = new DoubleRange(0.0, 20.0);
 
-    private static final String INFO_STRING =
-        "Biome: %s%nElevation: %d%nHumidity: %d%%";
+    private static final String INFO_STRING = "Biome: %s%nElevation: %d%nHumidity: %d%%";
     private static final String DEBUG_INFO_STRING = "%nPos: %s%nChunk: %s%nWater: %.2f|%.2f%n";
 
     public enum RiverConnection {
@@ -30,6 +29,7 @@ public class Tile implements HexPointable {
     private final HexPoint pos; // The position of this tile in the world (NOT chunk-relative)
 
     private Chunk chunk; // The chunk that this tile belongs to
+    private Continent continent; // The continent that this tile belongs to
 
     private Biome biome = Biome.NONE;
 
@@ -55,6 +55,22 @@ public class Tile implements HexPointable {
     public void setChunk(Chunk chunk) {
         Objects.requireNonNull(chunk);
         this.chunk = chunk;
+    }
+
+    public Continent getContinent() {
+        return continent;
+    }
+
+    /**
+     * Sets this tile's continent. The caller of this function must always make sure that this
+     * tile is added to the given continent, so that this tile's continent field stays consistent
+     * with that continent's container. It is also the caller's responsibility to ensure that, if
+     * this tile previously belonged to another continent, then it is removed from that continent.
+     *
+     * @param continent the new continent for this tile to belong to
+     */
+    public void setContinent(Continent continent) {
+        this.continent = continent;
     }
 
     public final HexPoint pos() {
