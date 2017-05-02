@@ -6,7 +6,6 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
 
 import java.awt.Color;
-import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.util.Objects;
 
@@ -83,7 +82,7 @@ public class VertexBufferObject {
     private final Runnable drawFunction;
 
     private int vertexHandle;
-    private final DoubleBuffer vertexBuffer;
+    private final FloatBuffer vertexBuffer;
 
     private final FloatBuffer colorBuffer;
     private int colorHandle;
@@ -93,7 +92,7 @@ public class VertexBufferObject {
         this.colorMode = colorMode;
         this.drawFunction = drawFunction;
 
-        vertexBuffer = BufferUtils.createDoubleBuffer(VERTEX_SIZE * numVertices);
+        vertexBuffer = BufferUtils.createFloatBuffer(VERTEX_SIZE * numVertices);
         colorBuffer = BufferUtils.createFloatBuffer(colorMode.size * numVertices);
     }
 
@@ -114,8 +113,8 @@ public class VertexBufferObject {
     }
 
     public void addVertex(Point point) {
-        vertexBuffer.put(point.x());
-        vertexBuffer.put(point.y());
+        vertexBuffer.put((float) point.x());
+        vertexBuffer.put((float) point.y());
     }
 
     public void addColor(Color color) {
@@ -123,19 +122,20 @@ public class VertexBufferObject {
     }
 
     public void bindVertexBuffer(int usage) {
-        vertexBuffer.rewind(); // Reset the buffer before binding
-        vertexHandle = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexHandle);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexBuffer, usage);
-        GL30.glBindVertexArray(0);
+        vertexHandle = bindBuffer(vertexBuffer, usage);
     }
 
     public void bindColorBuffer(int usage) {
-        colorBuffer.rewind(); // Reset the buffer before binding
-        colorHandle = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorHandle);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorBuffer, usage);
+        colorHandle = bindBuffer(colorBuffer, usage);
+    }
+
+    private int bindBuffer(FloatBuffer buffer, int usage) {
+        buffer.rewind(); // Reset the buffer before binding
+        final int handle = GL15.glGenBuffers();
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, handle);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, usage);
         GL30.glBindVertexArray(0);
+        return handle;
     }
 
     /**
@@ -154,7 +154,7 @@ public class VertexBufferObject {
     public void draw() {
         // Set up the vertex buffer
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexHandle);
-        GL11.glVertexPointer(VERTEX_SIZE, GL11.GL_DOUBLE, 0, 0L);
+        GL11.glVertexPointer(VERTEX_SIZE, GL11.GL_FLOAT, 0, 0L);
 
         // Set up the color buffer
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorHandle);
