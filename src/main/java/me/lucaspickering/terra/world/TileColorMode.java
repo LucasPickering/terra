@@ -49,7 +49,7 @@ public enum TileColorMode {
             if (tile.biome().isWater()) {
                 return Color.BLACK;
             }
-            return interpolateColor(Color.WHITE, Color.BLUE,
+            return interpolateColor(Color.WHITE, Color.RED,
                                     tile.getWaterTraversed(), WATER_TRAVERSED_RANGE);
         }
     },

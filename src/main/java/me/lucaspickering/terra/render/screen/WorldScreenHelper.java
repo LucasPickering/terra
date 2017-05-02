@@ -27,8 +27,8 @@ class WorldScreenHelper {
         new Point(+(3.0 / 8.0) * TILE_WIDTH, -TILE_HEIGHT / 4), // Northeast
         new Point(+(3.0 / 8.0) * TILE_WIDTH, +TILE_HEIGHT / 4), // Southest
         new Point(0, TILE_HEIGHT / 2),                          // South
-        new Point(-(3.0 / 8.0) * TILE_WIDTH, -TILE_HEIGHT / 4), // Southwest
-        new Point(-(3.0 / 8.0) * TILE_WIDTH, +TILE_HEIGHT / 4)  // Northwest
+        new Point(-(3.0 / 8.0) * TILE_WIDTH, +TILE_HEIGHT / 4), // Southwest
+        new Point(-(3.0 / 8.0) * TILE_WIDTH, -TILE_HEIGHT / 4)  // Northwest
     };
 
     static final Range<Double> VALID_WORLD_SCALES = new DoubleRange(0.5, 10.0);

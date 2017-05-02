@@ -1,5 +1,6 @@
 package me.lucaspickering.terra.util;
 
+import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.util.HexPoint;
 
 public enum Direction {
@@ -39,6 +40,10 @@ public enum Direction {
                 "Distance must be non-negative, was [%d]", distance));
         }
         return point.plus(delta.times(distance));
+    }
+
+    public Direction opposite() {
+        return values()[(ordinal() + Tile.NUM_SIDES / 2) % Tile.NUM_SIDES];
     }
 
     public boolean isOpposite(Direction other) {

@@ -11,8 +11,16 @@ import me.lucaspickering.terra.world.util.HexPointable;
 
 public class Tile implements HexPointable {
 
-    private static final String INFO_STRING = "Biome: %s%nElevation: %d%nHumidity: %d%%";
-    private static final String DEBUG_INFO_STRING = "%nPos: %s%nChunk: %s%nWater: %.2f|%.2f%n";
+    public static final int NUM_SIDES = Direction.values().length;
+
+    private static final String INFO_STRING = "Biome: %s%n" +
+                                              "Elevation: %d%n" +
+                                              "Humidity: %d%%";
+    private static final String DEBUG_INFO_STRING = "%nPos: %s%n" +
+                                                    "Chunk: %s%n" +
+                                                    "Water: %.2f|%.2f%n" +
+                                                    "River entries: %s%n" +
+                                                    "River exits: %s";
 
     public enum RiverConnection {
         ENTRY, EXIT
@@ -198,8 +206,23 @@ public class Tile implements HexPointable {
         final String info = String.format(INFO_STRING, biome.displayName(), elevation(),
                                           (int) (humidity() * 100));
         if (debug) {
+            final StringBuilder entriesString = new StringBuilder();
+            final StringBuilder exitsString = new StringBuilder();
+            for (Map.Entry<Direction, RiverConnection> entry : riverConnections.entrySet()) {
+                switch (entry.getValue()) {
+                    case ENTRY:
+                        entriesString.append(entry.getKey());
+                        entriesString.append(" ");
+                        break;
+                    case EXIT:
+                        exitsString.append(entry.getKey());
+                        exitsString.append(" ");
+                        break;
+                }
+            }
             return info + String.format(DEBUG_INFO_STRING, pos, chunk.getPos(),
-                                        waterLevel, totalWaterTraversed);
+                                        waterLevel, totalWaterTraversed,
+                                        entriesString, exitsString);
         }
         return info;
     }

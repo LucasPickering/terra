@@ -1,6 +1,7 @@
 package me.lucaspickering.terra.world.generate;
 
-import java.util.List;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -12,7 +13,7 @@ import me.lucaspickering.terra.world.util.TileSet;
 
 public class RiverGenerator extends Generator {
 
-    private static final double RIVER_THRESHOLD = 10.0;
+    private static final double RIVER_THRESHOLD = 7.0;
 
     public RiverGenerator(World world, Random random) {
         super(world, random);
@@ -27,14 +28,48 @@ public class RiverGenerator extends Generator {
         final TileSet riverTiles = continent.getTiles().parallelStream()
             .filter(t -> t.getWaterTraversed() >= RIVER_THRESHOLD)
             .collect(Collectors.toCollection(TileSet::new));
-        final List<Tile> sortedRiverTiles = riverTiles.stream()
-            .sorted((t1, t2) -> Integer.compare(t2.elevation(), t1.elevation()))
-            .collect(Collectors.toList());
 
-        for (Tile tile : sortedRiverTiles) {
-            for (Direction dir : Direction.values()) {
-                tile.addRiverConnection(dir, Tile.RiverConnection.ENTRY);
+        while (!riverTiles.isEmpty()) {
+            Tile firstTile = riverTiles.stream()
+                .max(Comparator.comparingDouble(Tile::getWaterTraversed))
+                .orElseThrow(RuntimeException::new);
+            riverTiles.remove(firstTile);
+
+            Map.Entry<Direction, Tile> nextTileEntry = getNextTile(firstTile);
+            while (nextTileEntry != null) {
+                final Direction dir = nextTileEntry.getKey();
+                final Tile nextTile = nextTileEntry.getValue();
+                firstTile.addRiverConnection(dir, Tile.RiverConnection.EXIT);
+                if (nextTile.biome().isLand()) {
+                    nextTile.addRiverConnection(dir.opposite(), Tile.RiverConnection.ENTRY);
+                    riverTiles.remove(nextTile);
+
+                    firstTile = nextTile;
+                } else {
+                    break;
+                }
+
+                nextTileEntry = getNextTile(firstTile);
             }
         }
+    }
+
+    private Map.Entry<Direction, Tile> getNextTile(Tile tile) {
+        final Map<Direction, Tile> adjTiles = world().getTiles().getAdjacentTiles(tile.pos());
+        Map.Entry<Direction, Tile> nextTile;
+        nextTile = adjTiles.entrySet().stream()
+            .filter(p -> p.getValue().biome().isLand() &&
+                         p.getValue().elevation() < tile.elevation())
+            .max(Comparator.comparingDouble(p -> p.getValue().getWaterTraversed()))
+            .orElse(null);
+        if (nextTile != null) {
+            return nextTile;
+        }
+
+        nextTile = adjTiles.entrySet().stream()
+            .filter(p -> p.getValue().biome().isWater())
+            .findFirst()
+            .orElse(null);
+        return nextTile;
     }
 }
