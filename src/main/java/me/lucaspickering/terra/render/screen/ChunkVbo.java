@@ -18,7 +18,7 @@ import me.lucaspickering.utils.Point;
 
 public class ChunkVbo {
 
-    private static final float RIVER_LINE_WIDTH = 3f;
+    private static final float RIVER_LINE_WIDTH = 1.5f;
 
     // All chunks can share the same vertex buffer (only color has to vary between them)
     private static int tilesVertexHandle = -1; // yaay sentinel values
@@ -110,7 +110,7 @@ public class ChunkVbo {
         final VertexBufferObject vbo = new VertexBufferObject.Builder()
             .setNumVertices(vertices.size())
             .setDrawFunction(() -> {
-                GL11.glLineWidth(RIVER_LINE_WIDTH);
+                GL11.glLineWidth((float) worldScreen.getWorldScale() * RIVER_LINE_WIDTH);
                 GL11.glDrawArrays(GL11.GL_LINES, 0, vertices.size());
             })
             .build();

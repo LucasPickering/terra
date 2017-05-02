@@ -168,6 +168,10 @@ public class WorldScreen extends Screen {
         logger.log(Level.FINER, String.format("Color update took %d ms", endTime - startTime));
     }
 
+    public double getWorldScale() {
+        return worldScale;
+    }
+
     public TileColorMode getTileColorMode() {
         return tileColorMode;
     }
@@ -204,7 +208,8 @@ public class WorldScreen extends Screen {
 
     private void regenerateWorld() {
         worldHandler.generate();
-        updateAllTileColors();
+        chunkVbos.clear();
+        initVbos();
     }
 
     private void stepWorld() {

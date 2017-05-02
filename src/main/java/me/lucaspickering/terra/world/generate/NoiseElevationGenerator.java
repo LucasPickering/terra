@@ -19,8 +19,8 @@ public class NoiseElevationGenerator extends NoiseGenerator {
 
     public NoiseElevationGenerator(World world, Random random) {
         super(world, random, new Perlin());
-        noiseGenerator.setFrequency(3.5);
-        noiseGenerator.setLacunarity(2.5);
+        noiseGenerator.setFrequency(1.5);
+        noiseGenerator.setLacunarity(4);
         noiseGenerator.setPersistence(0.5);
         noiseGenerator.setOctaveCount(12);
     }
