@@ -8,9 +8,11 @@ import me.lucaspickering.terra.world.generate.BeachGenerator;
 import me.lucaspickering.terra.world.generate.BiomePainter;
 import me.lucaspickering.terra.world.generate.ContinentClusterer;
 import me.lucaspickering.terra.world.generate.Generator;
+import me.lucaspickering.terra.world.generate.LakeGenerator;
 import me.lucaspickering.terra.world.generate.NoiseElevationGenerator;
 import me.lucaspickering.terra.world.generate.NoiseHumidityGenerator;
 import me.lucaspickering.terra.world.generate.OceanGenerator;
+import me.lucaspickering.terra.world.generate.RiverGenerator;
 import me.lucaspickering.terra.world.generate.RunoffGenerator;
 import me.lucaspickering.terra.world.step.Stepper;
 
@@ -73,7 +75,9 @@ public class WorldHandler {
             new BiomePainter(world, random),
             new ContinentClusterer(world, random),
             new BeachGenerator(world, random),
-            new RunoffGenerator(world, random)
+            new RunoffGenerator(world, random),
+            new LakeGenerator(world, random),
+            new RiverGenerator(world, random)
         };
     }
 

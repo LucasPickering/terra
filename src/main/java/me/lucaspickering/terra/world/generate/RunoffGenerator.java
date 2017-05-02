@@ -7,8 +7,6 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import me.lucaspickering.terra.util.Direction;
-import me.lucaspickering.terra.world.Biome;
 import me.lucaspickering.terra.world.Continent;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.World;
@@ -30,8 +28,6 @@ import me.lucaspickering.terra.world.util.TileSet;
 public class RunoffGenerator extends Generator {
 
     private static final double RAINFALL = 0.5;
-    private static final double LAKE_THRESHOLD = 3.0;
-    private static final double RIVER_THRESHOLD = 10.0;
     private static final int ITERATIONS = 5;
     private static final double TOLERABLE_CHANGE_THRESHOLD = 0.001;
 
@@ -46,8 +42,6 @@ public class RunoffGenerator extends Generator {
         for (int i = 0; i < ITERATIONS; i++) {
             continents.parallelStream().forEach(this::spreadForContinent);
         }
-        continents.parallelStream().forEach(this::generateLakes);
-        continents.parallelStream().forEach(this::generateRivers);
     }
 
     /**
@@ -57,29 +51,6 @@ public class RunoffGenerator extends Generator {
         for (Continent continent : world.getContinents()) {
             for (Tile tile : continent.getTiles()) {
                 tile.addWater(RAINFALL);
-            }
-        }
-    }
-
-    private void generateLakes(Continent continent) {
-        for (Tile tile : continent.getTiles()) {
-            if (tile.getWaterLevel() >= LAKE_THRESHOLD) {
-                tile.setBiome(Biome.LAKE);
-            }
-        }
-    }
-
-    private void generateRivers(Continent continent) {
-        final TileSet riverTiles = continent.getTiles().parallelStream()
-            .filter(t -> t.getWaterTraversed() >= RIVER_THRESHOLD)
-            .collect(Collectors.toCollection(TileSet::new));
-        final List<Tile> sortedRiverTiles = riverTiles.stream()
-            .sorted((t1, t2) -> Integer.compare(t2.elevation(), t1.elevation()))
-            .collect(Collectors.toList());
-
-        for (Tile tile : sortedRiverTiles) {
-            for (Direction dir : Direction.values()) {
-                tile.addRiverConnection(dir, Tile.RiverConnection.ENTRY);
             }
         }
     }
