@@ -11,13 +11,14 @@ import java.util.List;
 import me.lucaspickering.terra.render.VertexBufferObject;
 import me.lucaspickering.terra.util.Direction;
 import me.lucaspickering.terra.util.Funcs;
-import me.lucaspickering.terra.world.Continent;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
 import me.lucaspickering.utils.Point;
 
 public class ChunkVbo {
+
+    private static final float RIVER_LINE_WIDTH = 3f;
 
     // All chunks can share the same vertex buffer (only color has to vary between them)
     private static int tilesVertexHandle = -1; // yaay sentinel values
@@ -109,7 +110,7 @@ public class ChunkVbo {
         final VertexBufferObject vbo = new VertexBufferObject.Builder()
             .setNumVertices(vertices.size())
             .setDrawFunction(() -> {
-                GL11.glLineWidth(5f);
+                GL11.glLineWidth(RIVER_LINE_WIDTH);
                 GL11.glDrawArrays(GL11.GL_LINES, 0, vertices.size());
             })
             .build();
@@ -150,35 +151,14 @@ public class ChunkVbo {
      * @return the calculated color of the given tile
      */
     private Color getTileColor(Tile tile) {
-        final Color baseColor = tile.getColor(worldScreen.getTileColorMode());
-        final Color overlayColor = getTileOverlayColor(tile);
+        final Color baseColor = worldScreen.getTileColorMode().getColor(tile);
+        final Color overlayColor = worldScreen.getTileOverlayMode().getColor(tile);
 
         // If there is an overlay color, mix the two colors
         if (overlayColor != null) {
             return Funcs.overlayColors(overlayColor, baseColor);
         }
         return baseColor;
-    }
-
-    /**
-     * Gets the current overlay color for the given tile.
-     *
-     * @param tile the tile whose color we are retrieving
-     * @return the overlay color, or {@code null} if this tile has no active overlay
-     */
-    private Color getTileOverlayColor(Tile tile) {
-        switch (worldScreen.getTileOverlayMode()) {
-            case CONTINENT:
-                final Continent continent = tile.getContinent();
-                if (continent != null) {
-                    // Draw an overlay in the continent's color
-                    return continent.getOverlayColor();
-                }
-                break;
-            case CHUNK:
-                return tile.getChunk().getOverlayColor();
-        }
-        return null;
     }
 
     /**

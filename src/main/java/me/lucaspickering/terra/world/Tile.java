@@ -1,23 +1,15 @@
 package me.lucaspickering.terra.world;
 
-import java.awt.Color;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 
 import me.lucaspickering.terra.util.Direction;
-import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
 import me.lucaspickering.terra.world.util.HexPointable;
-import me.lucaspickering.utils.range.DoubleRange;
-import me.lucaspickering.utils.range.Range;
 
 public class Tile implements HexPointable {
-
-    // Only used for coloring, these values aren't enforced anywhere
-    private static final Range<Double> WATER_LEVEL_RANGE = new DoubleRange(0.0, 10.0);
-    private static final Range<Double> WATER_TRAVERSED_RANGE = new DoubleRange(0.0, 20.0);
 
     private static final String INFO_STRING = "Biome: %s%nElevation: %d%nHumidity: %d%%";
     private static final String DEBUG_INFO_STRING = "%nPos: %s%nChunk: %s%nWater: %.2f|%.2f%n";
@@ -169,10 +161,6 @@ public class Tile implements HexPointable {
             throw new IllegalArgumentException(String.format("Water must be positive, was [%f]",
                                                              water));
         }
-//        if (water > waterLevel) {
-//            throw new IllegalArgumentException(String.format(
-//                "Cannot remove [%f] water from tile; only [%f] is available", water, waterLevel));
-//        }
         final double toRemove = Math.min(waterLevel, water);
         waterLevel -= toRemove;
         return toRemove;
@@ -203,45 +191,6 @@ public class Tile implements HexPointable {
 
     public void removeRiverConnection(Direction dir) {
         riverConnections.remove(dir);
-    }
-
-    public final Color getColor(TileColorMode colorMode) {
-        switch (colorMode) {
-            case ELEVATION:
-                return colorMode.interpolateColor(elevation, World.ELEVATION_RANGE);
-            case HUMIDITY:
-                // Water tiles are always blue
-                if (biome.isWater()) {
-                    return Color.BLUE;
-                }
-                return colorMode.interpolateColor(humidity, World.HUMIDITY_RANGE);
-            case WATER_LEVEL:
-                // Water tiles are always black
-                if (biome.isWater()) {
-                    return Color.BLACK;
-                }
-                return colorMode.interpolateColor(getWaterLevel(), WATER_LEVEL_RANGE);
-            case WATER_TRAVERSED:
-                // Water tiles are always black
-                if (biome.isWater()) {
-                    return Color.BLACK;
-                }
-                return colorMode.interpolateColor(getWaterTraversed(), WATER_TRAVERSED_RANGE);
-            case BIOME:
-                return biome.color();
-            case COMPOSITE:
-                final Color elevColor = getColor(TileColorMode.ELEVATION);
-                float elevBrightness = Funcs.getColorBrightness(elevColor);
-                elevBrightness = (float) Math.pow(elevBrightness, 0.75); // Make it brighter
-
-                // Scale this biome color's brightness by the brightness of the elevation color
-                final Color biomeColor = biome.color();
-                return new Color((int) (biomeColor.getRed() * elevBrightness),
-                                 (int) (biomeColor.getGreen() * elevBrightness),
-                                 (int) (biomeColor.getBlue() * elevBrightness));
-            default:
-                throw new IllegalArgumentException("Unknown color mode: " + colorMode);
-        }
     }
 
     public String info(boolean debug) {
