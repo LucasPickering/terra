@@ -13,17 +13,7 @@ import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.util.TileSet;
 
 /**
- * Simulates rainfall and uses that to generate lakes and rivers. The general approach is as
- * follows:
- * <ul>
- * <li>Drop x liters of water on each land tile</li>
- * <li>For each tile, move its water onto each adjacent tile that is lower than it; apply this
- * to tiles in descending order of elevation</li>
- * <li>If there is no where for a tile's water to go, and its water level hits some threshold,
- * that tile becomes a lake</li>
- * <li>At each step keep track of how much water has moved across each tile; if this hits some
- * threshold, that tile becomes a river</li>
- * </ul>
+ * Simulates rainfall, which will later be used to determine where to generate lakes and rivers.
  */
 public class RunoffGenerator extends Generator {
 
