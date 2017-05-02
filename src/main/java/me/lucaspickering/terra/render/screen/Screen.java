@@ -12,6 +12,7 @@ import me.lucaspickering.terra.input.ButtonAction;
 import me.lucaspickering.terra.input.KeyEvent;
 import me.lucaspickering.terra.input.MouseButtonEvent;
 import me.lucaspickering.terra.input.ScrollEvent;
+import me.lucaspickering.terra.render.Font;
 import me.lucaspickering.terra.render.Renderer;
 import me.lucaspickering.terra.render.screen.gui.GuiElement;
 import me.lucaspickering.utils.Point;
@@ -23,6 +24,9 @@ import me.lucaspickering.utils.Point;
  * the in-game screen.
  */
 public abstract class Screen implements ScreenElement {
+
+    private static final String FPS_FORMAT = "FPS: %d";
+
 
     protected final Point center = new Point(Renderer.RES_WIDTH / 2,
                                              Renderer.RES_HEIGHT / 2);
@@ -46,6 +50,11 @@ public abstract class Screen implements ScreenElement {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
 
+        // If debug mode is enabled, draw debug info
+        if (debug) {
+            drawDebugInfo();
+        }
+
         updateFPS();
     }
 
@@ -55,6 +64,11 @@ public abstract class Screen implements ScreenElement {
         GL11.glTranslated(pos.x(), pos.y(), 0f);
         element.draw(mousePos);
         GL11.glPopMatrix();
+    }
+
+    private void drawDebugInfo() {
+        final String debugString = String.format(FPS_FORMAT, getFps());
+        renderer().drawString(Font.DEBUG, debugString, 10, 10); // Draw FPS
     }
 
     private void updateFPS() {
