@@ -17,6 +17,8 @@ import me.lucaspickering.terra.world.util.TileSet;
  */
 public class RunoffGenerator extends Generator {
 
+    // This logging is very intensive and slows down the routine a lot. Only enable if necessary.
+    private static final boolean DEBUG_LOGGING = false;
     private static final double RAINFALL = 0.5;
     private static final int ITERATIONS = 5;
     private static final double TOLERABLE_CHANGE_THRESHOLD = 0.001;
@@ -75,7 +77,9 @@ public class RunoffGenerator extends Generator {
 
         final double targetWaterElev = getTargetWaterElev(tile, lowerTiles);
 
-        logStatus(tile, lowerTiles, targetWaterElev); // Log for debugging
+        if (DEBUG_LOGGING) {
+            logStatus(tile, lowerTiles, targetWaterElev); // Log for debugging
+        }
 
         // If there are any lower tiles to pass water onto, do that
         if (lowerTiles.size() > 0) {
