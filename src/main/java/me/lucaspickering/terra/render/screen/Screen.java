@@ -40,20 +40,21 @@ public abstract class Screen implements ScreenElement {
 
     @Override
     public void draw(Point mousePos) {
-        // Draw all visible GUI elements
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+        // Draw all visible GUI elements
         guiElements.stream()
             .filter(GuiElement::isVisible) // Only draw elements that are visible
             .forEach(element -> drawElement(mousePos, element)); // Draw each element
-
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_BLEND);
 
         // If debug mode is enabled, draw debug info
         if (debug) {
             drawDebugInfo();
         }
+
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_BLEND);
 
         updateFPS();
     }
