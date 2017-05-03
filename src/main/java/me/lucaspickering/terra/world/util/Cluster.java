@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToDoubleBiFunction;
 
 import me.lucaspickering.terra.world.Tile;
@@ -28,6 +29,29 @@ public class Cluster extends TileSet {
      */
     private Cluster() {
         super();
+    }
+
+    /**
+     * Clusters the tiles in the given set into a list of clusters based on adjacency. For each
+     * tile in any given cluster, the following is true:
+     * <ul>
+     * <li>if it is not the only tile in the cluster, then it is adjacent to at least one
+     * other tile in the cluster</li>
+     * <li>it satisfies the given predicate</li>
+     * </ul>
+     *
+     * This means that each cluster is one contiguous set of tiles. No two clusters will be
+     * adjacent to each other, meaning that every cluster will be as large as possible.
+     *
+     * Each tile in the given set will be in no more than one cluster. If it satisfies the
+     * predicate, it will be in EXACTLY ONE cluster. Otherwise, it will not be in any cluster.
+     *
+     * The predicate should be stable, i.e. the same input always returns the same output.
+     */
+    @NotNull
+    public static List<Cluster> predicateCluster(@NotNull TileSet tiles,
+                                                 @NotNull Predicate<Tile> predicate) {
+        return categoryCluster(tiles, predicate::test).get(true);
     }
 
     /**

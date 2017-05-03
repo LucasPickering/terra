@@ -20,7 +20,7 @@ abstract class NoiseGenerator extends Generator {
 
     protected final Perlin noiseGenerator;
 
-    public NoiseGenerator(World world, Random random,Perlin noiseGenerator) {
+    public NoiseGenerator(World world, Random random, Perlin noiseGenerator) {
         super(world, random);
         this.noiseGenerator = noiseGenerator;
     }
@@ -33,8 +33,8 @@ abstract class NoiseGenerator extends Generator {
      * given set.
      */
     HexPointMap<Tile, Double> generateNoises(TileSet tiles) {
-        // Compute a noise value for each tile. This can be done in parallel, as the calculations
-        // are all independent of each other.
+        // Compute a noise value for each tile. This can be done in parallel, but it seems to
+        // actually take longer that way so let's not.
         return tiles.stream()
             .map(t -> new Pair<>(t, generateNoise(t))) // Generate a noise for each tile
             .collect(Pair.mapCollector(HexPointMap::new));

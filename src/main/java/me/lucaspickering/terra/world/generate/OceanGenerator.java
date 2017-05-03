@@ -17,7 +17,8 @@ import me.lucaspickering.utils.GeneralFuncs;
  */
 public class OceanGenerator extends Generator {
 
-    private static final int MIN_OCEAN_SIZE = 50; // Minimum size to be considered an ocean
+    private static final int MIN_OCEAN_SIZE = 15; // Minimum size to be possibly become an ocean
+    private static final int MIN_GUARANTEED_OCEAN_SIZE = 50; // Min size to be guaranteed an ocean
     private static final int MIN_COAST_DEPTH = -5; // Everything in an ocean >= this is coast
 
     public OceanGenerator(World world, Random random) {
@@ -28,15 +29,20 @@ public class OceanGenerator extends Generator {
     public void generate() {
         // Get clusters of tiles that are at or below sea level
         final List<Cluster> clusters =
-            Cluster.categoryCluster(world().getTiles(), t -> t.elevation() < World.SEA_LEVEL).get(true);
+            Cluster.predicateCluster(world().getTiles(), t -> t.elevation() < World.SEA_LEVEL);
+
+        // We use this every iteration so calculate it now. See below for explanation of math.
+        final float chanceDenom = MIN_GUARANTEED_OCEAN_SIZE - MIN_OCEAN_SIZE + 1;
 
         for (Cluster cluster : clusters) {
-            // 1 tile has 0 chance, 2 tiles have 1/x chance, 3 tiles have 2/x chance, etc.
-            final float chance = (float) (cluster.size() - 1) / (MIN_OCEAN_SIZE - 2);
+            // Calculate the chance of this cluster becoming an ocean. For this example, let's
+            // say MIN_OCEAN_SIZE=15 and MIN_GUARANTEED_OCEAN_SIZE=50. Clusters of size 14 and
+            // below have 0 chance of being an ocean. Size 15 has a 1/36 chance, size 16 has
+            // 2/36, etc. up to 49->35/36 size, and 50 has 100% chance.
+            final float chance = (cluster.size() - MIN_OCEAN_SIZE + 1) / chanceDenom;
 
-            // If the cluster is above the size threshold, or the we randomly select it to be an
-            // ocean, set all tiles in it to be coast/ocean
-            if (cluster.size() >= MIN_OCEAN_SIZE || GeneralFuncs.weightedChance(random(), chance)) {
+            // Decide if this should be an ocean
+            if (GeneralFuncs.weightedChance(random(), chance)) {
                 makeOcean(cluster);
             }
         }

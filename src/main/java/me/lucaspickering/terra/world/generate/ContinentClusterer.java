@@ -24,7 +24,7 @@ public class ContinentClusterer extends Generator {
     public void generate() {
         // Cluster tiles based on whether they're land or not
         final List<Cluster> continentClusters =
-            Cluster.categoryCluster(world().getTiles(), tile -> tile.biome().isLand()).get(true);
+            Cluster.predicateCluster(world().getTiles(), tile -> tile.biome().isLand());
 
         final List<Continent> continents = world().getContinents();
 
