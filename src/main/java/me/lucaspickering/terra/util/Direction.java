@@ -46,14 +46,6 @@ public enum Direction {
         return values()[(ordinal() + Tile.NUM_SIDES / 2) % Tile.NUM_SIDES];
     }
 
-    public boolean isOpposite(Direction other) {
-        // Two directions are opposite each other if each one's x, y, & z is the negation of the
-        // other's corresponding coordinate
-        return delta().x() == -other.delta().x()
-               && delta().y() == -other.delta().y()
-               && delta().z() == -other.delta().z();
-    }
-
     public boolean isAdjacentTo(Direction other) {
         // Two directions are adjacent to each other if the distance between their deltas is 1.
         return delta().distanceTo(other.delta()) == 1;
