@@ -166,7 +166,7 @@
         </dependency>
         <dependency>
             <groupId>me.lucaspickering</groupId>
-            <artifactId>LP-utils</artifactId>
+            <artifactId>lp-jutils</artifactId>
             <version>1.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

@@ -1,7 +1,7 @@
 # Terra
 Generate terrain and civilizations.
-  
-Uses the Lightweight Java Game Library.  
+
+Uses the Lightweight Java Game Library.
 ## Installation instructions for Development:
 #### IntelliJ
 1. Clone the repo
@@ -13,7 +13,7 @@ Uses the Lightweight Java Game Library.
 All dependencies are managed by Maven. Most are available online and will be downloaded
 automatically, but some need to be built manually. Those are:
 
-* [LP-utils](https://github.com/LucasPickering/LP-utils)
+* [lp-jutils](https://github.com/LucasPickering/lp-jutils)
 * [noise by flowpowered](https://github.com/flow/noise)
 
 For each of those, clone the git repo and run `mvn clean install` to build and install it.
