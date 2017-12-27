@@ -6,7 +6,7 @@ public class Constants {
     public static final String TEXTURE_PATH = "textures/%s.png";
     public static final String FONT_PATH = "fonts/%s.ttf";
     public static final String SAVE_PATH = "saves/%s.csv";
-    public static final String CFG_PATH = "config/%s.cfg";
+    public static final String CFG_PATH = "config/%s.ini";
 
     // Texture names
     public static final String TEX_ICON = "icon";

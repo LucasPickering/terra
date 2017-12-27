@@ -39,4 +39,8 @@ public enum CommandGroup {
     public static CommandGroup getByString(String groupName) {
         return stringMappings.get(groupName);
     }
+
+    public String toString() {
+        return name;
+    }
 }

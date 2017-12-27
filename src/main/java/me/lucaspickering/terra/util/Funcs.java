@@ -1,18 +1,24 @@
 package me.lucaspickering.terra.util;
 
+import org.apache.commons.configuration2.INIConfiguration;
+import org.apache.commons.configuration2.SubnodeConfiguration;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.Properties;
+import java.util.Map;
 
 import me.lucaspickering.utils.MathFuncs;
+import me.lucaspickering.utils.Pair;
 import me.lucaspickering.utils.range.IntRange;
 import me.lucaspickering.utils.range.Range;
 
@@ -24,9 +30,27 @@ public class Funcs {
         // This should never be instantiated
     }
 
-    public static InputStream getResource(String resourcePath, String fileName) {
+    /**
+     * Opens the resource with the given path format and file name as an {@link InputStream}. The
+     * file name will be formatted into the path, then the file at the formatted path will be
+     * openened.
+     *
+     * @param resourcePath the path format for the resource (e.g. "config/%s.ini")
+     * @param fileName     the name of the file (e.g. "keys")
+     * @return an {@link InputStream} for the given resource
+     * @throws FileNotFoundException if the file does not exist
+     */
+    public static InputStream getResource(String resourcePath, String fileName) throws IOException {
         final String resource = String.format(resourcePath, fileName);
-        return Funcs.class.getClassLoader().getResourceAsStream(resource);
+        final InputStream stream = Funcs.class.getClassLoader().getResourceAsStream(resource);
+
+        // If the stream is null, the file doesn't exist
+        if (stream == null) {
+            throw new FileNotFoundException(String.format("Resource [%s] does not exist",
+                                                          resource));
+        }
+
+        return stream;
     }
 
     private static ByteBuffer resizeBuffer(ByteBuffer buffer, int newCapacity) {
@@ -136,21 +160,29 @@ public class Funcs {
     }
 
     /**
-     * Loads the config file with the given name. The given string should be the name of the file
-     * with no path or extension. Its name will be inserted into {@link Constants#CFG_PATH} to
-     * get the file path.
+     * Loads the config file with the given name as an INI file. The given string should be the name
+     * of the file with no path or extension. Its name will be appended to
+     * {@link Constants#CFG_PATH} to get the file path.
      *
      * @param configFile the name of the config file
-     * @return the values of the file
+     * @return the values of the file, in a map of the sections
      */
     @NotNull
-    public static Properties loadProperties(String configFile) {
-        final Properties prop = new Properties();
-        try (InputStream inputStream = Funcs.getResource(Constants.CFG_PATH, configFile)) {
-            prop.load(inputStream);
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading config file " + configFile, e);
+    public static Map<String, SubnodeConfiguration> loadConfig(String configFile) {
+        final INIConfiguration cfg = new INIConfiguration();
+
+        try (
+            InputStream inputStream = Funcs.getResource(Constants.CFG_PATH, configFile);
+            InputStreamReader reader = new InputStreamReader(inputStream)) {
+            cfg.read(reader);
+        } catch (IOException | ConfigurationException e) {
+            throw new RuntimeException(String.format("Error reading config file [%s]", configFile),
+                                       e);
         }
-        return prop;
+
+        // Convert the config object to a map of sections
+        return cfg.getSections().parallelStream()
+            .map(sec -> new Pair<>(sec, cfg.getSection(sec))) // Map to collection of pairs
+            .collect(Pair.mapCollector()); // Collect pairs into a map
     }
 }

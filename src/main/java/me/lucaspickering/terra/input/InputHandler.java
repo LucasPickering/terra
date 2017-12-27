@@ -1,8 +1,9 @@
 package me.lucaspickering.terra.input;
 
+import org.apache.commons.configuration2.SubnodeConfiguration;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,24 +26,37 @@ public class InputHandler {
     }
 
     private void loadConfig() {
-        final Properties prop = Funcs.loadProperties(Constants.CFG_KEYS);
+        Command.values(); // We have to do this to get the enum to initialize
 
-        // Process the input from the config file
-        Command.values(); // Force the Commands class to initialize now (I know this is ugly)
-        for (String propName : prop.stringPropertyNames()) {
-            final String propValue = prop.getProperty(propName);
-            addInputMapping(propName, propValue);
+        final Map<String, SubnodeConfiguration> cfg = Funcs.loadConfig(Constants.CFG_KEYS);
+        for (Map.Entry<String, SubnodeConfiguration> entry : cfg.entrySet()) {
+            final String sectionName = entry.getKey();
+            final SubnodeConfiguration values = entry.getValue();
+
+            // Get the command group by name. If it doesn't exist, log an error and skip
+            final CommandGroup group = CommandGroup.getByString(sectionName);
+            if (group == null) {
+                logger.log(Level.WARNING, String.format("Unknown command group [%s]", sectionName));
+                continue; // Skip this group
+            }
+
+            // Register each command and its mapping for this section
+            for (String key : (Iterable<String>) values::getKeys) {
+                addInputMapping(group, key, values.getString(key));
+            }
         }
+
         logger.log(Level.INFO, "Loaded input config");
     }
 
     /**
      * Adds a mapping between the input with the given name and the command with the given name.
      *
-     * @param commandString the name of the command (e.g. "game.menu")
-     * @param input         the name of the input (e.g. "f" for the F key)
+     * @param group       the {@link CommandGroup} for the given command (e.g. GAME)
+     * @param commandName the name of the command (e.g. "menu")
+     * @param input       the name of the input (e.g. "f" for the F key)
      */
-    private void addInputMapping(String commandString, String input) {
+    private void addInputMapping(CommandGroup group, String commandName, String input) {
         // Note that each if statement here checks an invalid condition - success requires that
         // every if condition FAILS
         final KeyMapping keyMap = KeyMapping.getByName(input);
@@ -50,27 +64,7 @@ public class InputHandler {
         // Check that the input name is valid
         if (keyMap == null) {
             logger.log(Level.WARNING, String.format("Unknown input [%s] for command [%s]",
-                                                    input, commandString));
-            return;
-        }
-
-        final String[] commandParts = commandString.split("\\.", 2); // Split on '.' into two parts
-
-        // Check if the split failed. If it did, the command is malformed.
-        if (commandParts.length != 2) {
-            logger.log(Level.WARNING, String.format("Malformed command [%s] for input [%s]",
-                                                    commandString, input));
-            return;
-        }
-
-        final String groupName = commandParts[0];
-        final String commandName = commandParts[1];
-        final CommandGroup group = CommandGroup.getByString(groupName);
-
-        // Check if the command group name is valid
-        if (group == null) {
-            logger.log(Level.WARNING, String.format("Unknown command group [%s] for input [%s]",
-                                                    groupName, commandString));
+                                                    input, commandName));
             return;
         }
 
@@ -78,13 +72,11 @@ public class InputHandler {
 
         if (command == null) {
             logger.log(Level.WARNING, String.format(
-                "Unknown command [%s] for group [%s] on input [%s]",
-                commandName, groupName, input));
+                "Unknown command [%s] for group [%s] on input [%s]", commandName, group, input));
         }
 
         keyMapping.put(keyMap.getCode(), command);
-        logger.log(Level.FINE, String.format("Mapping key [%s] to command [%s]",
-                                             keyMap, input));
+        logger.log(Level.FINE, String.format("Mapping key [%s] to command [%s]", keyMap, input));
     }
 
     public Point getMousePos() {
