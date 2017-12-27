@@ -96,8 +96,7 @@ public class InputHandler {
 
         // If this key is bound to a command, send an event to the game
         if (command != null) {
-            final KeyEvent event = new KeyEvent(window, command,
-                                                ButtonAction.getByGlfwCode(action), mods);
+            final KeyEvent event = new KeyEvent(window, command, action, mods);
             main.getCurrentScreen().onKey(event);
         }
     }
@@ -105,9 +104,8 @@ public class InputHandler {
     public void onMouseButton(long window, int button, int action, int mods) {
         final Screen currentScreen = main.getCurrentScreen();
         if (currentScreen.contains(mousePos)) {
-            final MouseButtonEvent event =
-                new MouseButtonEvent(window, button, ButtonAction.getByGlfwCode(action),
-                                     mods, mousePos);
+            final MouseButtonEvent event = new MouseButtonEvent(window, button, action,
+                                                                mods, mousePos);
             currentScreen.onClick(event);
         }
     }

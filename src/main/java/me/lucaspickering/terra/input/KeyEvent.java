@@ -12,4 +12,8 @@ public class KeyEvent extends Event {
         this.action = action;
         this.mods = mods;
     }
+
+    public KeyEvent(long window, Command command, int action, int mods) {
+        this(window, command, ButtonAction.getByGlfwCode(action), mods);
+    }
 }
