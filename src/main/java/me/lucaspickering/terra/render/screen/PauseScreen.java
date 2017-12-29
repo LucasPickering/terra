@@ -9,7 +9,7 @@ import me.lucaspickering.terra.render.Renderer;
 import me.lucaspickering.terra.render.screen.gui.Button;
 import me.lucaspickering.terra.render.screen.gui.GuiElement;
 import me.lucaspickering.terra.util.Colors;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class PauseScreen extends Screen {
 
@@ -28,9 +28,9 @@ public class PauseScreen extends Screen {
         this.worldScreen = worldScreen;
 
         // Initialize everything
-        backToWorldButton = new Button("Resume", new Point(center.x(), center.y() - 200));
-        optionsButton = new Button("Options", new Point(center.x(), center.y()));
-        desktopButton = new Button("Exit to Desktop", new Point(center.x(), center.y() + 200));
+        backToWorldButton = new Button("Resume", new Point2(center.x(), center.y() - 200));
+        optionsButton = new Button("Options", new Point2(center.x(), center.y()));
+        desktopButton = new Button("Exit to Desktop", new Point2(center.x(), center.y() + 200));
 
         // Add all the elements
         addGuiElement(backToWorldButton);
@@ -39,7 +39,7 @@ public class PauseScreen extends Screen {
     }
 
     @Override
-    public void draw(Point mousePos) {
+    public void draw(Point2 mousePos) {
         worldScreen.draw(null);
 
         GL11.glEnable(GL11.GL_BLEND);

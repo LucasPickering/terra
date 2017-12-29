@@ -2,7 +2,7 @@ package me.lucaspickering.terra.render.screen;
 
 import me.lucaspickering.terra.Main;
 import me.lucaspickering.terra.render.Renderer;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 /**
  * A {@code ScreenElement} is anything that be drawn into the game window. A {@code ScreenElement}
@@ -16,7 +16,7 @@ public interface ScreenElement {
      *
      * @param mousePos the current position of the mouse cursor
      */
-    void draw(Point mousePos);
+    void draw(Point2 mousePos);
 
     /**
      * Checks if this element contains the given point. Bounds checking is inclusive on all sides.
@@ -24,7 +24,7 @@ public interface ScreenElement {
      * @param p the point to be checked
      * @return true if p falls inside this element, false otherwise
      */
-    boolean contains(Point p);
+    boolean contains(Point2 p);
 
     default Renderer renderer() {
         return Main.renderer();

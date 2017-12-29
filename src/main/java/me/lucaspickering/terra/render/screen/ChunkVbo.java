@@ -14,7 +14,7 @@ import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class ChunkVbo {
 
@@ -80,8 +80,8 @@ public class ChunkVbo {
         // Add vertices for each tile in the chunk
         for (int x = 0; x < Chunk.SIDE_LENGTH; x++) {
             for (int y = 0; y < Chunk.SIDE_LENGTH; y++) {
-                final Point tileCenter = WorldScreenHelper.tileToPixel(new HexPoint(x, y));
-                for (Point vertex : WorldScreenHelper.TILE_VERTICES) {
+                final Point2 tileCenter = WorldScreenHelper.tileToPixel(new HexPoint(x, y));
+                for (Point2 vertex : WorldScreenHelper.TILE_VERTICES) {
                     // Shift this vertex by the tile's center, and add it to the VBO
                     vbo.addVertex(tileCenter.plus(vertex));
                 }
@@ -93,13 +93,13 @@ public class ChunkVbo {
 
     private void initRivers() {
         // Populate a list of all river vertices for this chunk
-        final List<Point> vertices = new LinkedList<>();
+        final List<Point2> vertices = new LinkedList<>();
         for (Tile tile : chunk.getTiles()) {
-            final Point tileCenter =
+            final Point2 tileCenter =
                 WorldScreenHelper.tileToPixel(Chunk.getRelativeTilePos(tile.pos()));
             for (Direction dir : Direction.values()) {
                 if (tile.getRiverConnection(dir) != null) {
-                    final Point midpoint = WorldScreenHelper.TILE_SIDE_MIDPOINTS[dir.ordinal()];
+                    final Point2 midpoint = WorldScreenHelper.TILE_SIDE_MIDPOINTS[dir.ordinal()];
                     vertices.add(tileCenter);
                     vertices.add(tileCenter.plus(midpoint));
                 }
@@ -116,7 +116,7 @@ public class ChunkVbo {
             .build();
 
         // Populate the vertex and color buffers
-        for (Point vertex : vertices) {
+        for (Point2 vertex : vertices) {
             vbo.addVertex(vertex);
             vbo.addColor(Color.BLUE);
         }

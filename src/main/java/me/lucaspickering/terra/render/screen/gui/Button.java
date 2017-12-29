@@ -5,7 +5,7 @@ import me.lucaspickering.terra.render.HorizAlignment;
 import me.lucaspickering.terra.render.VertAlignment;
 import me.lucaspickering.terra.util.Colors;
 import me.lucaspickering.terra.util.Constants;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class Button extends GuiElement {
 
@@ -14,11 +14,11 @@ public class Button extends GuiElement {
 
     private String text;
 
-    public Button(String text, Point pos) {
+    public Button(String text, Point2 pos) {
         this(text, pos, HorizAlignment.CENTER, VertAlignment.CENTER);
     }
 
-    public Button(String text, Point pos, HorizAlignment horizAlign, VertAlignment vertAlign) {
+    public Button(String text, Point2 pos, HorizAlignment horizAlign, VertAlignment vertAlign) {
         super(pos, WIDTH, HEIGHT, horizAlign, vertAlign);
         this.text = text;
     }
@@ -32,7 +32,7 @@ public class Button extends GuiElement {
     }
 
     @Override
-    public void draw(Point mousePos) {
+    public void draw(Point2 mousePos) {
         final boolean mouseOver = contains(mousePos);
         renderer().drawTexture(Constants.TEX_BUTTON, 0, 0, getWidth(), getHeight());
         renderer().drawString(Font.UI, text, getWidth() / 2, getHeight() / 2,

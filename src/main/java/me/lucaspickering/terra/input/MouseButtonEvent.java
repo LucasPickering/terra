@@ -1,16 +1,16 @@
 package me.lucaspickering.terra.input;
 
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class MouseButtonEvent extends Event {
 
     public final int button;
     public final ButtonAction action;
     public final int mods;
-    public final Point mousePos;
+    public final Point2 mousePos;
 
     public MouseButtonEvent(long window, int button, ButtonAction action, int mods,
-                            Point mousePos) {
+                            Point2 mousePos) {
         super(window);
         this.button = button;
         this.action = action;
@@ -18,7 +18,7 @@ public class MouseButtonEvent extends Event {
         this.mousePos = mousePos;
     }
 
-    public MouseButtonEvent(long window, int button, int action, int mods, Point mousePos) {
+    public MouseButtonEvent(long window, int button, int action, int mods, Point2 mousePos) {
         this(window, button, ButtonAction.getByGlfwCode(action), mods, mousePos);
     }
 }

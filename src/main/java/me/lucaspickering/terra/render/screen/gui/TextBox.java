@@ -10,7 +10,7 @@ import me.lucaspickering.terra.render.HorizAlignment;
 import me.lucaspickering.terra.render.VertAlignment;
 import me.lucaspickering.terra.util.Colors;
 import me.lucaspickering.utils.Pair;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class TextBox extends GuiElement {
 
@@ -22,15 +22,15 @@ public class TextBox extends GuiElement {
     private Color textColor = Color.WHITE;
 
     public TextBox() {
-        this("", Point.ZERO);
+        this("", Point2.ZERO);
     }
 
-    public TextBox(String text, Point pos) {
+    public TextBox(String text, Point2 pos) {
         super(pos);
         setText(text);
     }
 
-    public TextBox(String text, Point pos, HorizAlignment horizAlign, VertAlignment vertAlign) {
+    public TextBox(String text, Point2 pos, HorizAlignment horizAlign, VertAlignment vertAlign) {
         super(pos, 0, 0, horizAlign, vertAlign);
         setText(text);
     }
@@ -49,7 +49,7 @@ public class TextBox extends GuiElement {
     }
 
     @Override
-    public void draw(Point mousePos) {
+    public void draw(Point2 mousePos) {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         renderer().drawRect(0, 0, getWidth(), getHeight(), Colors.TILE_INFO_BG);
         GL11.glEnable(GL11.GL_TEXTURE_2D);

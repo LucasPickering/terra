@@ -3,7 +3,7 @@ package me.lucaspickering.terra.world.util;
 import java.awt.Color;
 
 import me.lucaspickering.terra.world.Tile;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 /**
  * A Chunk is a set of tiles of a set size that makes up a portion of the world. The
@@ -27,7 +27,7 @@ public class Chunk implements HexPointable {
     private final HexPoint pos; // Position of this chunk relative to other chunks
     private final TileSet tiles;
     private final Color overlayColor;
-    private Point screenPos;
+    private Point2 screenPos;
 
     private Chunk(HexPoint pos) {
         this.pos = pos;
@@ -124,11 +124,11 @@ public class Chunk implements HexPointable {
         return overlayColor;
     }
 
-    public Point getScreenPos() {
+    public Point2 getScreenPos() {
         return screenPos;
     }
 
-    public void setScreenPos(Point screenPos) {
+    public void setScreenPos(Point2 screenPos) {
         this.screenPos = screenPos;
     }
 

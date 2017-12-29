@@ -5,13 +5,13 @@ import java.util.Objects;
 import me.lucaspickering.terra.render.HorizAlignment;
 import me.lucaspickering.terra.render.VertAlignment;
 import me.lucaspickering.terra.render.screen.ScreenElement;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public abstract class GuiElement implements ScreenElement {
 
     // This is only retained so adjustedPos can be updated after changing alignments
-    private Point pos;
-    private Point adjustedPos; // The position after being adjusted for alignments
+    private Point2 pos;
+    private Point2 adjustedPos; // The position after being adjusted for alignments
     private int width;
     private int height;
     private HorizAlignment horizAlign;
@@ -24,7 +24,7 @@ public abstract class GuiElement implements ScreenElement {
      *
      * @param pos the position of the element
      */
-    protected GuiElement(Point pos) {
+    protected GuiElement(Point2 pos) {
         this.pos = pos;
         this.horizAlign = HorizAlignment.LEFT;
         this.vertAlign = VertAlignment.TOP;
@@ -38,7 +38,7 @@ public abstract class GuiElement implements ScreenElement {
      * @param height the height of the element (non-negative)
      * @throws IllegalArgumentException if width or height is non-positive
      */
-    protected GuiElement(Point pos, int width, int height) {
+    protected GuiElement(Point2 pos, int width, int height) {
         this(pos, width, height, HorizAlignment.LEFT, VertAlignment.TOP);
     }
 
@@ -53,7 +53,7 @@ public abstract class GuiElement implements ScreenElement {
      * @throws IllegalArgumentException if width or height is non-positive
      * @throws NullPointerException     if {@code horizAlign == null} or {@code vertAlign == null}
      */
-    protected GuiElement(Point pos, int width, int height,
+    protected GuiElement(Point2 pos, int width, int height,
                          HorizAlignment horizAlign, VertAlignment vertAlign) {
         if (width < 0 || height < 0) {
             throw new IllegalArgumentException("Width or height out of bounds");
@@ -68,11 +68,11 @@ public abstract class GuiElement implements ScreenElement {
         setPos(pos);
     }
 
-    public Point getPos() {
+    public Point2 getPos() {
         return adjustedPos;
     }
 
-    public GuiElement setPos(Point pos) {
+    public GuiElement setPos(Point2 pos) {
         Objects.requireNonNull(pos);
         this.pos = pos;
         updateAdjustedPos();
@@ -138,7 +138,7 @@ public abstract class GuiElement implements ScreenElement {
     }
 
     @Override
-    public boolean contains(Point p) {
+    public boolean contains(Point2 p) {
         return adjustedPos.x() <= p.x() && p.x() <= adjustedPos.x() + width
                && adjustedPos.y() <= p.y() && p.y() <= adjustedPos.y() + height;
     }

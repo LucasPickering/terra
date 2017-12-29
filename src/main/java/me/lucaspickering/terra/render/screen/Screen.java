@@ -15,7 +15,7 @@ import me.lucaspickering.terra.input.ScrollEvent;
 import me.lucaspickering.terra.render.Font;
 import me.lucaspickering.terra.render.Renderer;
 import me.lucaspickering.terra.render.screen.gui.GuiElement;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 /**
  * A {@code Screen} is a type of {@link ScreenElement} that is meant to be a top-level element.
@@ -28,8 +28,8 @@ public abstract class Screen implements ScreenElement {
     private static final String FPS_FORMAT = "FPS: %d";
 
 
-    protected final Point center = new Point(Renderer.RES_WIDTH / 2,
-                                             Renderer.RES_HEIGHT / 2);
+    protected final Point2 center = new Point2(Renderer.RES_WIDTH / 2,
+                                              Renderer.RES_HEIGHT / 2);
     private List<GuiElement> guiElements = new LinkedList<>();
     private Screen nextScreen;
     private double lastFpsUpdate; // Time of the last FPS update, in seconds
@@ -39,7 +39,7 @@ public abstract class Screen implements ScreenElement {
     private boolean shouldExit; // Set to true to close the game
 
     @Override
-    public void draw(Point mousePos) {
+    public void draw(Point2 mousePos) {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
@@ -59,9 +59,9 @@ public abstract class Screen implements ScreenElement {
         updateFPS();
     }
 
-    private void drawElement(Point mousePos, GuiElement element) {
+    private void drawElement(Point2 mousePos, GuiElement element) {
         GL11.glPushMatrix();
-        final Point pos = element.getPos();
+        final Point2 pos = element.getPos();
         GL11.glTranslated(pos.x(), pos.y(), 0f);
         element.draw(mousePos);
         GL11.glPopMatrix();
@@ -130,7 +130,7 @@ public abstract class Screen implements ScreenElement {
     }
 
     @Override
-    public boolean contains(Point p) {
+    public boolean contains(Point2 p) {
         return 0 <= p.x() && p.x() <= Renderer.RES_WIDTH
                && 0 <= p.y() && p.y() <= Renderer.RES_HEIGHT;
     }

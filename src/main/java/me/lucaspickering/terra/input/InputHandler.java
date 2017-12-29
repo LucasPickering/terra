@@ -11,14 +11,14 @@ import me.lucaspickering.terra.Main;
 import me.lucaspickering.terra.render.screen.Screen;
 import me.lucaspickering.terra.util.Constants;
 import me.lucaspickering.terra.util.Funcs;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class InputHandler {
 
     private final Logger logger = Logger.getLogger(getClass().getName());
     private final Main main;
     private final Map<Integer, Command> keyMapping = new HashMap<>();
-    private Point mousePos = Point.ZERO;
+    private Point2 mousePos = Point2.ZERO;
 
     public InputHandler(Main main) {
         this.main = main;
@@ -79,7 +79,7 @@ public class InputHandler {
         logger.log(Level.FINE, String.format("Mapping key [%s] to command [%s]", keyMap, input));
     }
 
-    public Point getMousePos() {
+    public Point2 getMousePos() {
         return mousePos;
     }
 

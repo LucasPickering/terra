@@ -9,7 +9,7 @@ import me.lucaspickering.terra.render.Renderer;
 import me.lucaspickering.terra.render.screen.gui.Button;
 import me.lucaspickering.terra.render.screen.gui.GuiElement;
 import me.lucaspickering.terra.util.Colors;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class OptionsScreen extends Screen {
 
@@ -30,14 +30,14 @@ public class OptionsScreen extends Screen {
         this.prevScreen = prevScreen;
 
         // Initialize everything
-        backButton = new Button("Back", new Point(center.x(), center.y()));
+        backButton = new Button("Back", new Point2(center.x(), center.y()));
 
         // Add all the elements
         addGuiElement(backButton);
     }
 
     @Override
-    public void draw(Point mousePos) {
+    public void draw(Point2 mousePos) {
         worldScreen.draw(null);
 
         GL11.glEnable(GL11.GL_BLEND);

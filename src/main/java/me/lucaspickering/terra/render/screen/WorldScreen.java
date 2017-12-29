@@ -22,19 +22,19 @@ import me.lucaspickering.terra.world.WorldHandler;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
 import me.lucaspickering.terra.world.util.HexPointMap;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class WorldScreen extends Screen {
 
     private final WorldHandler worldHandler;
     private final MouseTextBox mouseOverTileInfo;
-    private Point worldCenter; // The pixel location of the center of the world
+    private Point2 worldCenter; // The pixel location of the center of the world
     private double worldScale = 1.0;
 
     private TileColorMode tileColorMode = TileColorMode.COMPOSITE;
     private TileOverlayMode tileOverlayMode = TileOverlayMode.NONE;
 
-    private Point lastMouseDragPos; // The last position of the mouse while dragging, or null
+    private Point2 lastMouseDragPos; // The last position of the mouse while dragging, or null
     private Tile mouseOverTile; // The tile that the mouse is currently over
     private long mouseDownTime; // The time at which the user pressed the mouse button down
 
@@ -77,7 +77,7 @@ public class WorldScreen extends Screen {
             .build();
 
         // Add each vertex in the tile, with corresponding color
-        for (Point vertex : WorldScreenHelper.TILE_VERTICES) {
+        for (Point2 vertex : WorldScreenHelper.TILE_VERTICES) {
             mouseOverVbo.addVertex(vertex);
             mouseOverVbo.addColor(Colors.MOUSE_OVER);
         }
@@ -87,7 +87,7 @@ public class WorldScreen extends Screen {
     }
 
     @Override
-    public void draw(Point mousePos) {
+    public void draw(Point2 mousePos) {
         // Mouse pos is null when being rendered in the background (behind a menu)
         if (mousePos == null) {
             lastMouseDragPos = null; // No longer dragging
@@ -119,13 +119,13 @@ public class WorldScreen extends Screen {
      *
      * @param mousePos the current position of the mouse
      */
-    private void updateMouseOver(Point mousePos) {
+    private void updateMouseOver(Point2 mousePos) {
         // If the mouse is being dragged, shift the world center based on it.
         // Otherwise, draw info for the tile that the mouse is currently over.
         if (lastMouseDragPos != null) {
             mouseOverTile = null; // No highlight while dragging
             // Shift the world
-            final Point diff = mousePos.minus(lastMouseDragPos);
+            final Point2 diff = mousePos.minus(lastMouseDragPos);
             worldCenter = worldCenter.plus(diff);
             lastMouseDragPos = mousePos; // Update the mouse pos
         } else {
@@ -140,9 +140,9 @@ public class WorldScreen extends Screen {
         mouseOverTileInfo.updatePosition(mousePos);
     }
 
-    private Tile calcTileUnderMouse(Point mousePos) {
+    private Tile calcTileUnderMouse(Point2 mousePos) {
         // Shift and scale the mouse pos to align with the world
-        final Point fixedMousePos = mousePos.minus(worldCenter).scale(1.0 / worldScale);
+        final Point2 fixedMousePos = mousePos.minus(worldCenter).scale(1.0 / worldScale);
 
         // Get the tile that the mouse is over and return it
         final HexPoint mouseOverPos = WorldScreenHelper.pixelToTile(fixedMousePos);
@@ -150,7 +150,7 @@ public class WorldScreen extends Screen {
     }
 
     private void drawMouseOverHighlight() {
-        final Point tilePos = WorldScreenHelper.tileToPixel(mouseOverTile.pos());
+        final Point2 tilePos = WorldScreenHelper.tileToPixel(mouseOverTile.pos());
         GL11.glPushMatrix();
         GL11.glTranslated(tilePos.x(), tilePos.y(), 0.0);
 

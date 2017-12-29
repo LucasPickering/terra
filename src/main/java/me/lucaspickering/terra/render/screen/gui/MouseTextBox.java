@@ -3,7 +3,7 @@ package me.lucaspickering.terra.render.screen.gui;
 import me.lucaspickering.terra.render.HorizAlignment;
 import me.lucaspickering.terra.render.Renderer;
 import me.lucaspickering.terra.render.VertAlignment;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class MouseTextBox extends TextBox {
 
@@ -16,10 +16,10 @@ public class MouseTextBox extends TextBox {
     }
 
     public MouseTextBox(String text) {
-        super(text, Point.ZERO, HorizAlignment.LEFT, VertAlignment.BOTTOM);
+        super(text, Point2.ZERO, HorizAlignment.LEFT, VertAlignment.BOTTOM);
     }
 
-    public void updatePosition(Point mousePos) {
+    public void updatePosition(Point2 mousePos) {
         int x = OFFSET_X;
         int y = OFFSET_Y;
         HorizAlignment horizAlign = HorizAlignment.LEFT;

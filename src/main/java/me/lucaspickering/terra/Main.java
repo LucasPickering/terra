@@ -17,7 +17,7 @@ import me.lucaspickering.terra.render.screen.Screen;
 import me.lucaspickering.terra.render.screen.WorldScreen;
 import me.lucaspickering.terra.util.Colors;
 import me.lucaspickering.terra.world.WorldHandler;
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class Main {
 
@@ -204,8 +204,8 @@ public class Main {
         return currentScreen;
     }
 
-    public Point scaleMousePos(double xPos, double yPos) {
-        return new Point(xPos * Renderer.RES_WIDTH / windowWidth,
-                         yPos * Renderer.RES_HEIGHT / windowHeight);
+    public Point2 scaleMousePos(double xPos, double yPos) {
+        return new Point2(xPos * Renderer.RES_WIDTH / windowWidth,
+                          yPos * Renderer.RES_HEIGHT / windowHeight);
     }
 }

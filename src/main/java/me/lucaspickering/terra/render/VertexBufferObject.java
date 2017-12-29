@@ -9,7 +9,7 @@ import java.awt.Color;
 import java.nio.FloatBuffer;
 import java.util.Objects;
 
-import me.lucaspickering.utils.Point;
+import me.lucaspickering.utils.Point2;
 
 public class VertexBufferObject {
 
@@ -112,7 +112,7 @@ public class VertexBufferObject {
         this.colorHandle = colorHandle;
     }
 
-    public void addVertex(Point point) {
+    public void addVertex(Point2 point) {
         vertexBuffer.put((float) point.x());
         vertexBuffer.put((float) point.y());
     }
