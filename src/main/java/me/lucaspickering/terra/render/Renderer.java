@@ -38,8 +38,7 @@ public class Renderer {
     private final Map<String, Texture> textures = new HashMap<>();
     private final Map<Font, TrueTypeFont> fonts = new EnumMap<>(Font.class);
 
-    public Renderer() {
-
+    public void init() {
         // Load all fonts
         for (Font font : Font.values()) {
             try {
@@ -116,9 +115,9 @@ public class Renderer {
     }
 
     /**
-     * Deletes all loaded textures and fonts.
+     * Clean up all loaded resources.
      */
-    public void deleteTexturesAndFonts() {
+    public void cleanup() {
         textures.values().forEach(Texture::delete);
         fonts.values().forEach(TrueTypeFont::delete);
     }

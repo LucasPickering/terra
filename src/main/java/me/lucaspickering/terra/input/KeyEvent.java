@@ -6,14 +6,13 @@ public class KeyEvent extends Event {
     public final ButtonAction action;
     public final int mods;
 
-    public KeyEvent(long window, Command command, ButtonAction action, int mods) {
-        super(window);
+    public KeyEvent(Command command, ButtonAction action, int mods) {
         this.command = command;
         this.action = action;
         this.mods = mods;
     }
 
-    public KeyEvent(long window, Command command, int action, int mods) {
-        this(window, command, ButtonAction.getByGlfwCode(action), mods);
+    public KeyEvent(Command command, int action, int mods) {
+        this(command, ButtonAction.getByGlfwCode(action), mods);
     }
 }

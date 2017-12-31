@@ -9,16 +9,14 @@ public class MouseButtonEvent extends Event {
     public final int mods;
     public final Point2 mousePos;
 
-    public MouseButtonEvent(long window, int button, ButtonAction action, int mods,
-                            Point2 mousePos) {
-        super(window);
+    public MouseButtonEvent(int button, ButtonAction action, int mods, Point2 mousePos) {
         this.button = button;
         this.action = action;
         this.mods = mods;
         this.mousePos = mousePos;
     }
 
-    public MouseButtonEvent(long window, int button, int action, int mods, Point2 mousePos) {
-        this(window, button, ButtonAction.getByGlfwCode(action), mods, mousePos);
+    public MouseButtonEvent(int button, int action, int mods, Point2 mousePos) {
+        this(button, ButtonAction.getByGlfwCode(action), mods, mousePos);
     }
 }

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import me.lucaspickering.terra.Main;
+import me.lucaspickering.terra.render.Window;
 import me.lucaspickering.terra.render.screen.Screen;
 import me.lucaspickering.terra.util.Constants;
 import me.lucaspickering.terra.util.Funcs;
@@ -16,12 +16,12 @@ import me.lucaspickering.utils.Point2;
 public class InputHandler {
 
     private final Logger logger = Logger.getLogger(getClass().getName());
-    private final Main main;
+    private final Window window;
     private final Map<Integer, Command> keyMapping = new HashMap<>();
     private Point2 mousePos = Point2.ZERO;
 
-    public InputHandler(Main main) {
-        this.main = main;
+    public InputHandler(Window window) {
+        this.window = window;
         loadConfig();
     }
 
@@ -88,33 +88,32 @@ public class InputHandler {
 
         // If this key is bound to a command, send an event to the game
         if (command != null) {
-            final KeyEvent event = new KeyEvent(window, command, action, mods);
-            main.getCurrentScreen().onKey(event);
+            final KeyEvent event = new KeyEvent(command, action, mods);
+            this.window.getCurrentScreen().onKey(event);
         }
     }
 
     public void onMouseButton(long window, int button, int action, int mods) {
-        final Screen currentScreen = main.getCurrentScreen();
+        final Screen currentScreen = this.window.getCurrentScreen();
         if (currentScreen.contains(mousePos)) {
-            final MouseButtonEvent event = new MouseButtonEvent(window, button, action,
-                                                                mods, mousePos);
+            final MouseButtonEvent event = new MouseButtonEvent(button, action, mods, mousePos);
             currentScreen.onClick(event);
         }
     }
 
     public void onScroll(long window, double xOffset, double yOffset) {
-        final Screen currentScreen = main.getCurrentScreen();
+        final Screen currentScreen = this.window.getCurrentScreen();
         if (currentScreen.contains(mousePos)) {
-            final ScrollEvent event = new ScrollEvent(window, xOffset, yOffset, mousePos);
+            final ScrollEvent event = new ScrollEvent(xOffset, yOffset, mousePos);
             currentScreen.onScroll(event);
         }
     }
 
     public void onCursorPos(long window, double xPos, double yPos) {
-        mousePos = main.scaleMousePos(xPos, yPos);
+        mousePos = this.window.scaleMousePos(xPos, yPos);
     }
 
     public void onWindowResize(long window, int width, int height) {
-        main.resizeWindow(width, height);
+        this.window.resize(width, height);
     }
 }
