@@ -26,10 +26,9 @@ import me.lucaspickering.utils.Point2;
 public abstract class Screen implements ScreenElement {
 
     private static final String FPS_FORMAT = "FPS: %d";
+    protected final Point2 CENTER = new Point2(Renderer.RES_WIDTH / 2,
+                                               Renderer.RES_HEIGHT / 2);
 
-
-    protected final Point2 center = new Point2(Renderer.RES_WIDTH / 2,
-                                              Renderer.RES_HEIGHT / 2);
     private List<GuiElement> guiElements = new LinkedList<>();
     private Screen nextScreen;
     private double lastFpsUpdate; // Time of the last FPS update, in seconds
@@ -172,7 +171,7 @@ public abstract class Screen implements ScreenElement {
         if (event.button == GLFW.GLFW_MOUSE_BUTTON_1 && event.action == ButtonAction.RELEASE) {
             guiElements.stream()
                 .filter(element -> element.isEnabled() && element.contains(event.mousePos))
-                .forEach(element -> onElementClicked(event, element));
+                .forEach(element -> element.onClick(event));
         }
     }
 
@@ -182,16 +181,6 @@ public abstract class Screen implements ScreenElement {
      * @param event the event that occurred
      */
     public void onScroll(ScrollEvent event) {
-        // By default, do nothing
-    }
-
-    /**
-     * Called when an element in{@link #guiElements} is clicked.
-     *
-     * @param event   the event that occurred
-     * @param element the element that was clicked
-     */
-    protected void onElementClicked(MouseButtonEvent event, GuiElement element) {
         // By default, do nothing
     }
 }

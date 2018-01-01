@@ -2,6 +2,7 @@ package me.lucaspickering.terra.render.screen.gui;
 
 import java.util.Objects;
 
+import me.lucaspickering.terra.input.MouseButtonEvent;
 import me.lucaspickering.terra.render.HorizAlignment;
 import me.lucaspickering.terra.render.VertAlignment;
 import me.lucaspickering.terra.render.screen.ScreenElement;
@@ -141,6 +142,15 @@ public abstract class GuiElement implements ScreenElement {
     public boolean contains(Point2 p) {
         return adjustedPos.x() <= p.x() && p.x() <= adjustedPos.x() + width
                && adjustedPos.y() <= p.y() && p.y() <= adjustedPos.y() + height;
+    }
+
+    /**
+     * Called when this element is clicked. This should be called from the parent {@code Screen}.
+     *
+     * @param event the mouse click event
+     */
+    public void onClick(MouseButtonEvent event) {
+        // By default, do nothing
     }
 
     private void updateAdjustedPos() {

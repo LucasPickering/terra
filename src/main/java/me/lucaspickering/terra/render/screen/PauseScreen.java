@@ -1,52 +1,41 @@
 package me.lucaspickering.terra.render.screen;
 
-import org.lwjgl.opengl.GL11;
-
 import me.lucaspickering.terra.input.ButtonAction;
 import me.lucaspickering.terra.input.KeyEvent;
-import me.lucaspickering.terra.input.MouseButtonEvent;
-import me.lucaspickering.terra.render.Renderer;
 import me.lucaspickering.terra.render.screen.gui.Button;
-import me.lucaspickering.terra.render.screen.gui.GuiElement;
-import me.lucaspickering.terra.util.Colors;
-import me.lucaspickering.utils.Point2;
 
-public class PauseScreen extends Screen {
-
-    private final WorldScreen worldScreen;
-    private final Button backToWorldButton;
-    private final Button optionsButton;
-    private final Button desktopButton;
+public class PauseScreen extends MenuScreen {
 
     /**
-     * Constructs a new {@code PauseScreen}. The given screen is the {@link WorldScreen} that will
-     * be returned to when the game is resumed.
+     * Constructs a new {@code PauseScreen}. The given screen is the one that was open before this,
+     * which will be renderer in the background and returned to when this screen is exited.
      *
-     * @param worldScreen the screen to eventually return to
+     * @param prevScreen the screen to eventually return to
      */
-    public PauseScreen(WorldScreen worldScreen) {
-        this.worldScreen = worldScreen;
+    public PauseScreen(Screen prevScreen) {
+        super(prevScreen, prevScreen);
 
-        // Initialize everything
-        backToWorldButton = new Button("Resume", new Point2(center.x(), center.y() - 200));
-        optionsButton = new Button("Options", new Point2(center.x(), center.y()));
-        desktopButton = new Button("Exit to Desktop", new Point2(center.x(), center.y() + 200));
+        // Resume button
+        addGuiElement(new Button.Builder()
+                          .text("Resume")
+                          .pos(CENTER.plus(0, -200))
+                          .clickHandler(event -> returnToPrev()) // Return to last menu
+                          .build());
 
-        // Add all the elements
-        addGuiElement(backToWorldButton);
-        addGuiElement(optionsButton);
-        addGuiElement(desktopButton);
-    }
+        // Options Menu button
+        addGuiElement(new Button.Builder()
+                          .text("Options")
+                          .pos(CENTER)
+                          .clickHandler(event -> setNextScreen(
+                              new OptionsScreen(getBgScreen(), this))) // Go to options menu
+                          .build());
 
-    @Override
-    public void draw(Point2 mousePos) {
-        worldScreen.draw(null);
-
-        GL11.glEnable(GL11.GL_BLEND);
-        renderer().drawRect(0, 0, Renderer.RES_WIDTH, Renderer.RES_HEIGHT, Colors.MENU_SHADER);
-        GL11.glDisable(GL11.GL_BLEND);
-
-        super.draw(mousePos);
+        // Exit to Desktop button
+        addGuiElement(new Button.Builder()
+                          .text("Exit to Desktop")
+                          .pos(CENTER.plus(0, 200))
+                          .clickHandler(event -> exit()) // Exit the program
+                          .build());
     }
 
     @Override
@@ -54,25 +43,10 @@ public class PauseScreen extends Screen {
         if (event.action == ButtonAction.RELEASE) {
             switch (event.command) {
                 case GAME_MENU:
-                    returnToWorld();
+                    returnToPrev();
                     break;
             }
         }
         super.onKey(event);
-    }
-
-    @Override
-    public void onElementClicked(MouseButtonEvent event, GuiElement element) {
-        if (element == backToWorldButton) {
-            returnToWorld();
-        } else if (element == optionsButton) {
-            setNextScreen(new OptionsScreen(worldScreen, this));
-        } else if (element == desktopButton) {
-            exit(); // Close the program
-        }
-    }
-
-    private void returnToWorld() {
-        setNextScreen(worldScreen); // Go back to the world
     }
 }

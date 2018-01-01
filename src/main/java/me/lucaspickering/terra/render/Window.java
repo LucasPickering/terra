@@ -63,19 +63,17 @@ public class Window {
         // Disable using high DPI on retina displays. TODO remove this and support retina
         glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 
-        // Set default size to half the monitor resolution
-        final GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        width = vidmode.width() / 2;
-        height = vidmode.height() / 2;
-
         // Create the window
         windowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
         if (windowHandle == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
+
+        // Center the window
+        final GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         glfwSetWindowPos(windowHandle,
                          (vidmode.width() - width) / 2,
-                         (vidmode.height() - height) / 2); // Center the window
+                         (vidmode.height() - height) / 2);
 
         glfwMakeContextCurrent(windowHandle);
         glfwShowWindow(windowHandle); // Make the window visible
