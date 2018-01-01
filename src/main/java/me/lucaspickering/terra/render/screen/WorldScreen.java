@@ -2,7 +2,6 @@ package me.lucaspickering.terra.render.screen;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
 
 import java.util.Objects;
 import java.util.logging.Level;
@@ -12,9 +11,7 @@ import me.lucaspickering.terra.input.ButtonAction;
 import me.lucaspickering.terra.input.KeyEvent;
 import me.lucaspickering.terra.input.MouseButtonEvent;
 import me.lucaspickering.terra.input.ScrollEvent;
-import me.lucaspickering.terra.render.VertexBufferObject;
 import me.lucaspickering.terra.render.screen.gui.MouseTextBox;
-import me.lucaspickering.terra.util.Colors;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.TileOverlayMode;
@@ -43,17 +40,17 @@ public class WorldScreen extends Screen {
     // CHUNK VBO FIELDS
     private final HexPointMap<Chunk, ChunkVbo> chunkVbos = new HexPointMap<>();
 
-    private VertexBufferObject mouseOverVbo;
-
     public WorldScreen(WorldHandler worldHandler) {
         Objects.requireNonNull(worldHandler);
 
         logger = Logger.getLogger(getClass().getName());
         this.worldHandler = worldHandler;
         worldCenter = WorldScreenHelper.SCREEN_CENTER;
+
         mouseOverTileInfo = new MouseTextBox();
         mouseOverTileInfo.setVisible(false); // Hide this for now
         addGuiElement(mouseOverTileInfo);
+
         initVbos();
     }
 
@@ -62,28 +59,6 @@ public class WorldScreen extends Screen {
         for (Chunk chunk : worldHandler.getWorld().getChunks()) {
             chunkVbos.put(chunk, new ChunkVbo(this, chunk));
         }
-
-        initMouseOverVbo(); // Init VBO for mouse-over highlight
-    }
-
-
-    private void initMouseOverVbo() {
-        // Initialize the mouse-over VBO
-        mouseOverVbo = new VertexBufferObject.Builder()
-            .setNumVertices(WorldScreenHelper.NUM_VERTICES)
-            .setColorMode(VertexBufferObject.ColorMode.RGBA)
-            .setDrawFunction(() -> GL11.glDrawArrays(GL11.GL_TRIANGLE_FAN, 0,
-                                                     WorldScreenHelper.NUM_VERTICES))
-            .build();
-
-        // Add each vertex in the tile, with corresponding color
-        for (Point2 vertex : WorldScreenHelper.TILE_VERTICES) {
-            mouseOverVbo.addVertex(vertex);
-            mouseOverVbo.addColor(Colors.MOUSE_OVER);
-        }
-
-        mouseOverVbo.bindVertexBuffer(GL15.GL_STATIC_DRAW);
-        mouseOverVbo.bindColorBuffer(GL15.GL_STATIC_DRAW);
     }
 
     @Override
@@ -104,18 +79,14 @@ public class WorldScreen extends Screen {
             vbo.draw();
         }
 
-        if (mouseOverTile != null) {
-            drawMouseOverHighlight();
-        }
-
         GL11.glPopMatrix();
 
         super.draw(mousePos); // Draw GUI elements
     }
 
     /**
-     * Updates state based on the current mouse position. The mouse-over tile is updated, the
-     * world is shifted if the user is dragging the mouse, etc.
+     * Updates state based on the current mouse position. The mouse-over tile is updated, the world
+     * is shifted if the user is dragging the mouse, etc.
      *
      * @param mousePos the current position of the mouse
      */
@@ -147,16 +118,6 @@ public class WorldScreen extends Screen {
         // Get the tile that the mouse is over and return it
         final HexPoint mouseOverPos = WorldScreenHelper.pixelToTile(fixedMousePos);
         return worldHandler.getWorld().getTiles().getByPoint(mouseOverPos);
-    }
-
-    private void drawMouseOverHighlight() {
-        final Point2 tilePos = WorldScreenHelper.tileToPixel(mouseOverTile.pos());
-        GL11.glPushMatrix();
-        GL11.glTranslated(tilePos.x(), tilePos.y(), 0.0);
-
-        mouseOverVbo.draw();
-
-        GL11.glPopMatrix();
     }
 
     private void updateAllTileColors() {

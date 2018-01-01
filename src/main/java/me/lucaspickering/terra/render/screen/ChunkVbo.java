@@ -1,11 +1,7 @@
 package me.lucaspickering.terra.render.screen;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GL15;
-
 import java.awt.Color;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import me.lucaspickering.terra.render.VertexBufferObject;
@@ -16,12 +12,16 @@ import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
 import me.lucaspickering.utils.Point2;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL14.glMultiDrawArrays;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+
 public class ChunkVbo {
 
+    private static final int PRIMITIVE_RESTART_INDEX = -1;
     private static final float RIVER_LINE_WIDTH = 1.5f;
-
-    // All chunks can share the same vertex buffer (only color has to vary between them)
-    private static int tilesVertexHandle = -1; // yaay sentinel values
 
     // These two arrays specify to GL when to start/stop each polygon. The first array tells it
     // the index of the first vertex for each polygon, and the second tells it how many vertices
@@ -54,46 +54,40 @@ public class ChunkVbo {
         chunk.setScreenPos(WorldScreenHelper.chunkToPixel(chunk.getPos()));
 
         // Create a VBO for the chunk
-        final VertexBufferObject vbo = new VertexBufferObject.Builder()
-            .setNumVertices(WorldScreenHelper.NUM_VERTICES * Chunk.TOTAL_TILES)
-            .setDrawFunction(() -> GL14.glMultiDrawArrays(GL11.GL_TRIANGLE_FAN,
-                                                          startingIndices, sizes))
-            .build();
+        final VertexBufferObject.Builder vboBuilder = new VertexBufferObject.Builder()
+            .colorUsage(GL_DYNAMIC_DRAW);
 
-        // If this is the first chunk VBO to be initialized, we need to create the vertex VBO.
-        // Otherwise, use the pre-existing VBO.
-        if (tilesVertexHandle == -1) {
-            initTileVertices(vbo);
-        } else {
-            // The vertex VBO was initialized already, just use its handle
-            vbo.setVertexHandle(tilesVertexHandle);
-        }
-
-        vbo.bindColorBuffer(GL15.GL_DYNAMIC_DRAW); // Bind the color buffer now and populate later
-
-        // Put the handle in the map, then populate the buffer with the correct colors
-        tilesVbo = vbo;
-        updateColors();
-    }
-
-    private void initTileVertices(VertexBufferObject vbo) {
         // Add vertices for each tile in the chunk
         for (int x = 0; x < Chunk.SIDE_LENGTH; x++) {
             for (int y = 0; y < Chunk.SIDE_LENGTH; y++) {
-                final Point2 tileCenter = WorldScreenHelper.tileToPixel(new HexPoint(x, y));
-                for (Point2 vertex : WorldScreenHelper.TILE_VERTICES) {
-                    // Shift this vertex by the tile's center, and add it to the VBO
-                    vbo.addVertex(tileCenter.plus(vertex));
-                }
+                addTileVertices(vboBuilder, new HexPoint(x, y));
             }
         }
-        vbo.bindVertexBuffer(GL15.GL_STATIC_DRAW);
-        tilesVertexHandle = vbo.getVertexHandle();
+
+        // Set draw function
+        final int numVertices = vboBuilder.getNumVertices();
+        vboBuilder.drawFunction(() -> {
+            glMultiDrawArrays(GL_TRIANGLE_FAN, startingIndices, sizes);
+        });
+
+        tilesVbo = vboBuilder.build(); // Build the VBO
+        updateColors(); // Populate the color buffer with the correct colors
+    }
+
+    private void addTileVertices(VertexBufferObject.Builder vboBuilder, HexPoint tilePos) {
+        final Point2 tileCenter = WorldScreenHelper.tileToPixel(tilePos);
+        for (Point2 vertex : WorldScreenHelper.TILE_VERTICES) {
+            // Add the index of the vertex that is about to be added
+            vboBuilder.addIndex(vboBuilder.getNumVertices());
+
+            // Add the vertex with a placeholder color
+            vboBuilder.addVertex(tileCenter.plus(vertex), Color.BLACK);
+        }
     }
 
     private void initRivers() {
         // Populate a list of all river vertices for this chunk
-        final List<Point2> vertices = new LinkedList<>();
+        final List<Point2> vertices = new ArrayList<>();
         for (Tile tile : chunk.getTiles()) {
             final Point2 tileCenter =
                 WorldScreenHelper.tileToPixel(Chunk.getRelativeTilePos(tile.pos()));
@@ -107,33 +101,28 @@ public class ChunkVbo {
         }
 
         // Init a VBO
-        final VertexBufferObject vbo = new VertexBufferObject.Builder()
-            .setNumVertices(vertices.size())
-            .setDrawFunction(() -> {
-                GL11.glLineWidth((float) worldScreen.getWorldScale() * RIVER_LINE_WIDTH);
-                GL11.glDrawArrays(GL11.GL_LINES, 0, vertices.size());
-            })
-            .build();
+        final VertexBufferObject.Builder vboBuilder = new VertexBufferObject.Builder()
+            .drawFunction(() -> {
+                glLineWidth((float) worldScreen.getWorldScale() * RIVER_LINE_WIDTH);
+                glDrawElements(GL_LINES, vertices.size(), GL_UNSIGNED_INT, 0);
+            });
 
-        // Populate the vertex and color buffers
-        for (Point2 vertex : vertices) {
-            vbo.addVertex(vertex);
-            vbo.addColor(Color.BLUE);
+        // Populate the vertex, color, and index buffers
+        for (int i = 0; i < vertices.size(); i++) {
+            vboBuilder.addVertex(vertices.get(i), Color.BLUE);
+            vboBuilder.addIndex(i);
         }
 
-        vbo.bindVertexBuffer(GL15.GL_STATIC_DRAW);
-        vbo.bindColorBuffer(GL15.GL_STATIC_DRAW);
-
-        riversVbo = vbo;
+        riversVbo = vboBuilder.build();
     }
 
     /**
-     * Updates the color of each tile in this chunk. The color for each tile is recalculated,
-     * then updated in the color buffer.
+     * Updates the color of each tile in this chunk. The color for each tile is recalculated, then
+     * updated in the color buffer.
      */
     public void updateColors() {
         // Bind the handle for the color buffer
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, tilesVbo.getColorHandle());
+        glBindBuffer(GL_ARRAY_BUFFER, tilesVbo.getColorHandle());
         long offset = 0;
         for (Tile tile : chunk.getTiles()) {
             final Color color = getTileColor(tile);
@@ -166,12 +155,12 @@ public class ChunkVbo {
      */
     public void draw() {
         // Translate to this chunk's pixel position
-        GL11.glPushMatrix();
-        GL11.glTranslated(chunk.getScreenPos().x(), chunk.getScreenPos().y(), 0.0);
+        glPushMatrix();
+        glTranslated(chunk.getScreenPos().x(), chunk.getScreenPos().y(), 0.0);
 
         tilesVbo.draw();
         riversVbo.draw();
 
-        GL11.glPopMatrix();
+        glPopMatrix();
     }
 }

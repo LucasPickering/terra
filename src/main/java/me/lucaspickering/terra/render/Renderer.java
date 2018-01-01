@@ -23,7 +23,8 @@ public class Renderer {
 
     /**
      * The width of the window that will be assumed when all textures, words, etc. are drawn to the
-     * screen. Everything will be rendered to this resolution, then scaled to the actual resolution.
+     * screen. Everything will be rendered to this resolution, then scaled to the actual
+     * resolution.
      */
     public static final int RES_WIDTH = 3840;
 
@@ -33,7 +34,6 @@ public class Renderer {
     public static final int RES_HEIGHT = 2160;
 
     private static final int BYTES_PER_PIXEL = 4; // RGBA
-
 
     private final Map<String, Texture> textures = new HashMap<>();
     private final Map<Font, TrueTypeFont> fonts = new EnumMap<>(Font.class);
@@ -242,5 +242,20 @@ public class Renderer {
             return fontObj.getStringSize(text);
         }
         throw new IllegalArgumentException("Could not get font from map.");
+    }
+
+    /**
+     * Initializes a {@link ShaderProgram} with the given vertex and fragment shader files.
+     *
+     * @param vertexShader   the file containing the vertex shader
+     * @param fragmentShader the file containing the fragment shader
+     * @return the {@link ShaderProgram}
+     */
+    public ShaderProgram initShaderProgram(String vertexShader, String fragmentShader) {
+        final ShaderProgram shaderProgram = new ShaderProgram();
+        shaderProgram.loadVertexShader(vertexShader);
+        shaderProgram.loadFragmentShader(fragmentShader);
+        shaderProgram.link();
+        return shaderProgram;
     }
 }

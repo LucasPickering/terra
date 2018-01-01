@@ -16,6 +16,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Map;
+import java.util.Scanner;
 
 import me.lucaspickering.utils.MathFuncs;
 import me.lucaspickering.utils.Pair;
@@ -31,7 +32,7 @@ public class Funcs {
     }
 
     /**
-     * Opens the resource with the given path format and file name as an {@link InputStream}. The
+     * Open the resource with the given path format and file name as an {@link InputStream}. The
      * file name will be formatted into the path, then the file at the formatted path will be
      * openened.
      *
@@ -51,6 +52,24 @@ public class Funcs {
         }
 
         return stream;
+    }
+
+    /**
+     * Open the resource with the given path format and file name as a text file and return its
+     * contents as a string. The file name will be formatted into the path, then the file at the
+     * formatted path will be openened.
+     *
+     * @param resourcePath the path format for the resource (e.g. "config/%s.ini")
+     * @param fileName     the name of the file (e.g. "keys")
+     * @return a {@link String} with the contents of the file
+     * @throws FileNotFoundException if the file does not exist
+     */
+    public static String loadTextResource(String resourcePath, String fileName) throws IOException {
+        // Load the resource as a stream, then parse it with Scanner
+        try (InputStream in = getResource(resourcePath, fileName);
+             Scanner scanner = new Scanner(in, "UTF-8")) {
+            return scanner.useDelimiter("\\A").next();
+        }
     }
 
     private static ByteBuffer resizeBuffer(ByteBuffer buffer, int newCapacity) {
@@ -111,8 +130,8 @@ public class Funcs {
     }
 
     /**
-     * Blends the two given colors according to their individual alpha values. A color with a
-     * higher alpha will have a stronger effect on the blended color.
+     * Blends the two given colors according to their individual alpha values. A color with a higher
+     * alpha will have a stronger effect on the blended color.
      *
      * @param c1 the first color
      * @param c2 the second color
@@ -132,10 +151,10 @@ public class Funcs {
 
 
     /**
-     * Overlays the first color onto the second. If the foreground color is opaque, then the
-     * result will be just the foreground. If the foreground is transparent, then the result will
-     * be just the background. Otherwise, foreground is blended into the background according to
-     * its alpha value.
+     * Overlays the first color onto the second. If the foreground color is opaque, then the result
+     * will be just the foreground. If the foreground is transparent, then the result will be just
+     * the background. Otherwise, foreground is blended into the background according to its alpha
+     * value.
      *
      * @param fg the foreground color
      * @param bg the background color
@@ -161,8 +180,8 @@ public class Funcs {
 
     /**
      * Loads the config file with the given name as an INI file. The given string should be the name
-     * of the file with no path or extension. Its name will be appended to
-     * {@link Constants#CFG_PATH} to get the file path.
+     * of the file with no path or extension. Its name will be appended to {@link
+     * Constants#CFG_PATH} to get the file path.
      *
      * @param configFile the name of the config file
      * @return the values of the file, in a map of the sections

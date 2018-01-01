@@ -7,6 +7,7 @@ public class Constants {
     public static final String FONT_PATH = "fonts/%s.ttf";
     public static final String SAVE_PATH = "saves/%s.csv";
     public static final String CFG_PATH = "config/%s.ini";
+    public static final String SHADER_PATH = "shaders/%s"; // Shaders have multiple extensions
 
     // Texture names
     public static final String TEX_ICON = "icon";
