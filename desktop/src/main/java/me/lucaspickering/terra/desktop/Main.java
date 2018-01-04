@@ -7,6 +7,8 @@ public class Main {
 
     public static void main(String[] args) {
         final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+        config.title = "Terra";
+
         new LwjglApplication(new me.lucaspickering.terra.Main(), config);
     }
 }
