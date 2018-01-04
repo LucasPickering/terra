@@ -1,108 +1,127 @@
 package me.lucaspickering.terra.input;
 
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CameraController extends InputAdapter {
+public class CameraController extends GestureDetector {
 
-    private enum Action {
-        CAMERA_FORWARD(Input.Keys.W) {
+    private enum CameraMovement {
+        FORWARD(Input.Keys.W) {
             @Override
-            public void execute(Camera camera) {
-                camera.translate()
+            public void transform(Camera camera) {
+                camera.translate(alignToCamera(new Vector3(0f, 0f, -MOVE_VELOCITY), camera));
             }
         },
-        CAMERA_BACK(Input.Keys.S) {
+        BACK(Input.Keys.S) {
             @Override
-            public void execute(Camera camera) {
-
+            public void transform(Camera camera) {
+                camera.translate(alignToCamera(new Vector3(0f, 0f, MOVE_VELOCITY), camera));
             }
         },
-        CAMERA_LEFT(Input.Keys.A) {
+        LEFT(Input.Keys.A) {
             @Override
-            public void execute(Camera camera) {
-
+            public void transform(Camera camera) {
+                camera.translate(alignToCamera(new Vector3(-MOVE_VELOCITY, 0f, 0f), camera));
             }
         },
-        CAMERA_RIGHT(Input.Keys.D) {
+        RIGHT(Input.Keys.D) {
             @Override
-            public void execute(Camera camera) {
-
+            public void transform(Camera camera) {
+                camera.translate(alignToCamera(new Vector3(MOVE_VELOCITY, 0f, 0f), camera));
             }
         },
-        CAMERA_UP(Input.Keys.SPACE) {
+        UP(Input.Keys.SPACE) {
             @Override
-            public void execute(Camera camera) {
-
+            public void transform(Camera camera) {
+                camera.translate(alignToCamera(new Vector3(0f, MOVE_VELOCITY, 0f), camera));
             }
         },
-        CAMERA_DOWN(Input.Keys.SHIFT_LEFT) {
+        DOWN(Input.Keys.SHIFT_LEFT) {
             @Override
-            public void execute(Camera camera) {
-
+            public void transform(Camera camera) {
+                camera.translate(alignToCamera(new Vector3(0f, -MOVE_VELOCITY, 0f), camera));
+            }
+        },
+        ROTATE_LEFT(Input.Keys.LEFT) {
+            @Override
+            public void transform(Camera camera) {
+                camera.rotate(ROTATE_VELOCITY, 0f, 1f, 0f);
+            }
+        },
+        ROTATE_RIGHT(Input.Keys.RIGHT) {
+            @Override
+            public void transform(Camera camera) {
+                camera.rotate(-ROTATE_VELOCITY, 0f, 1f, 0f);
             }
         };
 
-        private static final Map<Integer, Action> keycodeMap = new HashMap<>();
+        private static final Map<Integer, CameraMovement> keycodeMap = new HashMap<>();
 
         static {
             // Initialize a map of all actions keyed by keycode
-            for (Action action : values()) {
-                keycodeMap.put(action.keycode, action);
+            for (CameraMovement cameraMovement : values()) {
+                keycodeMap.put(cameraMovement.keycode, cameraMovement);
             }
         }
 
         private final int keycode;
 
-        Action(int keycode) {
+        CameraMovement(int keycode) {
             this.keycode = keycode;
-
-
         }
 
-        public static Action byKeycode(int keycode) {
+        public static CameraMovement byKeycode(int keycode) {
             return keycodeMap.get(keycode);
         }
 
-        public abstract void execute(Camera camera);
+        private static Vector3 alignToCamera(Vector3 vec, Camera camera) {
+            // Get the vector's components in the xz-plane
+            final Vector2 xz = new Vector2(camera.direction.x, camera.direction.z);
+            // Figure out how much the vector needs to be rotated around the y axis
+            final float angle = -xz.angle() - 90;
+            return vec.rotate(angle, 0f, 1f, 0f); // Rotato potato
+        }
 
+        public abstract void transform(Camera camera);
     }
 
-    private static final float VELOCITY = 1f;
+    private static final float MOVE_VELOCITY = 10f;
+    private static final float ROTATE_VELOCITY = 1f;
 
     private final Camera camera;
-    private final Map<Action, Boolean> actionStates = new EnumMap<>(Action.class);
+    private final Map<CameraMovement, Boolean> actionStates = new EnumMap<>(CameraMovement.class);
 
     public CameraController(Camera camera) {
+        super(new GestureAdapter());
         this.camera = camera;
 
         // Initialize all states to false
-        for (Action action : Action.values()) {
-            actionStates.put(action, false);
+        for (CameraMovement cameraMovement : CameraMovement.values()) {
+            actionStates.put(cameraMovement, false);
         }
     }
 
     public void update() {
-        // Apply all actions that are currently active
-        for (Map.Entry<Action, Boolean> entry : actionStates.entrySet()) {
-            final Action action = entry.getKey();
-            final boolean state = entry.getValue();
-            if (state) {
-                action.execute(camera);
-            }
-        }
+        // Apply transformation for all active actions
+        actionStates.entrySet().stream()
+            .filter(Map.Entry::getValue) // Filter out inactive actions
+            .forEach(e -> e.getKey().transform(camera)); // Apply each transformation
+
+        camera.update();
     }
 
     @Override
     public boolean keyDown(int keycode) {
-        final Action action = Action.byKeycode(keycode);
-        if (action != null) {
-            actionStates.put(action, true);
+        final CameraMovement cameraMovement = CameraMovement.byKeycode(keycode);
+        if (cameraMovement != null) {
+            actionStates.put(cameraMovement, true);
             return true;
         }
         return false;
@@ -110,9 +129,9 @@ public class CameraController extends InputAdapter {
 
     @Override
     public boolean keyUp(int keycode) {
-        final Action action = Action.byKeycode(keycode);
-        if (action != null) {
-            actionStates.put(action, false);
+        final CameraMovement cameraMovement = CameraMovement.byKeycode(keycode);
+        if (cameraMovement != null) {
+            actionStates.put(cameraMovement, false);
             return true;
         }
         return false;

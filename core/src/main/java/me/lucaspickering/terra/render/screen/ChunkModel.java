@@ -132,7 +132,7 @@ public class ChunkModel implements RenderableProvider {
             new Vector3((float) tilePos.x(),     // Translate x/z based on position
                         tileHeight / 2f,         // Shift up based on height
                         (float) tilePos.y()),
-            new Quaternion().idt(),              // No rotation
+            new Quaternion(),                    // No rotation
             new Vector3(1f, tileHeight, 1f)      // Scale based on height
         );
 

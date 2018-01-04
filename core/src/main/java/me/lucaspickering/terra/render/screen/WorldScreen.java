@@ -7,12 +7,12 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import me.lucaspickering.terra.input.CameraController;
 import me.lucaspickering.terra.world.WorldHandler;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPointMap;
@@ -20,11 +20,13 @@ import me.lucaspickering.utils.Point2;
 
 public class WorldScreen extends Screen {
 
+    private static final float FOV = 75f;
+
     private final Logger logger;
     private final WorldHandler worldHandler;
 
     private final Camera camera;
-    private final CameraInputController cameraController;
+    private final CameraController cameraController;
     private final Environment environment;
     private final ModelBatch modelBatch;
     private final HexPointMap<Chunk, ChunkModel> chunkModels = new HexPointMap<>();
@@ -37,8 +39,8 @@ public class WorldScreen extends Screen {
 
         // RENDERING INIT
         // Camera
-        camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        cameraController = new CameraInputController(camera);
+        camera = new PerspectiveCamera(FOV, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        cameraController = new CameraController(camera);
         initCamera();
 
         // Environment
@@ -53,8 +55,8 @@ public class WorldScreen extends Screen {
     }
 
     private void initCamera() {
-        camera.position.set(10f, 400f, 10f);
-        camera.lookAt(0, 0, 0);
+        camera.position.set(0f, 400f, 0f);
+        camera.rotate(45, -1f, 0f, 0f);
         camera.near = 1f;
         camera.far = 3000f;
         camera.update();
