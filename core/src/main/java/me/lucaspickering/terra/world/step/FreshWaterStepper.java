@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import me.lucaspickering.terra.world.Continent;
@@ -48,7 +47,7 @@ public class FreshWaterStepper extends Stepper {
         final long startTime = System.currentTimeMillis();
         world().getContinents().stream().forEach(this::spreadForContinent);
         final long elapsedTime = System.currentTimeMillis() - startTime;
-        logger().log(Level.FINE, String.format("Runoff iteration took %d ms", elapsedTime));
+        logger().fine(String.format("Runoff iteration took %d ms", elapsedTime));
     }
 
     private void spreadForContinent(Continent continent) {
@@ -157,17 +156,17 @@ public class FreshWaterStepper extends Stepper {
 
     private void logStatus(Tile tile, TileSet adjTiles, double targetWaterElev) {
         // Log the center tile
-        logger().log(Level.FINEST, String.format(
+        logger().finest(String.format(
             "Center tile: [%s]  Elevation: [%d]  Water Level: [%f]  Water Elev: [%f]",
             tile.pos(), tile.elevation(), tile.getWaterLevel(), tile.getWaterElevation()));
 
         // Log the target water level that was calculated
-        logger().log(Level.FINEST, String.format("  Calculated target water level: [%f]",
+        logger().finest(String.format("  Calculated target water level: [%f]",
                                                  targetWaterElev));
 
         // Log each adjacent tile
         for (Tile adjTile : adjTiles) {
-            logger().log(Level.FINEST, String.format(
+            logger().finest(String.format(
                 "  Adj. tile: [%s]  Elevation: [%d]  Water Level: [%f]  Water Elev: [%f]",
                 adjTile.pos(), adjTile.elevation(), adjTile.getWaterLevel(),
                 adjTile.getWaterElevation()));

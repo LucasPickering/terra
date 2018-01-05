@@ -4,7 +4,6 @@ import com.flowpowered.noise.module.source.Perlin;
 
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
 
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.World;
@@ -38,7 +37,7 @@ public class NoiseElevationGenerator extends NoiseGenerator {
                                                                      e.getValue(),
                                                                      noiseRange));
 
-        logger().log(Level.FINER, String.format("Noise range: %s", noiseRange));
+        logger().finer(String.format("Noise range: %s", noiseRange));
     }
 
     private void setElevation(Tile tile, double noise, Range<Double> noiseRange) {
