@@ -26,7 +26,7 @@ import me.lucaspickering.utils.Point2;
 public class ChunkModel implements RenderableProvider {
 
     // Distance from the center of the tile to each VERTEX
-    private static final double TILE_RADIUS = 5.0;
+    private static final double TILE_RADIUS = 2.0;
     // Distance between opposite vertices
     private static final double TILE_WIDTH = TILE_RADIUS * 2;
     // Distance between midpoints of opposite sides
@@ -41,7 +41,7 @@ public class ChunkModel implements RenderableProvider {
     };
 
     private static final Attribute RUNOFF_COLOR_ATTR = ColorAttribute.createDiffuse(Colors.RUNOFF);
-    private static final Attribute WATER_BLENDING_ATTR = new BlendingAttribute(0.15f);
+    private static final Attribute WATER_BLENDING_ATTR = new BlendingAttribute(0.25f);
 
     // The hexagonal prism model used for all tiles. This will be created once, scaled and colored
     // when creating a ModelInstance from it.
@@ -59,7 +59,7 @@ public class ChunkModel implements RenderableProvider {
     }
 
     /**
-     * Converts a {@link HexPoint} in to a point on the screen.
+     * Converts a {@link HexPoint} in to a point in 2D space.
      *
      * @param tilePos the position of the tile as a {@link HexPoint}
      * @return the position of that tile's center on the screen
@@ -134,8 +134,8 @@ public class ChunkModel implements RenderableProvider {
 
         // If this tile has runoff water on it, init a model for the water
         if (tile.getWaterLevel() > 0f) {
-            translate.y = tileHeight + (float) tile.getWaterLevel() / 2f;
-            scale.y = (float) tile.getWaterLevel();
+            translate.y = tileHeight + (float) tile.getWaterLevel() / 2f; // Shift up some more
+            scale.y = (float) tile.getWaterLevel(); // Scale height based on water level
             final ModelInstance waterModelInst =
                 new ModelInstance(TILE_MODEL, new Matrix4(translate, rotate, scale));
 
@@ -151,7 +151,6 @@ public class ChunkModel implements RenderableProvider {
         tileModelInsts.forEach((tile, mi) -> {
             // Set the color for the model instance based on the tile
             final Color color = tileColorMode.getColor(tile);
-            color.a = 0.5f;
             mi.materials.get(0).set(ColorAttribute.createDiffuse(color));
         });
     }

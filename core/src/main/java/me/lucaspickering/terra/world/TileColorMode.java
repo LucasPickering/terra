@@ -61,9 +61,9 @@ public enum TileColorMode {
     WATER_TRAVERSED {
         @Override
         public Color getColor(Tile tile) {
-            // Water tiles are always black
+            // Water tiles get their biome color
             if (tile.biome().isWater()) {
-                return Color.BLACK;
+                return tile.biome().color();
             }
             return interpolateColor(Color.WHITE, Color.RED,
                                     tile.getWaterTraversed(), WATER_TRAVERSED_RANGE);
