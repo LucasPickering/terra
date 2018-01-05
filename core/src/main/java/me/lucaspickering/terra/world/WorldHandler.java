@@ -1,9 +1,9 @@
 package me.lucaspickering.terra.world;
 
 import java.util.Random;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.terra.world.generate.*;
 import me.lucaspickering.terra.world.step.Stepper;
 
@@ -44,18 +44,19 @@ public class WorldHandler {
     public void generate() {
         random = new Random(seed); // Init the Random instance
 
-        final long startTime = System.currentTimeMillis(); // We're timing this
-        final World world = new World(seed, size);
-        final Generator[] generators = makeGenerators(world, random); // Initialize the generators
+        // Generate the world, and time how long it takes
+        final long time = Funcs.timed(() -> {
+            final World world = new World(seed, size);
+            final Generator[] generators = makeGenerators(world, random); // Initialize generators
 
-        // Apply each generator in sequence (this is the heavy lifting)
-        for (Generator generator : generators) {
-            runGenerator(generator);
-        }
+            // Apply each generator in sequence (this is the heavy lifting)
+            for (Generator generator : generators) {
+                runGenerator(generator);
+            }
 
-        this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
-        final long elapsedTime = System.currentTimeMillis() - startTime; // Stop the timer
-        logger.log(Level.INFO, String.format("World generation took %d ms", elapsedTime));
+            this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
+        });
+        logger.info(String.format("World generation took %d ms", time));
     }
 
     private Generator[] makeGenerators(World world, Random random) {
@@ -73,11 +74,9 @@ public class WorldHandler {
     }
 
     private void runGenerator(Generator generator) {
-        final long startTime = System.currentTimeMillis();
-        generator.generate();
-        final long runTime = System.currentTimeMillis() - startTime;
-        logger.log(Level.FINE, String.format("Generator stage %s took %d ms",
-                                             generator.getClass().getSimpleName(), runTime));
+        final long time = Funcs.timed(generator::generate);
+        logger.fine(String.format("Generator stage %s took %d ms",
+                                  generator.getClass().getSimpleName(), time));
     }
 
     /**

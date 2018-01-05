@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 
 import java.util.Random;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import me.lucaspickering.terra.input.InputHandler;
@@ -25,7 +24,7 @@ public class Main extends ApplicationAdapter {
     public void create() {
         // Init random seed
         seed = initRandomSeed();
-        logger.log(Level.INFO, "Random seed: " + seed);
+        logger.info("Random seed: " + seed);
 
         initRendering();
         initGame();

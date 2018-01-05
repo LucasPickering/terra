@@ -10,10 +10,10 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 
 import java.util.Objects;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import me.lucaspickering.terra.input.CameraController;
+import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.WorldHandler;
 import me.lucaspickering.terra.world.util.Chunk;
@@ -67,11 +67,9 @@ public class WorldScreen extends Screen {
     }
 
     private void initChunkModels() {
-        final long startTime = System.currentTimeMillis(); // We're timing this
-        worldHandler.getWorld().getChunks()
-            .forEach(c -> chunkModels.put(c, new ChunkModel(c, TileColorMode.COMPOSITE)));
-        final long elapsedTime = System.currentTimeMillis() - startTime; // Stop the timer
-        logger.log(Level.INFO, String.format("Initializing world models took %d ms", elapsedTime));
+        final long time = Funcs.timed(() -> worldHandler.getWorld().getChunks()
+            .forEach(c -> chunkModels.put(c, new ChunkModel(c, TileColorMode.COMPOSITE))));
+        logger.info(String.format("Initializing world models took %d ms", time));
     }
 
     @Override
@@ -84,26 +82,15 @@ public class WorldScreen extends Screen {
         modelBatch.end();
     }
 
-    private void updateAllTileColors() {
-        final long startTime = System.currentTimeMillis();
-        // TODO
-        final long endTime = System.currentTimeMillis();
-        logger.log(Level.FINER, String.format("Color update took %d ms", endTime - startTime));
-    }
-
     private void regenerateWorld() {
         worldHandler.generate();
     }
 
-    private void stepWorld() {
-        // Step then refresh the world
-        worldHandler.step();
-        updateAllTileColors();
-    }
-
     private void setTileColorMode(TileColorMode tileColorMode) {
         // Set the color mode for each chunk
-        chunkModels.values().forEach(cm -> cm.setColorMode(tileColorMode));
+        final long time = Funcs.timed(() -> chunkModels.values()
+            .forEach(cm -> cm.setColorMode(tileColorMode)));
+        logger.finer(String.format("Color update took %d ms", time));
     }
 
     @Override
