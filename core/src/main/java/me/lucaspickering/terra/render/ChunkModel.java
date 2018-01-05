@@ -1,4 +1,4 @@
-package me.lucaspickering.terra.render.screen;
+package me.lucaspickering.terra.render;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttributes;

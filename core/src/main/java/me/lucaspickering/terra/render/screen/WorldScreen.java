@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 import me.lucaspickering.terra.input.CameraController;
+import me.lucaspickering.terra.render.ChunkModel;
 import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.WorldHandler;
