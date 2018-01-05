@@ -3,6 +3,7 @@ package me.lucaspickering.terra.render;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.utils.Pool;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.lucaspickering.terra.util.Colors;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.World;
@@ -38,6 +40,11 @@ public class ChunkModel implements RenderableProvider {
         new Point2(-(3.0 / 8.0) * TILE_WIDTH, -TILE_DEPTH / 4)  // Northwest
     };
 
+    private static final Attribute RUNOFF_COLOR_ATTR = ColorAttribute.createDiffuse(Colors.RUNOFF);
+    private static final Attribute WATER_BLENDING_ATTR = new BlendingAttribute(0.15f);
+
+    // The hexagonal prism model used for all tiles. This will be created once, scaled and colored
+    // when creating a ModelInstance from it.
     private static final Model TILE_MODEL;
 
     static {
@@ -86,9 +93,9 @@ public class ChunkModel implements RenderableProvider {
         return HexPoint.roundPoint(fracX, fracY, fracZ);
     }
 
-    private final HexPointMap<Tile, ModelInstance> tileModelInstances = new HexPointMap<>();
+    private final HexPointMap<Tile, ModelInstance> tileModelInsts = new HexPointMap<>();
+    private final HexPointMap<Tile, ModelInstance> tileWaterModelInsts = new HexPointMap<>();
     private final ModelCache tileModelCache = new ModelCache();
-
 
     /**
      * Initialize a model for the given chunk with the given color mode. The color mode can be
@@ -98,48 +105,61 @@ public class ChunkModel implements RenderableProvider {
      * @param tileColorMode the mode to derive each tile's color
      */
     public ChunkModel(Chunk chunk, TileColorMode tileColorMode) {
-        chunk.getTiles().forEach(this::initTileModelInstance); // Create a model for each tile
+        chunk.getTiles().forEach(this::initTileModelInst); // Create a model for each tile
         setColorMode(tileColorMode); // Init the color for each tile
         buildModelCache(); // Build the cache based on the models we just made
     }
 
     /**
-     * Create a {@link ModelInstance} for an individual tile. The model will be colored, scaled, and
-     * translated according to the tile's properties.
+     * Create a {@link ModelInstance} for an individual tile and add it to {@link #tileModelInsts}.
      *
      * @param tile the tile to create a model for
      */
-    private void initTileModelInstance(Tile tile) {
+    private void initTileModelInst(Tile tile) {
         // CALCULATE TRANSFORMATIONS
         // Calculate the height of the tile that we want the tile to be drawn with
         final int tileHeight = tile.elevation() - World.ELEVATION_RANGE.lower() + 1;
 
         final Point2 tilePos = tileToPixel(tile.pos());
-        final Matrix4 transform = new Matrix4(
-            new Vector3((float) tilePos.x(),     // Translate x/z based on position
-                        tileHeight / 2f,         // Shift up based on height
-                        (float) tilePos.y()),
-            new Quaternion(),                    // No rotation
-            new Vector3(1f, tileHeight, 1f)      // Scale based on height
-        );
+        final Vector3 translate = new Vector3((float) tilePos.x(),  // Translate x based on position
+                                              tileHeight / 2f,      // Shift up based on height
+                                              (float) tilePos.y()); // Translate x based on position
+        final Quaternion rotate = new Quaternion(); // No rotation
+        final Vector3 scale = new Vector3(1f, tileHeight, 1f); // Scale based on height
 
-        // Instantiate the model with the transformations
-        final ModelInstance modelInstance = new ModelInstance(TILE_MODEL, transform);
+        // Instantiate the model with the transformations and save it
+        tileModelInsts.put(tile, new ModelInstance(TILE_MODEL, new Matrix4(translate,
+                                                                           rotate,
+                                                                           scale)));
 
-        tileModelInstances.put(tile, modelInstance); // Save this model instance
+        // If this tile has runoff water on it, init a model for the water
+        if (tile.getWaterLevel() > 0f) {
+            translate.y = tileHeight + (float) tile.getWaterLevel() / 2f;
+            scale.y = (float) tile.getWaterLevel();
+            final ModelInstance waterModelInst =
+                new ModelInstance(TILE_MODEL, new Matrix4(translate, rotate, scale));
+
+            // Add color and transparency material attributes
+            waterModelInst.materials.get(0).set(WATER_BLENDING_ATTR);
+            waterModelInst.materials.get(0).set(RUNOFF_COLOR_ATTR);
+
+            tileWaterModelInsts.put(tile, waterModelInst); // Save this instance in the map
+        }
     }
 
     public void setColorMode(TileColorMode tileColorMode) {
-        tileModelInstances.forEach((tile, mi) -> {
+        tileModelInsts.forEach((tile, mi) -> {
             // Set the color for the model instance based on the tile
             final Color color = tileColorMode.getColor(tile);
-            mi.materials.get(0).set(new Material(ColorAttribute.createDiffuse(color)));
+            color.a = 0.5f;
+            mi.materials.get(0).set(ColorAttribute.createDiffuse(color));
         });
     }
 
     private void buildModelCache() {
         tileModelCache.begin();
-        tileModelInstances.values().forEach(tileModelCache::add);
+        tileModelInsts.values().forEach(tileModelCache::add); // Add tile models
+        tileWaterModelInsts.values().forEach(tileModelCache::add); // Add tile water models
         tileModelCache.end();
     }
 

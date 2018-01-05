@@ -17,8 +17,8 @@ import me.lucaspickering.utils.GeneralFuncs;
  */
 public class OceanGenerator extends Generator {
 
-    private static final int MIN_OCEAN_SIZE = 15; // Minimum size to be possibly become an ocean
-    private static final int MIN_GUARANTEED_OCEAN_SIZE = 50; // Min size to be guaranteed an ocean
+    private static final int MIN_OCEAN_SIZE = 50; // Minimum size to be possibly become an ocean
+    private static final int MIN_GUARANTEED_OCEAN_SIZE = 100; // Min size to be guaranteed an ocean
     private static final int MIN_COAST_DEPTH = -5; // Everything in an ocean >= this is coast
 
     public OceanGenerator(World world, Random random) {

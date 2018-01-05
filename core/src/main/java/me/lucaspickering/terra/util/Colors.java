@@ -10,7 +10,8 @@ public class Colors {
     public static final Color CLEAR = new Color(0x777777ff);
     public static final Color MENU_SHADER = new Color(0x101010cc);
 
-    // Tile overlay colors
+    // Tile colors
+    public static final Color RUNOFF = new Color(0x61bdffff);
     public static final Color MOUSE_OVER = new Color(0xaa1111c0);
     public static final Color TILE_INFO_BG = new Color(0x444444ee);
 

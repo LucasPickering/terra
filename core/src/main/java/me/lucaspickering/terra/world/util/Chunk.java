@@ -15,7 +15,7 @@ import me.lucaspickering.utils.Point2;
  */
 public class Chunk implements HexPointable {
 
-    public static final int SIDE_LENGTH = 50;
+    public static final int SIDE_LENGTH = 100;
     public static final int TOTAL_TILES = SIDE_LENGTH * SIDE_LENGTH;
 
     private static final int OVERLAY_RGB_FACTOR = 50;

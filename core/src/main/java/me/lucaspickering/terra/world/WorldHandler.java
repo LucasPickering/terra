@@ -16,7 +16,7 @@ import me.lucaspickering.terra.world.step.Stepper;
  */
 public class WorldHandler {
 
-    private static final int DEFAULT_CHUNK_RADIUS = 3; // Default radius of the world, in chunks
+    private static final int DEFAULT_CHUNK_RADIUS = 2; // Default radius of the world, in chunks
 
     private final Logger logger;
     private final long seed;
