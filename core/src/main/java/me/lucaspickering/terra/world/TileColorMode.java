@@ -13,6 +13,22 @@ import me.lucaspickering.utils.range.Range;
  */
 public enum TileColorMode {
 
+    COMPOSITE {
+        @Override
+        public Color getColor(Tile tile) {
+            // Combine elevation and biome color
+            final Color elevColor = ELEVATION.getColor(tile);
+            float elevBrightness = Funcs.getColorBrightness(elevColor);
+            elevBrightness = (float) Math.pow(elevBrightness, 0.75); // Make it brighter
+
+            // Scale this biome color's brightness by the brightness of the elevation color
+            final Color biomeColor = tile.biome().color();
+            return new Color(biomeColor.r * elevBrightness,
+                             biomeColor.g * elevBrightness,
+                             biomeColor.b * elevBrightness,
+                             1f);
+        }
+    },
     ELEVATION {
         @Override
         public Color getColor(Tile tile) {
@@ -57,22 +73,6 @@ public enum TileColorMode {
         @Override
         public Color getColor(Tile tile) {
             return tile.biome().color();
-        }
-    },
-    COMPOSITE {
-        @Override
-        public Color getColor(Tile tile) {
-            // Combine elevation and biome color
-            final Color elevColor = ELEVATION.getColor(tile);
-            float elevBrightness = Funcs.getColorBrightness(elevColor);
-            elevBrightness = (float) Math.pow(elevBrightness, 0.75); // Make it brighter
-
-            // Scale this biome color's brightness by the brightness of the elevation color
-            final Color biomeColor = tile.biome().color();
-            return new Color(biomeColor.r * elevBrightness,
-                             biomeColor.g * elevBrightness,
-                             biomeColor.b * elevBrightness,
-                             1f);
         }
     };
 

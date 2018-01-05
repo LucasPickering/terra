@@ -1,6 +1,7 @@
 package me.lucaspickering.terra.render.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -13,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import me.lucaspickering.terra.input.CameraController;
+import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.WorldHandler;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPointMap;
@@ -66,7 +68,8 @@ public class WorldScreen extends Screen {
 
     private void initChunkModels() {
         final long startTime = System.currentTimeMillis(); // We're timing this
-        worldHandler.getWorld().getChunks().forEach(c -> chunkModels.put(c, new ChunkModel(c)));
+        worldHandler.getWorld().getChunks()
+            .forEach(c -> chunkModels.put(c, new ChunkModel(c, TileColorMode.COMPOSITE)));
         final long elapsedTime = System.currentTimeMillis() - startTime; // Stop the timer
         logger.log(Level.INFO, String.format("Initializing world models took %d ms", elapsedTime));
     }
@@ -98,8 +101,46 @@ public class WorldScreen extends Screen {
         updateAllTileColors();
     }
 
+    private void setTileColorMode(TileColorMode tileColorMode) {
+        // Set the color mode for each chunk
+        chunkModels.values().forEach(cm -> cm.setColorMode(tileColorMode));
+    }
+
     @Override
     public void dispose() {
         chunkModels.values().forEach(ChunkModel::dispose);
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        switch (keycode) {
+            case Input.Keys.NUM_1:
+                setTileColorMode(TileColorMode.COMPOSITE);
+                return true;
+            case Input.Keys.NUM_2:
+                setTileColorMode(TileColorMode.ELEVATION);
+                return true;
+            case Input.Keys.NUM_3:
+                setTileColorMode(TileColorMode.HUMIDITY);
+                return true;
+            case Input.Keys.NUM_4:
+                setTileColorMode(TileColorMode.WATER_LEVEL);
+                return true;
+            case Input.Keys.NUM_5:
+                setTileColorMode(TileColorMode.WATER_TRAVERSED);
+                return true;
+            case Input.Keys.NUM_6:
+                setTileColorMode(TileColorMode.BIOME);
+                return true;
+        }
+
+        // Forward everything else to the camera controller
+        return cameraController.keyDown(keycode);
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        // Forward everything else to the camera controller
+        return cameraController.keyUp(keycode);
     }
 }

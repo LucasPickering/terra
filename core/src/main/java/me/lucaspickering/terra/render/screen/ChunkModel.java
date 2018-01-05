@@ -18,6 +18,7 @@ import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
+import me.lucaspickering.terra.world.util.HexPointMap;
 import me.lucaspickering.utils.Point2;
 
 public class ChunkModel implements RenderableProvider {
@@ -28,14 +29,6 @@ public class ChunkModel implements RenderableProvider {
     private static final double TILE_WIDTH = TILE_RADIUS * 2;
     // Distance between midpoints of opposite sides
     private static final double TILE_DEPTH = Math.sqrt(3) * TILE_RADIUS;
-    private static final Point2[] TILE_VERTICES = {
-        new Point2(-TILE_WIDTH / 4, -TILE_DEPTH / 2),  // Top-left
-        new Point2(+TILE_WIDTH / 4, -TILE_DEPTH / 2),  // Top-right
-        new Point2(+TILE_WIDTH / 2, 0),                // Right
-        new Point2(+TILE_WIDTH / 4, +TILE_DEPTH / 2),  // Bottom-right
-        new Point2(-TILE_WIDTH / 4, +TILE_DEPTH / 2),  // Bottom-left
-        new Point2(-TILE_WIDTH / 2, 0)                 // Left
-    };
     private static final Point2[] TILE_SIDE_MIDPOINTS = {
         new Point2(0, -TILE_DEPTH / 2),                         // North
         new Point2(+(3.0 / 8.0) * TILE_WIDTH, -TILE_DEPTH / 4), // Northeast
@@ -50,11 +43,10 @@ public class ChunkModel implements RenderableProvider {
     static {
         // Initialize the tile model
         final ModelBuilder modelBuilder = new ModelBuilder();
-        final Material material = new Material();
 
         // A cylinder with 6 divisions just happens to be a hexagon
         TILE_MODEL = modelBuilder.createCylinder((float) TILE_WIDTH, 1f, (float) TILE_WIDTH,
-                                                 Tile.NUM_SIDES, material,
+                                                 Tile.NUM_SIDES, new Material(),
                                                  VertexAttributes.Usage.Position
                                                  | VertexAttributes.Usage.Normal);
     }
@@ -94,25 +86,21 @@ public class ChunkModel implements RenderableProvider {
         return HexPoint.roundPoint(fracX, fracY, fracZ);
     }
 
-    /**
-     * Gets the pixel position of the center of the tile at the bottom-left of the given chunk.
-     *
-     * @param chunkPos the chunk
-     * @return the center of the tile at the bottom-left of the chunk
-     */
-    @NotNull
-    private static Point2 chunkToPixel(@NotNull HexPoint chunkPos) {
-        return tileToPixel(Chunk.getChunkOrigin(chunkPos));
-    }
-
+    private final HexPointMap<Tile, ModelInstance> tileModelInstances = new HexPointMap<>();
     private final ModelCache tileModelCache = new ModelCache();
 
 
-    public ChunkModel(Chunk chunk) {
-        // Create a model for each tile and store it in the cache
-        tileModelCache.begin();
-        chunk.getTiles().forEach(t -> tileModelCache.add(createModelInstance(t)));
-        tileModelCache.end();
+    /**
+     * Initialize a model for the given chunk with the given color mode. The color mode can be
+     * changed later with {@link #setColorMode}.
+     *
+     * @param chunk         the chunk to model
+     * @param tileColorMode the mode to derive each tile's color
+     */
+    public ChunkModel(Chunk chunk, TileColorMode tileColorMode) {
+        chunk.getTiles().forEach(this::initTileModelInstance); // Create a model for each tile
+        setColorMode(tileColorMode); // Init the color for each tile
+        buildModelCache(); // Build the cache based on the models we just made
     }
 
     /**
@@ -120,9 +108,8 @@ public class ChunkModel implements RenderableProvider {
      * translated according to the tile's properties.
      *
      * @param tile the tile to create a model for
-     * @return the {@link ModelInstance}
      */
-    private ModelInstance createModelInstance(Tile tile) {
+    private void initTileModelInstance(Tile tile) {
         // CALCULATE TRANSFORMATIONS
         // Calculate the height of the tile that we want the tile to be drawn with
         final int tileHeight = tile.elevation() - World.ELEVATION_RANGE.lower() + 1;
@@ -139,15 +126,21 @@ public class ChunkModel implements RenderableProvider {
         // Instantiate the model with the transformations
         final ModelInstance modelInstance = new ModelInstance(TILE_MODEL, transform);
 
-        // Create a material for this tile and add it to the model instance
-        modelInstance.materials.get(0).set(createTileMaterial(tile));
-
-        return modelInstance; // Job's done
+        tileModelInstances.put(tile, modelInstance); // Save this model instance
     }
 
-    private Material createTileMaterial(Tile tile) {
-        final Color color = TileColorMode.COMPOSITE.getColor(tile);
-        return new Material(ColorAttribute.createDiffuse(color));
+    public void setColorMode(TileColorMode tileColorMode) {
+        tileModelInstances.forEach((tile, mi) -> {
+            // Set the color for the model instance based on the tile
+            final Color color = tileColorMode.getColor(tile);
+            mi.materials.get(0).set(new Material(ColorAttribute.createDiffuse(color)));
+        });
+    }
+
+    private void buildModelCache() {
+        tileModelCache.begin();
+        tileModelInstances.values().forEach(tileModelCache::add);
+        tileModelCache.end();
     }
 
     @Override

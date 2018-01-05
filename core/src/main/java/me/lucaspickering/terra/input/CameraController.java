@@ -93,7 +93,7 @@ public class CameraController extends GestureDetector {
     }
 
     private static final float MOVE_VELOCITY = 10f;
-    private static final float ROTATE_VELOCITY = 1f;
+    private static final float ROTATE_VELOCITY = 2f;
 
     private final Camera camera;
     private final Map<CameraMovement, Boolean> actionStates = new EnumMap<>(CameraMovement.class);

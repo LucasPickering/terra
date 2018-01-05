@@ -8,7 +8,8 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import me.lucaspickering.terra.render.screen.Screen;
+import me.lucaspickering.terra.input.InputHandler;
+import me.lucaspickering.terra.render.screen.ScreenHandler;
 import me.lucaspickering.terra.render.screen.WorldScreen;
 import me.lucaspickering.terra.util.Colors;
 import me.lucaspickering.terra.world.WorldHandler;
@@ -16,9 +17,9 @@ import me.lucaspickering.terra.world.WorldHandler;
 public class Main extends ApplicationAdapter {
 
     private final Logger logger = Logger.getLogger(getClass().getName());
+    private final ScreenHandler screenHandler = new ScreenHandler();
 
     private long seed;
-    private Screen currentScreen; // Should never be null after creation!
 
     @Override
     public void create() {
@@ -28,6 +29,9 @@ public class Main extends ApplicationAdapter {
 
         initRendering();
         initGame();
+
+        // Create and register our input handler
+        Gdx.input.setInputProcessor(new InputHandler(screenHandler));
     }
 
     private long initRandomSeed() {
@@ -57,18 +61,18 @@ public class Main extends ApplicationAdapter {
     private void initGame() {
         final WorldHandler worldHandler = new WorldHandler(seed);
         worldHandler.generate(); // Generate a world
-        currentScreen = new WorldScreen(worldHandler); // Initialize the current screen
+        screenHandler.setCurrentScreen(new WorldScreen(worldHandler)); // Create initial screen
     }
 
     @Override
     public void render() {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        currentScreen.draw(null);
+        screenHandler.getCurrentScreen().draw(null);
     }
 
     @Override
     public void dispose() {
-        currentScreen.dispose();
+        screenHandler.getCurrentScreen().dispose();
     }
 }

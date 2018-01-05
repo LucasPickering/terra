@@ -17,6 +17,11 @@ public abstract class Screen implements ScreenElement {
     private Screen nextScreen;
     private boolean shouldExit; // Set to true to close the game
 
+    @Override
+    public boolean contains(Point2 p) {
+        return true;
+    }
+
     /**
      * Called each frame by the main game loop, after {@link #draw}. To keep this screen as the
      * current screen, return {@code null}. To change to another screen, return that screen.
@@ -68,8 +73,11 @@ public abstract class Screen implements ScreenElement {
         // Do nothing by default
     }
 
-    @Override
-    public boolean contains(Point2 p) {
-        return true;
+    public boolean keyDown(int keycode) {
+        return false;
+    }
+
+    public boolean keyUp(int keycode) {
+        return false;
     }
 }
