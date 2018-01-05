@@ -23,7 +23,7 @@ For each of those, clone the git repo and run `mvn clean install` to build and i
 Use `F9` to enable debug mode.
 
 ### Debug Logging
-`-Djava.util.logging.config.file="src/test/resources/logging.properties"`
+`-Djava.util.logging.config.file="logging.properties"`
 
 ### LWJGL Debug Mode
 `-Dorg.lwjgl.util.Debug=true`
