@@ -14,11 +14,11 @@ import java.util.logging.Logger;
 
 import me.lucaspickering.terra.input.CameraController;
 import me.lucaspickering.terra.render.ChunkModel;
-import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.WorldHandler;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPointMap;
+import me.lucaspickering.utils.GeneralFuncs;
 import me.lucaspickering.utils.Point2;
 
 public class WorldScreen extends Screen {
@@ -68,7 +68,7 @@ public class WorldScreen extends Screen {
     }
 
     private void initChunkModels() {
-        final long time = Funcs.timed(() -> worldHandler.getWorld().getChunks()
+        final long time = GeneralFuncs.timed(() -> worldHandler.getWorld().getChunks()
             .forEach(c -> chunkModels.put(c, new ChunkModel(c, TileColorMode.COMPOSITE))));
         logger.info(String.format("Initializing world models took %d ms", time));
     }
@@ -89,7 +89,7 @@ public class WorldScreen extends Screen {
 
     private void setTileColorMode(TileColorMode tileColorMode) {
         // Set the color mode for each chunk
-        final long time = Funcs.timed(() -> chunkModels.values()
+        final long time = GeneralFuncs.timed(() -> chunkModels.values()
             .forEach(cm -> cm.setColorMode(tileColorMode)));
         logger.finer(String.format("Color update took %d ms", time));
     }

@@ -25,16 +25,4 @@ public class Funcs {
     public static float getColorBrightness(@NotNull Color color) {
         return MathFuncs.max(color.r, color.g, color.b);
     }
-
-    /**
-     * Run the given procedure and time how long it takes.
-     *
-     * @param runnable the procedure to run
-     * @return the time the procedure took to execute, in milliseconds
-     */
-    public static long timed(Runnable runnable) {
-        final long startTime = System.currentTimeMillis();
-        runnable.run();
-        return System.currentTimeMillis() - startTime;
-    }
 }

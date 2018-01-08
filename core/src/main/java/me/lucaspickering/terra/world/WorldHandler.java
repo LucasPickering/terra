@@ -3,9 +3,9 @@ package me.lucaspickering.terra.world;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import me.lucaspickering.terra.util.Funcs;
 import me.lucaspickering.terra.world.generate.*;
 import me.lucaspickering.terra.world.step.Stepper;
+import me.lucaspickering.utils.GeneralFuncs;
 
 /**
  * A class with fields and methods that can entirely encapsulate a {@link World} and perform useful
@@ -16,7 +16,7 @@ import me.lucaspickering.terra.world.step.Stepper;
  */
 public class WorldHandler {
 
-    private static final int DEFAULT_CHUNK_RADIUS = 2; // Default radius of the world, in chunks
+    private static final int DEFAULT_CHUNK_RADIUS = 3; // Default radius of the world, in chunks
 
     private final Logger logger;
     private final long seed;
@@ -45,7 +45,7 @@ public class WorldHandler {
         random = new Random(seed); // Init the Random instance
 
         // Generate the world, and time how long it takes
-        final long time = Funcs.timed(() -> {
+        final long time = GeneralFuncs.timed(() -> {
             final World world = new World(seed, size);
             final Generator[] generators = makeGenerators(world, random); // Initialize generators
 
@@ -56,7 +56,8 @@ public class WorldHandler {
 
             this.world = world.immutableCopy(); // Make an immutable copy and save it for the class
         });
-        logger.info(String.format("World generation took %d ms", time));
+        logger.info(String.format("Generated %d chunks, %s tiles in %d ms",
+                                  world.getChunks().size(), world.getTiles().size(), time));
     }
 
     private Generator[] makeGenerators(World world, Random random) {
@@ -74,7 +75,7 @@ public class WorldHandler {
     }
 
     private void runGenerator(Generator generator) {
-        final long time = Funcs.timed(generator::generate);
+        final long time = GeneralFuncs.timed(generator::generate);
         logger.fine(String.format("Generator stage %s took %d ms",
                                   generator.getClass().getSimpleName(), time));
     }
