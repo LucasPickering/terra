@@ -11,17 +11,18 @@ import me.lucaspickering.terra.world.util.TileSet;
 
 /**
  * Turns all land tiles that border ocean/coast and that are below some elevation threshold into
- * beach.
+ * beach or cliffs.
  */
-public class BeachGenerator extends Generator {
+public class CoastGenerator extends Generator {
 
-    // Any tile <= this elevation that borders ocean will become beach
-    private static final int MAX_BEACH_ELEV = 5;
+    // Any tile <= this elevation will become beach
+    // Any tile > this elevation will become cliffs
+    private static final int MAX_BEACH_ELEV = 3;
 
     // Biomes that can get beaches adjacent to them
     public static final Set<Biome> BEACHABLE_BIOMES = EnumSet.of(Biome.OCEAN, Biome.COAST);
 
-    public BeachGenerator(World world, Random random) {
+    public CoastGenerator(World world, Random random) {
         super(world, random);
     }
 
@@ -31,10 +32,11 @@ public class BeachGenerator extends Generator {
         for (Tile tile : worldTiles) {
             // If this tile is land and within our elevation bound, check the adjacent tiles, and
             // if there is an ocean (or similar) tile adjacent, make a beach.
-            if (tile.biome().isLand() && tile.elevation() <= MAX_BEACH_ELEV) {
+            if (tile.biome().isLand()) {
                 for (Tile adj : worldTiles.getAdjacentTiles(tile.pos()).values()) {
                     if (BEACHABLE_BIOMES.contains(adj.biome())) {
-                        tile.setBiome(Biome.BEACH);
+                        tile.setBiome(tile.elevation() <= MAX_BEACH_ELEV ?
+                                      Biome.BEACH : Biome.CLIFF);
                         break; // Done with this tile
                     }
                 }

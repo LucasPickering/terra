@@ -15,7 +15,7 @@ import me.lucaspickering.utils.GeneralFuncs;
  */
 public class WorldHandler {
 
-    private static final int DEFAULT_CHUNK_RADIUS = 3; // Default radius of the world, in chunks
+    private static final int DEFAULT_CHUNK_RADIUS = 1; // Default radius of the world, in chunks
 
     private final Logger logger;
     private final long seed;
@@ -65,7 +65,7 @@ public class WorldHandler {
             new OceanGenerator(world, random),
             new BiomePainter(world, random),
             new ContinentClusterer(world, random),
-            new BeachGenerator(world, random),
+            new CoastGenerator(world, random),
             new RunoffGenerator(world, random),
 //            new LakeGenerator(world, random),
             new RiverGenerator(world, random)

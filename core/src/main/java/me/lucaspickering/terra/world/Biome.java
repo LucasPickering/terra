@@ -20,8 +20,9 @@ public enum Biome {
     PLAINS("Plains", 0xadc974ff, Type.LAND),
 
     BEACH("Beach", 0xf2ef59ff, Type.LAND),
+    CLIFF("Cliff", 0x634936ff, Type.LAND),
 
-    NONE("None", 0x000000ff, Type.NONE);
+    NONE("None", 0x000000ff, Type.NONE); // Placeholder biome
 
     private enum Type {
         LAND, WATER, NONE
