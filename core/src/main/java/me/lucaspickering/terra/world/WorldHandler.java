@@ -4,7 +4,6 @@ import java.util.Random;
 import java.util.logging.Logger;
 
 import me.lucaspickering.terra.world.generate.*;
-import me.lucaspickering.terra.world.step.Stepper;
 import me.lucaspickering.utils.GeneralFuncs;
 
 /**
@@ -24,7 +23,6 @@ public class WorldHandler {
 
     private World world;
     private Random random;
-    private Stepper stepper;
 
     public WorldHandler(long seed) {
         this(seed, DEFAULT_CHUNK_RADIUS);
@@ -90,12 +88,4 @@ public class WorldHandler {
         return world;
     }
 
-    /**
-     * Advances the current {@link Stepper} by one step.
-     *
-     * @throws NullPointerException if there is no active {@link Stepper}
-     */
-    public void step() {
-        stepper.step();
-    }
 }
