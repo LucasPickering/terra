@@ -3,7 +3,6 @@ package me.lucaspickering.terra.world.util;
 import java.awt.Color;
 
 import me.lucaspickering.terra.world.Tile;
-import me.lucaspickering.utils.Point2;
 
 /**
  * A Chunk is a set of tiles of a set size that makes up a portion of the world. The shape of a
@@ -24,7 +23,6 @@ public class Chunk implements HexPointable {
     private final HexPoint pos; // Position of this chunk relative to other chunks
     private final TileSet tiles;
     private final Color overlayColor;
-    private Point2 screenPos;
 
     private Chunk(HexPoint pos) {
         this.pos = pos;
@@ -81,29 +79,6 @@ public class Chunk implements HexPointable {
                             Math.floorDiv(tilePos.y(), SIDE_LENGTH));
     }
 
-    /**
-     * Gets a chunk-relative coordinate for the given tile. The result is the given position, if it
-     * were relative to the lowest-value (min x and y) coordinate in its chunk.
-     *
-     * @param tilePos the tile position to be converted
-     * @return the given coordinate relative to the origin of its chunk
-     */
-    public static HexPoint getRelativeTilePos(HexPoint tilePos) {
-        return new HexPoint(Math.floorMod(tilePos.x(), SIDE_LENGTH),
-                            Math.floorMod(tilePos.y(), SIDE_LENGTH));
-    }
-
-    /**
-     * Gets the coordinates of the origin (bottom-left) tile in the given chunk.
-     *
-     * @param chunkPos the chunk
-     * @return the global coordinates of the chunk in the bottom-left of the chunk
-     */
-    public static HexPoint getChunkOrigin(HexPoint chunkPos) {
-        return new HexPoint(chunkPos.x() * SIDE_LENGTH,
-                            chunkPos.y() * SIDE_LENGTH);
-    }
-
     public HexPoint getPos() {
         return pos;
     }
@@ -119,14 +94,6 @@ public class Chunk implements HexPointable {
 
     public Color getOverlayColor() {
         return overlayColor;
-    }
-
-    public Point2 getScreenPos() {
-        return screenPos;
-    }
-
-    public void setScreenPos(Point2 screenPos) {
-        this.screenPos = screenPos;
     }
 
     public Chunk immutableCopy() {
