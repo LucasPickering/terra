@@ -92,7 +92,7 @@ public class CameraController extends GestureDetector {
         public abstract void transform(Camera camera);
     }
 
-    private static final float MOVE_VELOCITY = 10f;
+    private static final float MOVE_VELOCITY = 100f;
     private static final float ROTATE_VELOCITY = 2f;
 
     private final Camera camera;

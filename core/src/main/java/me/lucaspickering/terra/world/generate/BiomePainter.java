@@ -17,7 +17,7 @@ import me.lucaspickering.terra.world.World;
  */
 public class BiomePainter extends Generator {
 
-    // Basically a typedef, for convenience
+    // Basically a typedef, for convenience. Takes an elevation and a humidity.
     private interface BiomeFunction extends BiPredicate<Integer, Double> {
 
     }
@@ -28,11 +28,11 @@ public class BiomePainter extends Generator {
     private static Map<Biome, BiomeFunction> biomeFuncs =
         new EnumMap<Biome, BiomeFunction>(Biome.class) {{
             // I swear there's logic behind these I even drew a picture
-            put(Biome.SNOW, (e, h) -> e >= -5 * h + 35);
+            put(Biome.SNOW, (e, h) -> e >= -100 * h + 700);
             put(Biome.DESERT, (e, h) -> h <= 0.15);
-            put(Biome.ALPINE, (e, h) -> e >= -5 * h + 20);
+            put(Biome.ALPINE, (e, h) -> e >= -100 * h + 400);
             put(Biome.JUNGLE, (e, h) -> h >= 0.75);
-            put(Biome.FOREST, (e, h) -> e >= -44 * h + 27);
+            put(Biome.FOREST, (e, h) -> e >= -880 * h + 540);
             put(Biome.PLAINS, (e, h) -> true); // Default case
         }};
 

@@ -149,7 +149,7 @@ public class World {
     /**
      * Every tile's elevation must be in this range
      */
-    public static final Range<Integer> ELEVATION_RANGE = new IntRange(-50, 50);
+    public static final Range<Integer> ELEVATION_RANGE = new IntRange(-1000, 1000);
     public static final Range<Double> HUMIDITY_RANGE = new DoubleRange(0.0, 1.0);
 
     /**

@@ -136,8 +136,8 @@ public class Tile implements HexPointable {
     }
 
     /**
-     * Adds the given amount of water to this tile. If this tile is a water biome, (e.g. ocean), no
-     * water is added. This also adds to the total amount of water that has traversed this tile.
+     * Adds the given amount of water to this tile. This also adds to the total amount of water that
+     * has traversed this tile.
      *
      * @param water the amount of water to add (non-negative)
      * @return the amount of water added
@@ -148,12 +148,10 @@ public class Tile implements HexPointable {
             throw new IllegalArgumentException(String.format("Water must be positive, was [%f]",
                                                              water));
         }
-        if (!biome.isWater()) {
-            waterLevel += water;
-            totalWaterTraversed += water;
-            return water;
-        }
-        return 0.0;
+
+        waterLevel += water;
+        totalWaterTraversed += water;
+        return water;
     }
 
     /**

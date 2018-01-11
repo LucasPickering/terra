@@ -19,7 +19,7 @@ public class OceanGenerator extends Generator {
 
     private static final int MIN_OCEAN_SIZE = 50; // Minimum size to be possibly become an ocean
     private static final int MIN_GUARANTEED_OCEAN_SIZE = 100; // Min size to be guaranteed an ocean
-    private static final int MIN_COAST_DEPTH = -5; // Everything in an ocean >= this is coast
+    private static final int MIN_COAST_DEPTH = -100; // Everything in an ocean >= this is coast
 
     public OceanGenerator(World world, Random random) {
         super(world, random);
@@ -27,7 +27,7 @@ public class OceanGenerator extends Generator {
 
     @Override
     public void generate() {
-        // Get clusters of tiles that are at or below sea level
+        // Get clusters of tiles that are below sea level
         final List<Cluster> clusters =
             Cluster.predicateCluster(world().getTiles(), t -> t.elevation() < World.SEA_LEVEL);
 

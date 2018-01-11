@@ -26,7 +26,7 @@ import me.lucaspickering.utils.Point2;
 public class ChunkModel implements RenderableProvider {
 
     // Distance from the center of the tile to each VERTEX
-    private static final double TILE_RADIUS = 2.0;
+    private static final double TILE_RADIUS = 50.0;
     // Distance between opposite vertices
     private static final double TILE_WIDTH = TILE_RADIUS * 2;
     // Distance between midpoints of opposite sides

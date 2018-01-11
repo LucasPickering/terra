@@ -1,0 +1,21 @@
+1. Start at highest tile (by elev)
+2. Push ALL water to tiles with lower elevation
+3. Water falls into ocean, or collects in lake basins
+4. For each lake basin, cluster tiles that should form a lake
+5. Split the water among each cluster
+
+Problems
+--------
+Overly complex?
+Could have a basin that is larger than that the runoff can fill - complicates clustering
+
+
+
+1. Start at highest tile (by water elev)
+2. Equalize water between each tile and its neighbors
+3. Repeat x times (alternative: repeat until no changes occur)
+
+Problems
+--------
+Requires indefinite # of iterations
+May create infinite loop?

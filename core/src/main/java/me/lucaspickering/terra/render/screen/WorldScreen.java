@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import me.lucaspickering.terra.input.CameraController;
 import me.lucaspickering.terra.render.ChunkModel;
 import me.lucaspickering.terra.world.TileColorMode;
+import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.WorldHandler;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPointMap;
@@ -58,10 +59,10 @@ public class WorldScreen extends Screen {
     }
 
     private void initCamera() {
-        camera.position.set(0f, 400f, 0f);
+        camera.position.set(0f, World.ELEVATION_RANGE.upper() * 2f, 0f);
         camera.rotate(45, -1f, 0f, 0f);
         camera.near = 1f;
-        camera.far = 3000f;
+        camera.far = 100000f;
         camera.update();
 
         Gdx.input.setInputProcessor(cameraController);
@@ -81,10 +82,6 @@ public class WorldScreen extends Screen {
         modelBatch.begin(camera);
         modelBatch.render(chunkModels.values(), environment);
         modelBatch.end();
-    }
-
-    private void regenerateWorld() {
-        worldHandler.generate();
     }
 
     private void setTileColorMode(TileColorMode tileColorMode) {
