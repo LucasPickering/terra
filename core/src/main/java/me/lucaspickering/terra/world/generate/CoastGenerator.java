@@ -15,12 +15,11 @@ import me.lucaspickering.terra.world.util.TileSet;
  */
 public class CoastGenerator extends Generator {
 
-    // Any tile <= this elevation will become beach
-    // Any tile > this elevation will become cliffs
-    private static final int MAX_BEACH_ELEV = 3;
+    // Any tile <= this elevation will become beach, others will keep their normal biome
+    private static final int MAX_BEACH_ELEV = 50;
 
     // Biomes that can get beaches adjacent to them
-    public static final Set<Biome> BEACHABLE_BIOMES = EnumSet.of(Biome.OCEAN, Biome.COAST);
+    private static final Set<Biome> BEACHABLE_BIOMES = EnumSet.of(Biome.OCEAN, Biome.COAST);
 
     public CoastGenerator(World world, Random random) {
         super(world, random);
@@ -35,8 +34,10 @@ public class CoastGenerator extends Generator {
             if (tile.biome().isLand()) {
                 for (Tile adj : worldTiles.getAdjacentTiles(tile.pos()).values()) {
                     if (BEACHABLE_BIOMES.contains(adj.biome())) {
-                        tile.setBiome(tile.elevation() <= MAX_BEACH_ELEV ?
-                                      Biome.BEACH : Biome.CLIFF);
+                        // If this tile is under the elevation threshold, make it a beach
+                        if (tile.elevation() <= MAX_BEACH_ELEV) {
+                            tile.setBiome(Biome.BEACH);
+                        }
                         break; // Done with this tile
                     }
                 }

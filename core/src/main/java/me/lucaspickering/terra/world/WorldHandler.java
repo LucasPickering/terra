@@ -68,7 +68,7 @@ public class WorldHandler {
             new CoastGenerator(world, random),
             new RunoffGenerator(world, random),
 //            new LakeGenerator(world, random),
-            new RiverGenerator(world, random)
+//            new RiverGenerator(world, random)
         };
     }
 
