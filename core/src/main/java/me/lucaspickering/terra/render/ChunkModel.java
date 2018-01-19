@@ -133,9 +133,9 @@ public class ChunkModel implements RenderableProvider {
                                                                            scale)));
 
         // If this tile has runoff water on it, init a model for the water
-        if (tile.getWaterLevel() > 0f) {
-            translate.y = tileHeight + (float) tile.getWaterLevel() / 2f; // Shift up some more
-            scale.y = (float) tile.getWaterLevel(); // Scale height based on water level
+        if (tile.getRunoffLevel() > 0f) {
+            translate.y = tileHeight + (float) tile.getRunoffLevel() / 2f; // Shift up some more
+            scale.y = (float) tile.getRunoffLevel(); // Scale height based on water level
             final ModelInstance waterModelInst =
                 new ModelInstance(TILE_MODEL, new Matrix4(translate, rotate, scale));
 

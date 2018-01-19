@@ -22,7 +22,7 @@ public class LakeGenerator extends Generator {
 
     private void generateForContinent(Continent continent) {
         for (Tile tile : continent.getTiles()) {
-            if (tile.getWaterLevel() >= LAKE_THRESHOLD) {
+            if (tile.getRunoffLevel() >= LAKE_THRESHOLD) {
                 tile.setBiome(Biome.LAKE);
             }
         }

@@ -17,7 +17,7 @@ public class WorldHandler {
 
     private static final int DEFAULT_CHUNK_RADIUS = 1; // Default radius of the world, in chunks
 
-    private final Logger logger;
+    private final Logger logger = Logger.getLogger(getClass().getName());
     private final long seed;
     private final int size; // Radius of the world
 
@@ -30,7 +30,6 @@ public class WorldHandler {
 
     // Package visible for benchmarking purposes
     WorldHandler(long seed, int size) {
-        this.logger = Logger.getLogger(getClass().getName());
         this.seed = seed;
         this.size = size;
     }

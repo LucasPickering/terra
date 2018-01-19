@@ -55,7 +55,7 @@ public enum TileColorMode {
                 return Color.BLACK;
             }
             return interpolateColor(Color.WHITE, Color.BLUE,
-                                    tile.getWaterLevel(), WATER_LEVEL_RANGE);
+                                    tile.getRunoffLevel(), WATER_LEVEL_RANGE);
         }
     },
     WATER_TRAVERSED {
@@ -66,7 +66,7 @@ public enum TileColorMode {
                 return tile.biome().color();
             }
             return interpolateColor(Color.WHITE, Color.RED,
-                                    tile.getWaterTraversed(), WATER_TRAVERSED_RANGE);
+                                    tile.getRunoffTraversed(), WATER_TRAVERSED_RANGE);
         }
     },
     BIOME {

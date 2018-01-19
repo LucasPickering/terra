@@ -1,13 +1,12 @@
 package me.lucaspickering.terra.world;
 
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Objects;
 
 import me.lucaspickering.terra.util.Direction;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;
 import me.lucaspickering.terra.world.util.HexPointable;
+import me.lucaspickering.terra.world.util.RunoffPattern;
 
 public class Tile implements HexPointable {
 
@@ -18,13 +17,7 @@ public class Tile implements HexPointable {
                                               "Humidity: %d%%";
     private static final String DEBUG_INFO_STRING = "%nPos: %s%n" +
                                                     "Chunk: %s%n" +
-                                                    "Water: %.2f|%.2f%n" +
-                                                    "River entries: %s%n" +
-                                                    "River exits: %s";
-
-    public enum RiverConnection {
-        ENTRY, EXIT
-    }
+                                                    "Water: %.2f|%.2f%n";
 
     private final HexPoint pos; // The position of this tile in the world (NOT chunk-relative)
 
@@ -36,10 +29,10 @@ public class Tile implements HexPointable {
     private int elevation;
     private double humidity;
 
-    private double waterLevel;
-    private double totalWaterTraversed;
+    private double runoffLevel;
+    private double totalRunoffTraversed;
 
-    private final Map<Direction, RiverConnection> riverConnections = new EnumMap<>(Direction.class);
+    private final RunoffPattern runoffPattern = new RunoffPattern(this);
 
     public Tile(HexPoint pos, Chunk chunk) {
         Objects.requireNonNull(pos);
@@ -121,82 +114,56 @@ public class Tile implements HexPointable {
         this.humidity = World.HUMIDITY_RANGE.coerce(humidity);
     }
 
-    public double getWaterLevel() {
-        return waterLevel;
+    public double getRunoffLevel() {
+        return runoffLevel;
     }
 
     /**
-     * Gets the elevation of the top of the water on this tile. In other words, the elevation of
-     * this tile plus the water level.
+     * Adds the given amount of runoff to this tile.
      *
-     * @return elevation plus water level
+     * @param runoff the amount of runoff to add (non-negative)
+     * @return the amount of runoff added
+     * @throws IllegalArgumentException if {@code runoff} is negative
      */
-    public double getWaterElevation() {
-        return elevation + waterLevel;
-    }
-
-    /**
-     * Adds the given amount of water to this tile. This also adds to the total amount of water that
-     * has traversed this tile.
-     *
-     * @param water the amount of water to add (non-negative)
-     * @return the amount of water added
-     * @throws IllegalArgumentException if {@code water} is negative
-     */
-    public double addWater(double water) {
-        if (water < 0.0) {
-            throw new IllegalArgumentException(String.format("Water must be positive, was [%f]",
-                                                             water));
+    public double addRunoff(double runoff) {
+        if (runoff < 0.0) {
+            throw new IllegalArgumentException(String.format("Runoff must be positive, was [%f]",
+                                                             runoff));
         }
 
-        waterLevel += water;
-        totalWaterTraversed += water;
-        return water;
-    }
-
-    /**
-     * Removes the given amount of water from this tile. If there isn't enough water on this tile to
-     * remove the requested amount, the water level is reduced to zero.
-     *
-     * @param water the amount of water to remove (non-negative)
-     * @return the amount of water removed
-     * @throws IllegalArgumentException if {@code water} is negative
-     */
-    public double removeWater(double water) {
-        if (water < 0.0) {
-            throw new IllegalArgumentException(String.format("Water must be positive, was [%f]",
-                                                             water));
+        // Onnly land tiles can take runoff - water tiles swallow it and move on with their days
+        if (biome.isLand()) {
+            runoffLevel += runoff;
+            return runoff;
         }
-        final double toRemove = Math.min(waterLevel, water);
-        waterLevel -= toRemove;
-        return toRemove;
+        return 0.0;
     }
 
     /**
-     * Sets this tile's water level to zero.
+     * Sets this tile's runoff level to zero.
      *
-     * @return the amount of water removed from this tile (i.e. its previous water level)
+     * @return the amount of runoff removed from this tile (i.e. its previous runoff level)
      */
-    public double clearWater() {
-        final double remove = waterLevel;
-        waterLevel = 0.0;
+    public double clearRunoff() {
+        final double remove = runoffLevel;
+        runoffLevel = 0.0;
         return remove;
     }
 
-    public double getWaterTraversed() {
-        return totalWaterTraversed;
+    public double getRunoffTraversed() {
+        return totalRunoffTraversed;
     }
 
-    public RiverConnection getRiverConnection(Direction dir) {
-        return riverConnections.get(dir);
+    public void addRunoffTraversed(double traversed) {
+        if (traversed < 0.0) {
+            throw new IllegalArgumentException(String.format(
+                "Runoff traversed must be positive, was [%f]", traversed));
+        }
+        totalRunoffTraversed += traversed;
     }
 
-    public void addRiverConnection(Direction dir, RiverConnection conn) {
-        riverConnections.put(dir, conn);
-    }
-
-    public void removeRiverConnection(Direction dir) {
-        riverConnections.remove(dir);
+    public RunoffPattern getRunoffPattern() {
+        return runoffPattern;
     }
 
     public String info(boolean debug) {
@@ -204,23 +171,8 @@ public class Tile implements HexPointable {
         final String info = String.format(INFO_STRING, biome.displayName(), elevation(),
                                           (int) (humidity() * 100));
         if (debug) {
-            final StringBuilder entriesString = new StringBuilder();
-            final StringBuilder exitsString = new StringBuilder();
-            for (Map.Entry<Direction, RiverConnection> entry : riverConnections.entrySet()) {
-                switch (entry.getValue()) {
-                    case ENTRY:
-                        entriesString.append(entry.getKey());
-                        entriesString.append(" ");
-                        break;
-                    case EXIT:
-                        exitsString.append(entry.getKey());
-                        exitsString.append(" ");
-                        break;
-                }
-            }
             return info + String.format(DEBUG_INFO_STRING, pos, chunk.getPos(),
-                                        waterLevel, totalWaterTraversed,
-                                        entriesString, exitsString);
+                                        runoffLevel, totalRunoffTraversed);
         }
         return info;
     }

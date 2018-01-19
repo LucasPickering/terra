@@ -1,12 +1,16 @@
 package me.lucaspickering.terra.world.generate;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import me.lucaspickering.terra.world.Continent;
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.World;
-import me.lucaspickering.terra.world.util.TileSet;
+import me.lucaspickering.terra.world.util.RunoffPattern;
+import me.lucaspickering.utils.Pair;
 
 /**
  * Simulates rainfall, which will later be used to determine where to generate lakes and rivers.
@@ -23,7 +27,7 @@ public class RunoffGenerator extends Generator {
     public void generate() {
         final List<Continent> continents = world().getContinents();
         initWaterLevels(world());
-        continents.parallelStream().forEach(this::spreadForContinent);
+        continents.parallelStream().forEach(this::doContinentRunoff);
     }
 
     /**
@@ -32,65 +36,67 @@ public class RunoffGenerator extends Generator {
     private void initWaterLevels(World world) {
         for (Continent continent : world.getContinents()) {
             for (Tile tile : continent.getTiles()) {
-                tile.addWater(RAINFALL);
+                tile.addRunoff(RAINFALL);
             }
         }
     }
 
-    private void spreadForContinent(Continent continent) {
+    /**
+     * Simulates water runoff for the given continent. This assumes that the continent has already
+     * been populated with water.
+     *
+     * @param continent the continent
+     */
+    private void doContinentRunoff(Continent continent) {
+        // Sort the tiles
         final List<Tile> sortedTiles = continent.getTiles().stream()
-            .sorted(Comparator.comparingInt(Tile::elevation).reversed()) // Sort by desc elev
+            .sorted(Comparator.comparingInt(Tile::elevation)) // Sort by ascending elevation
             .collect(Collectors.toList());
-        for (Tile tile : sortedTiles) {
-            pushWater(tile);
-        }
+
+        // Starting at the lowest tile, initialize the runoff pattern for each tile. This has to
+        // start at the lowerst tile so that higher tiles can reference lowers tiles
+        sortedTiles.forEach(this::initRunoffPattern);
+
+        // Apply the runoff pattern for each tile to move all the water
+        sortedTiles.forEach(t -> t.getRunoffPattern().distributeRunoff());
     }
 
-    private void pushWater(Tile tile) {
+    private void initRunoffPattern(Tile tile) {
         final Collection<Tile> adjTiles = world().getTiles().getAdjacentTiles(tile.pos()).values();
+        final RunoffPattern runoffPattern = tile.getRunoffPattern();
 
         // If any of the adjacent tiles are water, just dump all our runoff in there
-        if (adjTiles.stream().anyMatch(t -> t.biome().isWater())) {
-            tile.clearWater();
-            return; // No more water to spread
-        }
+        final List<Tile> adjWaterTiles = adjTiles.stream()
+            .filter(t -> t.biome().isWater())
+            .collect(Collectors.toList());
+        if (!adjWaterTiles.isEmpty()) {
+            // Add each exit to the traversal pattern - evenly distribute the runoff among them
+            final double factor = 1.0 / adjWaterTiles.size(); // Amount of runoff for each tile
+            adjWaterTiles.forEach(t -> runoffPattern.addExit(t, factor));
+        } else {
+            // Add each lower adjacent tile as a runoff exit for this one. The runoff will be
+            // divided among the tiles according to a "share" system:
+            //   - Each tile gets 1 share by default
+            //   - Each tile gets 1 additional share for each meter of elevation diff from this tile
+            // The percentage of water that a tile gets is its number of shares divided by the total
 
-        // Get all tiles adjacent to this one with a lower water elevation
-        final TileSet lowerTiles = adjTiles.stream()
-            .filter(adj -> adj.elevation() < tile.elevation())
-            .collect(Collectors.toCollection(TileSet::new));
+            // Get all tiles adjacent to this one with lower elevation, along with the number
+            // of shares for each tile
+            final List<Pair<Tile, Integer>> lowerTiles = adjTiles.stream()
+                .filter(adj -> adj.elevation() < tile.elevation())
+                .map(t -> new Pair<>(t, tile.elevation() - t.elevation() + 1)) // Calc # of shares
+                .collect(Collectors.toList());
 
-        if (!lowerTiles.isEmpty()) {
-            final double waterToPush = tile.clearWater();
-            final double totalElevDiff = lowerTiles.stream()
-                .mapToInt(t -> tile.elevation() - t.elevation())
-                .sum();
+            final int totalShares = lowerTiles.stream()
+                .mapToInt(Pair::second) // Get number of shares from each pair
+                .sum(); // Sum all the shares
 
-            double totalPushedWater = 0.0;
-            for (Tile lowerTile : lowerTiles) {
-                final double toAdd = (tile.elevation() - lowerTile.elevation()) / totalElevDiff
-                                     * waterToPush;
-                totalPushedWater += lowerTile.addWater(toAdd);
+            for (Pair<Tile, Integer> pair : lowerTiles) {
+                final Tile lowerTile = pair.first();
+                final int shares = pair.second();
+                // Add the adjacent tile as a runoff exit, with the appropriate number of shares
+                runoffPattern.addExit(lowerTile, (double) shares / totalShares);
             }
-            assert Math.abs(totalPushedWater - waterToPush) < 0.001;
-        }
-    }
-
-    private void logStatus(Tile tile, TileSet adjTiles, double targetWaterElev) {
-        // Log the center tile
-        logger().finest(String.format(
-            "Center tile: [%s]  Elevation: [%d]  Water Level: [%f]  Water Elev: [%f]",
-            tile.pos(), tile.elevation(), tile.getWaterLevel(), tile.getWaterElevation()));
-
-        // Log the target water level that was calculated
-        logger().finest(String.format("  Calculated target water level: [%f]", targetWaterElev));
-
-        // Log each adjacent tile
-        for (Tile adjTile : adjTiles) {
-            logger().finest(String.format(
-                "  Adj. tile: [%s]  Elevation: [%d]  Water Level: [%f]  Water Elev: [%f]",
-                adjTile.pos(), adjTile.elevation(), adjTile.getWaterLevel(),
-                adjTile.getWaterElevation()));
         }
     }
 }
