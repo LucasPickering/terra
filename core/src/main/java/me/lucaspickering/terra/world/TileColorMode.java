@@ -58,17 +58,6 @@ public enum TileColorMode {
                                     tile.getRunoffLevel(), WATER_LEVEL_RANGE);
         }
     },
-    WATER_TRAVERSED {
-        @Override
-        public Color getColor(Tile tile) {
-            // Water tiles get their biome color
-            if (tile.biome().isWater()) {
-                return tile.biome().color();
-            }
-            return interpolateColor(Color.WHITE, Color.RED,
-                                    tile.getRunoffTraversed(), WATER_TRAVERSED_RANGE);
-        }
-    },
     BIOME {
         @Override
         public Color getColor(Tile tile) {

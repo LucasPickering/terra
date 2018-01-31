@@ -6,14 +6,16 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Logger;
 
 import me.lucaspickering.terra.input.CameraController;
 import me.lucaspickering.terra.render.ChunkModel;
+import me.lucaspickering.terra.render.TileOverlay;
 import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.WorldHandler;
@@ -34,6 +36,7 @@ public class WorldScreen extends Screen {
     private final Environment environment;
     private final ModelBatch modelBatch;
     private final HexPointMap<Chunk, ChunkModel> chunkModels = new HexPointMap<>();
+    private final Set<TileOverlay> activeTileOverlays = EnumSet.noneOf(TileOverlay.class);
 
     public WorldScreen(WorldHandler worldHandler) {
         Objects.requireNonNull(worldHandler);
@@ -78,9 +81,22 @@ public class WorldScreen extends Screen {
     public void draw(Point2 mousePos) {
         cameraController.update();
 
+        // Build a list of everything to render
+        final List<RenderableProvider> toRender = new LinkedList<>();
+
+        // Add renderables for each chunk
+        for (ChunkModel chunkModel : chunkModels.values()) {
+            toRender.add(chunkModel.getTileModels()); // Add the tiles
+
+            // Add models for each overlay that is active
+            for (TileOverlay overlay : activeTileOverlays) {
+                toRender.add(chunkModel.getTileOverlayModels(overlay));
+            }
+        }
+
         // Render each chunk
         modelBatch.begin(camera);
-        modelBatch.render(chunkModels.values(), environment);
+        modelBatch.render(toRender, environment);
         modelBatch.end();
     }
 
@@ -103,24 +119,38 @@ public class WorldScreen extends Screen {
                 setTileColorMode(TileColorMode.COMPOSITE);
                 return true;
             case Input.Keys.NUM_2:
-                setTileColorMode(TileColorMode.ELEVATION);
+                setTileColorMode(TileColorMode.BIOME);
                 return true;
             case Input.Keys.NUM_3:
-                setTileColorMode(TileColorMode.HUMIDITY);
+                setTileColorMode(TileColorMode.ELEVATION);
                 return true;
             case Input.Keys.NUM_4:
-                setTileColorMode(TileColorMode.WATER_LEVEL);
+                setTileColorMode(TileColorMode.HUMIDITY);
                 return true;
             case Input.Keys.NUM_5:
-                setTileColorMode(TileColorMode.WATER_TRAVERSED);
+                setTileColorMode(TileColorMode.WATER_LEVEL);
                 return true;
-            case Input.Keys.NUM_6:
-                setTileColorMode(TileColorMode.BIOME);
+            case Input.Keys.NUM_7:
+                toggleTileOverlay(TileOverlay.RUNOFF_LEVEL);
+                return true;
+            case Input.Keys.NUM_8:
+                toggleTileOverlay(TileOverlay.RUNOFF_EXITS);
+                return true;
+            case Input.Keys.NUM_9:
+                toggleTileOverlay(TileOverlay.RUNOFF_TERMINALS);
                 return true;
         }
 
         // Forward everything else to the camera controller
         return cameraController.keyDown(keycode);
+    }
+
+    private void toggleTileOverlay(TileOverlay overlay) {
+        if (activeTileOverlays.contains(overlay)) {
+            activeTileOverlays.remove(overlay);
+        } else {
+            activeTileOverlays.add(overlay);
+        }
     }
 
     @Override

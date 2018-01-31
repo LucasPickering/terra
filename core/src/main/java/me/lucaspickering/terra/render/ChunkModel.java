@@ -3,7 +3,6 @@ package me.lucaspickering.terra.render;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
@@ -14,7 +13,9 @@ import com.badlogic.gdx.utils.Pool;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.lucaspickering.terra.util.Colors;
+import java.util.EnumMap;
+import java.util.Map;
+
 import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.World;
@@ -40,12 +41,9 @@ public class ChunkModel implements RenderableProvider {
         new Point2(-(3.0 / 8.0) * TILE_WIDTH, -TILE_DEPTH / 4)  // Northwest
     };
 
-    private static final Attribute RUNOFF_COLOR_ATTR = ColorAttribute.createDiffuse(Colors.RUNOFF);
-    private static final Attribute WATER_BLENDING_ATTR = new BlendingAttribute(0.25f);
-
     // The hexagonal prism model used for all tiles. This will be created once, scaled and colored
-    // when creating a ModelInstance from it.
-    private static final Model TILE_MODEL;
+    // when creating a ModelInstance from it. Pls no modify!
+    public static final Model TILE_MODEL;
 
     static {
         // Initialize the tile model
@@ -65,10 +63,38 @@ public class ChunkModel implements RenderableProvider {
      * @return the position of that tile's center on the screen
      */
     @NotNull
-    private static Point2 tileToPixel(@NotNull HexPoint tilePos) {
+    public static Point2 tileToPixel(@NotNull HexPoint tilePos) {
         final double x = TILE_WIDTH * tilePos.x() * 0.75;
         final double y = -TILE_DEPTH * (tilePos.x() / 2.0 + tilePos.y());
         return new Point2(x, y);
+    }
+
+    /**
+     * Gets the rendered height of the given tile, based on its elevation. All tiles will be of
+     * height {@code maxElev - minElev + 1}.
+     *
+     * If the elevation range is [-1000, 1000], a tile with elevation -1000 will be height 1, and a
+     * tile of elevation 1000 will be height 2001.
+     *
+     * @param tile the tile
+     * @return the rendered height of the given tile
+     */
+    public static int getTileHeight(@NotNull Tile tile) {
+        return tile.elevation() - World.ELEVATION_RANGE.lower() + 1;
+    }
+
+    /**
+     * Get the rendered position of the center of the top face of the given tile.
+     *
+     * @param tile the tile
+     * @return the (x,y,z) position of the center of the top of the tile
+     */
+    public static Vector3 getTilePos(@NotNull Tile tile) {
+        // Get (x,y,z) of the top-center of the tile
+        final Point2 tilePos = ChunkModel.tileToPixel(tile.pos());
+        return new Vector3((float) tilePos.x(),            // x based on position
+                           getTileHeight(tile), // y based on elevation
+                           (float) tilePos.y());           // z based on position
     }
 
     /**
@@ -82,7 +108,7 @@ public class ChunkModel implements RenderableProvider {
      * @return the position of the tile that encloses the given point
      */
     @NotNull
-    private static HexPoint pixelToTile(@NotNull Point2 pos) {
+    public static HexPoint pixelToTile(@NotNull Point2 pos) {
         // Convert it to a fractional tile point
         final double fracX = pos.x() * 4.0 / 3.0 / TILE_WIDTH;
         final double fracY = -(pos.x() + Math.sqrt(3.0) * pos.y())
@@ -94,8 +120,9 @@ public class ChunkModel implements RenderableProvider {
     }
 
     private final HexPointMap<Tile, ModelInstance> tileModelInsts = new HexPointMap<>();
-    private final HexPointMap<Tile, ModelInstance> tileWaterModelInsts = new HexPointMap<>();
     private final ModelCache tileModelCache = new ModelCache();
+    private final Map<TileOverlay, ModelCache> overlayModelCaches =
+        new EnumMap<>(TileOverlay.class);
 
     /**
      * Initialize a model for the given chunk with the given color mode. The color mode can be
@@ -105,9 +132,16 @@ public class ChunkModel implements RenderableProvider {
      * @param tileColorMode the mode to derive each tile's color
      */
     public ChunkModel(Chunk chunk, TileColorMode tileColorMode) {
-        chunk.getTiles().forEach(this::initTileModelInst); // Create a model for each tile
+        // Populate the overlay cache map with an empty cache for each overlay
+        for (TileOverlay overlay : TileOverlay.values()) {
+            final ModelCache modelCache = new ModelCache();
+            modelCache.begin(); // The corresponding end() WILL happen, I promise
+            overlayModelCaches.put(overlay, modelCache);
+        }
+
+        chunk.getTiles().forEach(this::initTileModels); // Initialize each tile's models
         setColorMode(tileColorMode); // Init the color for each tile
-        buildModelCache(); // Build the cache based on the models we just made
+        buildModelCaches(); // Build the caches based on the models we just made
     }
 
     /**
@@ -115,15 +149,15 @@ public class ChunkModel implements RenderableProvider {
      *
      * @param tile the tile to create a model for
      */
-    private void initTileModelInst(Tile tile) {
+    private void initTileModels(Tile tile) {
         // CALCULATE TRANSFORMATIONS
         // Calculate the height of the tile that we want the tile to be drawn with
-        final int tileHeight = tile.elevation() - World.ELEVATION_RANGE.lower() + 1;
+        final int tileHeight = getTileHeight(tile);
 
         final Point2 tilePos = tileToPixel(tile.pos());
-        final Vector3 translate = new Vector3((float) tilePos.x(),  // Translate x based on position
+        final Vector3 translate = new Vector3((float) tilePos.x(),  // Set x based on position
                                               tileHeight / 2f,      // Shift up based on height
-                                              (float) tilePos.y()); // Translate x based on position
+                                              (float) tilePos.y()); // Set z based on position
         final Quaternion rotate = new Quaternion(); // No rotation
         final Vector3 scale = new Vector3(1f, tileHeight, 1f); // Scale based on height
 
@@ -132,18 +166,10 @@ public class ChunkModel implements RenderableProvider {
                                                                            rotate,
                                                                            scale)));
 
-        // If this tile has runoff water on it, init a model for the water
-        if (tile.getRunoffLevel() > 0f) {
-            translate.y = tileHeight + (float) tile.getRunoffLevel() / 2f; // Shift up some more
-            scale.y = (float) tile.getRunoffLevel(); // Scale height based on water level
-            final ModelInstance waterModelInst =
-                new ModelInstance(TILE_MODEL, new Matrix4(translate, rotate, scale));
-
-            // Add color and transparency material attributes
-            waterModelInst.materials.get(0).set(WATER_BLENDING_ATTR);
-            waterModelInst.materials.get(0).set(RUNOFF_COLOR_ATTR);
-
-            tileWaterModelInsts.put(tile, waterModelInst); // Save this instance in the map
+        // Build the necessary models for each overlay, and each one to its respect cache
+        for (TileOverlay overlay : TileOverlay.values()) {
+            final ModelCache modelCache = overlayModelCaches.get(overlay);
+            overlay.addRenderables(tile, modelCache);
         }
     }
 
@@ -155,11 +181,21 @@ public class ChunkModel implements RenderableProvider {
         });
     }
 
-    private void buildModelCache() {
+    private void buildModelCaches() {
+        // Add all tile model instances to the main cache
         tileModelCache.begin();
-        tileModelInsts.values().forEach(tileModelCache::add); // Add tile models
-        tileWaterModelInsts.values().forEach(tileModelCache::add); // Add tile water models
+        tileModelCache.add(tileModelInsts.values()); // Add tile models
         tileModelCache.end();
+
+        overlayModelCaches.values().forEach(ModelCache::end); // Finalize the cache for each overlay
+    }
+
+    public RenderableProvider getTileModels() {
+        return tileModelCache;
+    }
+
+    public RenderableProvider getTileOverlayModels(TileOverlay overlay) {
+        return overlayModelCaches.get(overlay);
     }
 
     @Override

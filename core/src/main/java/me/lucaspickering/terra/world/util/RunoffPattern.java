@@ -1,5 +1,6 @@
 package me.lucaspickering.terra.world.util;
 
+import java.util.Collections;
 import java.util.Map;
 
 import me.lucaspickering.terra.world.Tile;
@@ -65,15 +66,23 @@ public class RunoffPattern {
         return exits.isEmpty();
     }
 
+    public Map<Tile, Double> getTerminals() {
+        return Collections.unmodifiableMap(terminals);
+    }
+
+    public Map<Tile, Double> getExits() {
+        return Collections.unmodifiableMap(exits); // Immutability!
+    }
+
     public void distributeRunoff() {
         final double toDistribute = source.clearRunoff(); // Remove all water from this tile
-        addTraversedRunoff(toDistribute, false);
+//        addTraversedRunoff(toDistribute, false);
         terminals.forEach((tile, factor) -> tile.addRunoff(toDistribute * factor));
     }
 
     private void addTraversedRunoff(double traversed, boolean addToSelf) {
         if (addToSelf) {
-            source.addRunoffTraversed(traversed);
+//            source.addRunoffTraversed(traversed);
         }
 
         // Traverse the appropriate amount of water over each exit - that will cascade through the

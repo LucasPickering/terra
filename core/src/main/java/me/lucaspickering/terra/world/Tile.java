@@ -1,5 +1,7 @@
 package me.lucaspickering.terra.world;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 
 import me.lucaspickering.terra.util.Direction;
@@ -17,7 +19,7 @@ public class Tile implements HexPointable {
                                               "Humidity: %d%%";
     private static final String DEBUG_INFO_STRING = "%nPos: %s%n" +
                                                     "Chunk: %s%n" +
-                                                    "Water: %.2f|%.2f%n";
+                                                    "Water: %.2f%n";
 
     private final HexPoint pos; // The position of this tile in the world (NOT chunk-relative)
 
@@ -30,7 +32,7 @@ public class Tile implements HexPointable {
     private double humidity;
 
     private double runoffLevel;
-    private double totalRunoffTraversed;
+    private Map<Direction, Double> runoffTraversed = new EnumMap<>(Direction.class);
 
     private final RunoffPattern runoffPattern = new RunoffPattern(this);
 
@@ -150,16 +152,19 @@ public class Tile implements HexPointable {
         return remove;
     }
 
-    public double getRunoffTraversed() {
-        return totalRunoffTraversed;
+    public double getRunoffTraversed(Direction dir) {
+        return runoffTraversed.getOrDefault(dir, 0.0);
     }
 
-    public void addRunoffTraversed(double traversed) {
+    public void addRunoffTraversed(Direction dir, double traversed) {
         if (traversed < 0.0) {
             throw new IllegalArgumentException(String.format(
                 "Runoff traversed must be positive, was [%f]", traversed));
         }
-        totalRunoffTraversed += traversed;
+
+        // Add the given amount to the given direction in the map. If the direction isn't in the
+        // map already, will use 0 as the existing aount.
+        runoffTraversed.put(dir, runoffTraversed.getOrDefault(dir, 0.0) + traversed);
     }
 
     public RunoffPattern getRunoffPattern() {
@@ -172,7 +177,7 @@ public class Tile implements HexPointable {
                                           (int) (humidity() * 100));
         if (debug) {
             return info + String.format(DEBUG_INFO_STRING, pos, chunk.getPos(),
-                                        runoffLevel, totalRunoffTraversed);
+                                        runoffLevel);
         }
         return info;
     }
