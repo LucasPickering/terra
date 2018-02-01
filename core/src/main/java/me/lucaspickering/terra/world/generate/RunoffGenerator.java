@@ -50,7 +50,7 @@ public class RunoffGenerator extends Generator {
     private void doContinentRunoff(Continent continent) {
         // Sort the tiles
         final List<Tile> sortedTiles = continent.getTiles().stream()
-            .sorted(Comparator.comparingInt(Tile::elevation)) // Sort by ascending elevation
+            .sorted(Comparator.comparingDouble(Tile::elevation)) // Sort by ascending elevation
             .collect(Collectors.toList());
 
         // Starting at the lowest tile, initialize the runoff pattern for each tile. This has to
@@ -75,27 +75,26 @@ public class RunoffGenerator extends Generator {
             adjWaterTiles.forEach(t -> runoffPattern.addExit(t, factor));
         } else {
             // Add each lower adjacent tile as a runoff exit for this one. The runoff will be
-            // divided among the tiles according to a "share" system:
-            //   - Each tile gets 1 share by default
-            //   - Each tile gets 1 additional share for each meter of elevation diff from this tile
-            // The percentage of water that a tile gets is its number of shares divided by the total
+            // divided among the tiles proportional to their elevation difference. The further
+            // below this tile, the more runoff it gets.
 
-            // Get all tiles adjacent to this one with lower elevation, along with the number
-            // of shares for each tile
-            final List<Pair<Tile, Integer>> lowerTiles = adjTiles.stream()
+            // Get all tiles adjacent to this one with lower elevation, along with their elevation
+            // difference from the this tile
+            final List<Pair<Tile, Double>> lowerTiles = adjTiles.stream()
                 .filter(adj -> adj.elevation() < tile.elevation())
                 .map(t -> new Pair<>(t, tile.elevation() - t.elevation() + 1)) // Calc # of shares
                 .collect(Collectors.toList());
 
-            final int totalShares = lowerTiles.stream()
-                .mapToInt(Pair::second) // Get number of shares from each pair
-                .sum(); // Sum all the shares
+            // Sum all elevation diffs
+            final double totalElevDiff = lowerTiles.stream()
+                .mapToDouble(Pair::second)
+                .sum();
 
-            for (Pair<Tile, Integer> pair : lowerTiles) {
+            for (Pair<Tile, Double> pair : lowerTiles) {
                 final Tile lowerTile = pair.first();
-                final int shares = pair.second();
+                final double elevDiff = pair.second();
                 // Add the adjacent tile as a runoff exit, with the appropriate number of shares
-                runoffPattern.addExit(lowerTile, (double) shares / totalShares);
+                runoffPattern.addExit(lowerTile, elevDiff / totalElevDiff);
             }
         }
     }

@@ -55,8 +55,6 @@ sink - tile whose distribution pattern is 1.0 to ocean
 
 Forceful runoff: push all water to lower elev tiles
     Runoff either dumps to ocean or collects in basin
-    For tiles of equal elevation, sort them by coordinates just to get a consistent sorting
-    Don't push to a tile that pushed to you
     Tag a tile as a "sink" if all of its runoff reaches the ocean
         By default, assume all tiles are sinks
         For every tile, track how much water it has from every other tile
@@ -89,7 +87,3 @@ Filling a basin:
         Total water capacity: sum(max water elev - elev of tile for each tile in basin)
     If water available > capacity, add lowest (by elev) tile adjacent to basin
     If you add a sink to the basin,
-
-PROBLEMO NO ME SITOS
-Pushing between two tiles of equal elevation is necessary, but order isn't well-defined
-    Must be stable/consistent, otherwise no bueno no me quiero

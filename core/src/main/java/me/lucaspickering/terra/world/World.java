@@ -10,7 +10,6 @@ import me.lucaspickering.terra.world.util.HexPoint;
 import me.lucaspickering.terra.world.util.HexPointSet;
 import me.lucaspickering.terra.world.util.TileSet;
 import me.lucaspickering.utils.range.DoubleRange;
-import me.lucaspickering.utils.range.IntRange;
 import me.lucaspickering.utils.range.Range;
 
 /**
@@ -149,7 +148,7 @@ public class World {
     /**
      * Every tile's elevation must be in this range
      */
-    public static final Range<Integer> ELEVATION_RANGE = new IntRange(-1000, 1000);
+    public static final Range<Double> ELEVATION_RANGE = new DoubleRange(-1000.0, 1000.0);
     public static final Range<Double> HUMIDITY_RANGE = new DoubleRange(0.0, 1.0);
 
     /**

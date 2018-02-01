@@ -79,8 +79,8 @@ public class ChunkModel implements RenderableProvider {
      * @param tile the tile
      * @return the rendered height of the given tile
      */
-    public static int getTileHeight(@NotNull Tile tile) {
-        return tile.elevation() - World.ELEVATION_RANGE.lower() + 1;
+    public static double getTileHeight(@NotNull Tile tile) {
+        return tile.elevation() - World.ELEVATION_RANGE.lower() + 1.0;
     }
 
     /**
@@ -93,7 +93,7 @@ public class ChunkModel implements RenderableProvider {
         // Get (x,y,z) of the top-center of the tile
         final Point2 tilePos = ChunkModel.tileToPixel(tile.pos());
         return new Vector3((float) tilePos.x(),            // x based on position
-                           getTileHeight(tile), // y based on elevation
+                           (float) getTileHeight(tile), // y based on elevation
                            (float) tilePos.y());           // z based on position
     }
 
@@ -152,12 +152,12 @@ public class ChunkModel implements RenderableProvider {
     private void initTileModels(Tile tile) {
         // CALCULATE TRANSFORMATIONS
         // Calculate the height of the tile that we want the tile to be drawn with
-        final int tileHeight = getTileHeight(tile);
+        final float tileHeight = (float) getTileHeight(tile);
 
         final Point2 tilePos = tileToPixel(tile.pos());
-        final Vector3 translate = new Vector3((float) tilePos.x(),  // Set x based on position
-                                              tileHeight / 2f,      // Shift up based on height
-                                              (float) tilePos.y()); // Set z based on position
+        final Vector3 translate = new Vector3((float) tilePos.x(),     // Set x based on position
+                                              tileHeight / 2f, // Shift up based on height
+                                              (float) tilePos.y());    // Set z based on position
         final Quaternion rotate = new Quaternion(); // No rotation
         final Vector3 scale = new Vector3(1f, tileHeight, 1f); // Scale based on height
 

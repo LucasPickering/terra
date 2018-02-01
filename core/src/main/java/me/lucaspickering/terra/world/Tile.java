@@ -28,7 +28,7 @@ public class Tile implements HexPointable {
 
     private Biome biome = Biome.NONE;
 
-    private int elevation;
+    private double elevation;
     private double humidity;
 
     private double runoffLevel;
@@ -98,11 +98,11 @@ public class Tile implements HexPointable {
         this.biome = biome;
     }
 
-    public final int elevation() {
+    public final double elevation() {
         return elevation;
     }
 
-    public void setElevation(int elevation) {
+    public void setElevation(double elevation) {
         // Coerce the elevation to be a valid value
         this.elevation = World.ELEVATION_RANGE.coerce(elevation);
     }

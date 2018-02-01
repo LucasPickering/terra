@@ -18,7 +18,7 @@ import me.lucaspickering.terra.world.World;
 public class BiomePainter extends Generator {
 
     // Basically a typedef, for convenience. Takes an elevation and a humidity.
-    private interface BiomeFunction extends BiPredicate<Integer, Double> {
+    private interface BiomeFunction extends BiPredicate<Double, Double> {
 
     }
 
@@ -55,7 +55,7 @@ public class BiomePainter extends Generator {
      * @return a biome for the given tile
      */
     private Biome computeBiome(Tile tile) {
-        final int elevation = tile.elevation();
+        final double elevation = tile.elevation();
         final double humidity = tile.humidity();
 
         // Test the function for each biome. As soon as one returns true, use that biome.
@@ -68,6 +68,6 @@ public class BiomePainter extends Generator {
         }
 
         throw new IllegalStateException(String.format(
-            "No biome found for [elevation=%d], [humidity=%f]", elevation, humidity));
+            "No biome found for [elevation=%f], [humidity=%f]", elevation, humidity));
     }
 }

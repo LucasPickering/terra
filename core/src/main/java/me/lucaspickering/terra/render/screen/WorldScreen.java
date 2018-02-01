@@ -62,7 +62,7 @@ public class WorldScreen extends Screen {
     }
 
     private void initCamera() {
-        camera.position.set(0f, World.ELEVATION_RANGE.upper() * 2f, 0f);
+        camera.position.set(0f, (float) (World.ELEVATION_RANGE.upper() * 2.0), 0f);
         camera.rotate(45, -1f, 0f, 0f);
         camera.near = 1f;
         camera.far = 100000f;

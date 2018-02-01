@@ -41,7 +41,7 @@ public class NoiseElevationGenerator extends NoiseGenerator {
     }
 
     private void setElevation(Tile tile, double noise, Range<Double> noiseRange) {
-        final int elevation = noiseRange.mapTo(noise, World.ELEVATION_RANGE);
+        final double elevation = noiseRange.mapTo(noise, World.ELEVATION_RANGE);
         tile.setElevation(elevation);
     }
 }
