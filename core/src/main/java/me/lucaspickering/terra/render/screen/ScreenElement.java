@@ -11,10 +11,8 @@ public interface ScreenElement {
 
     /**
      * Draws this screen onto the window.
-     *
-     * @param mousePos the current position of the mouse cursor
      */
-    void draw(Point2 mousePos);
+    void draw();
 
     /**
      * Checks if this element contains the given point. Bounds checking is inclusive on all sides.

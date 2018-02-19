@@ -9,6 +9,9 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -16,13 +19,13 @@ import java.util.logging.Logger;
 import me.lucaspickering.terra.input.CameraController;
 import me.lucaspickering.terra.render.ChunkModel;
 import me.lucaspickering.terra.render.TileOverlay;
+import me.lucaspickering.terra.world.Tile;
 import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.WorldHandler;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPointMap;
 import me.lucaspickering.utils.GeneralFuncs;
-import me.lucaspickering.utils.Point2;
 
 public class WorldScreen extends Screen {
 
@@ -78,8 +81,10 @@ public class WorldScreen extends Screen {
     }
 
     @Override
-    public void draw(Point2 mousePos) {
+    public void draw() {
         cameraController.update();
+
+        getHoveredTile();
 
         // Build a list of everything to render
         final List<RenderableProvider> toRender = new LinkedList<>();
@@ -98,6 +103,20 @@ public class WorldScreen extends Screen {
         modelBatch.begin(camera);
         modelBatch.render(toRender, environment);
         modelBatch.end();
+    }
+
+    private Tile getHoveredTile() {
+        final Ray ray = camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
+        for (ChunkModel chunkModel : chunkModels.values()) {
+            for (Map.Entry<Tile, BoundingBox> entry : chunkModel.tileBoundingBoxes.entrySet()) {
+                final Tile tile = entry.getKey();
+                final BoundingBox boundingBox = entry.getValue();
+                if (Intersector.intersectRayBoundsFast(ray, boundingBox)) {
+                    System.out.println(tile.pos());
+                }
+            }
+        }
+        return null;
     }
 
     private void setTileColorMode(TileColorMode tileColorMode) {

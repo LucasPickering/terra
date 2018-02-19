@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
@@ -120,6 +121,7 @@ public class ChunkModel implements RenderableProvider {
     }
 
     private final HexPointMap<Tile, ModelInstance> tileModelInsts = new HexPointMap<>();
+    public final HexPointMap<Tile, BoundingBox> tileBoundingBoxes = new HexPointMap<>();
     private final ModelCache tileModelCache = new ModelCache();
     private final Map<TileOverlay, ModelCache> overlayModelCaches =
         new EnumMap<>(TileOverlay.class);
@@ -161,10 +163,12 @@ public class ChunkModel implements RenderableProvider {
         final Quaternion rotate = new Quaternion(); // No rotation
         final Vector3 scale = new Vector3(1f, tileHeight, 1f); // Scale based on height
 
-        // Instantiate the model with the transformations and save it
-        tileModelInsts.put(tile, new ModelInstance(TILE_MODEL, new Matrix4(translate,
-                                                                           rotate,
-                                                                           scale)));
+        final ModelInstance modelInst = new ModelInstance(TILE_MODEL,
+                                                          new Matrix4(translate, rotate, scale));
+
+        // Save the model instance and a bounding box for the instance
+        tileModelInsts.put(tile, modelInst);
+        tileBoundingBoxes.put(tile, modelInst.calculateBoundingBox(new BoundingBox()));
 
         // Build the necessary models for each overlay, and each one to its respect cache
         for (TileOverlay overlay : TileOverlay.values()) {
