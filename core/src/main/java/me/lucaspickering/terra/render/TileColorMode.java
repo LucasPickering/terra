@@ -1,8 +1,10 @@
-package me.lucaspickering.terra.world;
+package me.lucaspickering.terra.render;
 
 import com.badlogic.gdx.graphics.Color;
 
 import me.lucaspickering.terra.util.Funcs;
+import me.lucaspickering.terra.world.Tile;
+import me.lucaspickering.terra.world.World;
 import me.lucaspickering.utils.range.DoubleRange;
 import me.lucaspickering.utils.range.Range;
 
@@ -47,7 +49,7 @@ public enum TileColorMode {
                                     tile.humidity(), World.HUMIDITY_RANGE);
         }
     },
-    WATER_LEVEL {
+    RUNOFF_LEVEL {
         @Override
         public Color getColor(Tile tile) {
             // Water tiles are always black

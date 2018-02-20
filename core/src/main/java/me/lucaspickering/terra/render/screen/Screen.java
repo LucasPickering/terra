@@ -2,8 +2,11 @@ package me.lucaspickering.terra.render.screen;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 
+import me.lucaspickering.terra.input.KeyAction;
 import me.lucaspickering.utils.Point2;
 
 /**
@@ -14,12 +17,23 @@ import me.lucaspickering.utils.Point2;
  */
 public abstract class Screen implements ScreenElement {
 
+    private final Map<KeyAction, Runnable> keyActions = new EnumMap<>(KeyAction.class);
     private Screen nextScreen;
     private boolean shouldExit; // Set to true to close the game
 
     @Override
     public boolean contains(Point2 p) {
         return true;
+    }
+
+    /**
+     * Register the given function to be called when the given key action occurs.
+     *
+     * @param action  the action to be called on
+     * @param handler the function to be called when the action occurs
+     */
+    protected void registerKeyAction(KeyAction action, Runnable handler) {
+        keyActions.put(action, handler);
     }
 
     /**
@@ -73,11 +87,17 @@ public abstract class Screen implements ScreenElement {
         // Do nothing by default
     }
 
-    public boolean keyDown(int keycode) {
+    public boolean keyDown(KeyAction action) {
+        // If the action is registered, run it and return true
+        if (keyActions.containsKey(action)) {
+            keyActions.get(action).run();
+            return true;
+        }
+
         return false;
     }
 
-    public boolean keyUp(int keycode) {
+    public boolean keyUp(KeyAction action) {
         return false;
     }
 }

@@ -18,7 +18,6 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import me.lucaspickering.terra.world.Tile;
-import me.lucaspickering.terra.world.TileColorMode;
 import me.lucaspickering.terra.world.World;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPoint;

@@ -1,7 +1,6 @@
 package me.lucaspickering.terra.render.screen;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -17,12 +16,11 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import me.lucaspickering.terra.input.CameraController;
+import me.lucaspickering.terra.input.KeyAction;
 import me.lucaspickering.terra.render.ChunkModel;
+import me.lucaspickering.terra.render.TileColorMode;
 import me.lucaspickering.terra.render.TileOverlay;
-import me.lucaspickering.terra.world.Tile;
-import me.lucaspickering.terra.world.TileColorMode;
-import me.lucaspickering.terra.world.World;
-import me.lucaspickering.terra.world.WorldHandler;
+import me.lucaspickering.terra.world.*;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPointMap;
 import me.lucaspickering.utils.GeneralFuncs;
@@ -47,6 +45,8 @@ public class WorldScreen extends Screen {
         logger = Logger.getLogger(getClass().getName());
         this.worldHandler = worldHandler;
 
+        initActionHandlers();
+
         // RENDERING INIT
         // Camera
         camera = new PerspectiveCamera(FOV, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -62,6 +62,26 @@ public class WorldScreen extends Screen {
         modelBatch = new ModelBatch();
 
         initChunkModels();
+    }
+
+    private void initActionHandlers() {
+        registerKeyAction(KeyAction.WORLD_TILECOLOR_COMPOSITE,
+                          () -> setTileColorMode(TileColorMode.COMPOSITE));
+        registerKeyAction(KeyAction.WORLD_TILECOLOR_BIOME,
+                          () -> setTileColorMode(TileColorMode.BIOME));
+        registerKeyAction(KeyAction.WORLD_TILECOLOR_ELEVATION,
+                          () -> setTileColorMode(TileColorMode.ELEVATION));
+        registerKeyAction(KeyAction.WORLD_TILECOLOR_HUMIDITY,
+                          () -> setTileColorMode(TileColorMode.HUMIDITY));
+        registerKeyAction(KeyAction.WORLD_TILECOLOR_RUNOFFLEVEL,
+                          () -> setTileColorMode(TileColorMode.RUNOFF_LEVEL));
+
+        registerKeyAction(KeyAction.WORLD_TILEOVERLAY_RUNOFFLEVEL,
+                          () -> toggleTileOverlay(TileOverlay.RUNOFF_LEVEL));
+        registerKeyAction(KeyAction.WORLD_TILEOVERLAY_RUNOFFEXITS,
+                          () -> toggleTileOverlay(TileOverlay.RUNOFF_EXITS));
+        registerKeyAction(KeyAction.WORLD_TILEOVERLAY_RUNOFFTERMINALS,
+                          () -> toggleTileOverlay(TileOverlay.RUNOFF_TERMINALS));
     }
 
     private void initCamera() {
@@ -126,44 +146,6 @@ public class WorldScreen extends Screen {
         logger.finer(String.format("Color update took %d ms", time));
     }
 
-    @Override
-    public void dispose() {
-        chunkModels.values().forEach(ChunkModel::dispose);
-    }
-
-    @Override
-    public boolean keyDown(int keycode) {
-        switch (keycode) {
-            case Input.Keys.NUM_1:
-                setTileColorMode(TileColorMode.COMPOSITE);
-                return true;
-            case Input.Keys.NUM_2:
-                setTileColorMode(TileColorMode.BIOME);
-                return true;
-            case Input.Keys.NUM_3:
-                setTileColorMode(TileColorMode.ELEVATION);
-                return true;
-            case Input.Keys.NUM_4:
-                setTileColorMode(TileColorMode.HUMIDITY);
-                return true;
-            case Input.Keys.NUM_5:
-                setTileColorMode(TileColorMode.WATER_LEVEL);
-                return true;
-            case Input.Keys.NUM_7:
-                toggleTileOverlay(TileOverlay.RUNOFF_LEVEL);
-                return true;
-            case Input.Keys.NUM_8:
-                toggleTileOverlay(TileOverlay.RUNOFF_EXITS);
-                return true;
-            case Input.Keys.NUM_9:
-                toggleTileOverlay(TileOverlay.RUNOFF_TERMINALS);
-                return true;
-        }
-
-        // Forward everything else to the camera controller
-        return cameraController.keyDown(keycode);
-    }
-
     private void toggleTileOverlay(TileOverlay overlay) {
         if (activeTileOverlays.contains(overlay)) {
             activeTileOverlays.remove(overlay);
@@ -173,8 +155,24 @@ public class WorldScreen extends Screen {
     }
 
     @Override
-    public boolean keyUp(int keycode) {
+    public void dispose() {
+        chunkModels.values().forEach(ChunkModel::dispose);
+    }
+
+    @Override
+    public boolean keyDown(KeyAction action) {
+        // Check for any registered actions
+        if (super.keyDown(action)) {
+            return true;
+        }
+
         // Forward everything else to the camera controller
-        return cameraController.keyUp(keycode);
+        return cameraController.keyDown(action);
+    }
+
+    @Override
+    public boolean keyUp(KeyAction action) {
+        // Forward everything else to the camera controller
+        return cameraController.keyUp(action);
     }
 }

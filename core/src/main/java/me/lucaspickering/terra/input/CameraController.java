@@ -1,84 +1,83 @@
 package me.lucaspickering.terra.input;
 
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 public class CameraController extends GestureDetector {
 
     private enum CameraMovement {
-        FORWARD(Input.Keys.W) {
+        FORWARD(KeyAction.WORLD_CAMERA_FORWARD) {
             @Override
             public void transform(Camera camera) {
                 camera.translate(alignToCamera(new Vector3(0f, 0f, -MOVE_VELOCITY), camera));
             }
         },
-        BACK(Input.Keys.S) {
+        BACK(KeyAction.WORLD_CAMERA_BACK) {
             @Override
             public void transform(Camera camera) {
                 camera.translate(alignToCamera(new Vector3(0f, 0f, MOVE_VELOCITY), camera));
             }
         },
-        LEFT(Input.Keys.A) {
+        LEFT(KeyAction.WORLD_CAMERA_LEFT) {
             @Override
             public void transform(Camera camera) {
                 camera.translate(alignToCamera(new Vector3(-MOVE_VELOCITY, 0f, 0f), camera));
             }
         },
-        RIGHT(Input.Keys.D) {
+        RIGHT(KeyAction.WORLD_CAMERA_RIGHT) {
             @Override
             public void transform(Camera camera) {
                 camera.translate(alignToCamera(new Vector3(MOVE_VELOCITY, 0f, 0f), camera));
             }
         },
-        UP(Input.Keys.SPACE) {
+        UP(KeyAction.WORLD_CAMERA_UP) {
             @Override
             public void transform(Camera camera) {
                 camera.translate(alignToCamera(new Vector3(0f, MOVE_VELOCITY, 0f), camera));
             }
         },
-        DOWN(Input.Keys.SHIFT_LEFT) {
+        DOWN(KeyAction.WORLD_CAMERA_DOWN) {
             @Override
             public void transform(Camera camera) {
                 camera.translate(alignToCamera(new Vector3(0f, -MOVE_VELOCITY, 0f), camera));
             }
         },
-        ROTATE_LEFT(Input.Keys.LEFT) {
+        ROTATE_LEFT(KeyAction.WORLD_CAMERA_ROTATELEFT) {
             @Override
             public void transform(Camera camera) {
                 camera.rotate(ROTATE_VELOCITY, 0f, 1f, 0f);
             }
         },
-        ROTATE_RIGHT(Input.Keys.RIGHT) {
+        ROTATE_RIGHT(KeyAction.WORLD_CAMERA_ROTATERIGHT) {
             @Override
             public void transform(Camera camera) {
                 camera.rotate(-ROTATE_VELOCITY, 0f, 1f, 0f);
             }
         };
 
-        private static final Map<Integer, CameraMovement> keycodeMap = new HashMap<>();
+        private static final Map<KeyAction, CameraMovement> actionMap =
+            new EnumMap<>(KeyAction.class);
 
         static {
             // Initialize a map of all actions keyed by keycode
             for (CameraMovement cameraMovement : values()) {
-                keycodeMap.put(cameraMovement.keycode, cameraMovement);
+                actionMap.put(cameraMovement.action, cameraMovement);
             }
         }
 
-        private final int keycode;
+        private final KeyAction action;
 
-        CameraMovement(int keycode) {
-            this.keycode = keycode;
+        CameraMovement(KeyAction action) {
+            this.action = action;
         }
 
-        public static CameraMovement byKeycode(int keycode) {
-            return keycodeMap.get(keycode);
+        public static CameraMovement byAction(KeyAction action) {
+            return actionMap.get(action);
         }
 
         private static Vector3 alignToCamera(Vector3 vec, Camera camera) {
@@ -117,9 +116,8 @@ public class CameraController extends GestureDetector {
         camera.update();
     }
 
-    @Override
-    public boolean keyDown(int keycode) {
-        final CameraMovement cameraMovement = CameraMovement.byKeycode(keycode);
+    public boolean keyDown(KeyAction action) {
+        final CameraMovement cameraMovement = CameraMovement.byAction(action);
         if (cameraMovement != null) {
             actionStates.put(cameraMovement, true);
             return true;
@@ -127,9 +125,8 @@ public class CameraController extends GestureDetector {
         return false;
     }
 
-    @Override
-    public boolean keyUp(int keycode) {
-        final CameraMovement cameraMovement = CameraMovement.byKeycode(keycode);
+    public boolean keyUp(KeyAction action) {
+        final CameraMovement cameraMovement = CameraMovement.byAction(action);
         if (cameraMovement != null) {
             actionStates.put(cameraMovement, false);
             return true;
