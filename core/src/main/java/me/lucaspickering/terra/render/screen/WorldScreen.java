@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 
@@ -20,7 +21,9 @@ import me.lucaspickering.terra.input.KeyAction;
 import me.lucaspickering.terra.render.ChunkModel;
 import me.lucaspickering.terra.render.TileColorMode;
 import me.lucaspickering.terra.render.TileOverlay;
-import me.lucaspickering.terra.world.*;
+import me.lucaspickering.terra.world.Tile;
+import me.lucaspickering.terra.world.World;
+import me.lucaspickering.terra.world.WorldHandler;
 import me.lucaspickering.terra.world.util.Chunk;
 import me.lucaspickering.terra.world.util.HexPointMap;
 import me.lucaspickering.utils.GeneralFuncs;
@@ -104,7 +107,10 @@ public class WorldScreen extends Screen {
     public void draw() {
         cameraController.update();
 
-        getHoveredTile();
+        final Tile tileUnderMouse = getTileUnderMouse();
+        if (tileUnderMouse != null) {
+            System.out.println(tileUnderMouse.pos());
+        }
 
         // Build a list of everything to render
         final List<RenderableProvider> toRender = new LinkedList<>();
@@ -125,18 +131,44 @@ public class WorldScreen extends Screen {
         modelBatch.end();
     }
 
-    private Tile getHoveredTile() {
+    /**
+     * Get the tile under the mouse cursor. This generates a ray originating from the mouse cursor,
+     * and checks each tile to see if it intersects the ray. If multiple tiles intersect the ray,
+     * the nearest one is returned.
+     *
+     * @return the tile under the mouse cursor
+     */
+    private Tile getTileUnderMouse() {
         final Ray ray = camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
+
+        // Will store the intersection point for each tile that the ray hits
+        // Used to find the nearest tile when multiple are intersected
+        final Vector3 intersectPoint = new Vector3();
+
+        Tile nearestTile = null;
+        float distToNearestTile = Float.MAX_VALUE;
+
+        // Check each tile for intersection
         for (ChunkModel chunkModel : chunkModels.values()) {
             for (Map.Entry<Tile, BoundingBox> entry : chunkModel.tileBoundingBoxes.entrySet()) {
                 final Tile tile = entry.getKey();
                 final BoundingBox boundingBox = entry.getValue();
-                if (Intersector.intersectRayBoundsFast(ray, boundingBox)) {
-                    System.out.println(tile.pos());
+
+                // Check if the ray intersects this tile
+                if (Intersector.intersectRayBounds(ray, boundingBox, intersectPoint)) {
+                    // Get the distance between the ray origin and the tile
+                    final float distance = ray.origin.dst(intersectPoint);
+
+                    // If this is the closest tile found so far, save it
+                    if (distance < distToNearestTile) {
+                        nearestTile = tile;
+                        distToNearestTile = distance;
+                    }
                 }
             }
         }
-        return null;
+
+        return nearestTile;
     }
 
     private void setTileColorMode(TileColorMode tileColorMode) {

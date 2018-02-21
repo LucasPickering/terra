@@ -44,6 +44,7 @@ public class ChunkModel implements RenderableProvider {
     // The hexagonal prism model used for all tiles. This will be created once, scaled and colored
     // when creating a ModelInstance from it. Pls no modify!
     public static final Model TILE_MODEL;
+    public static final BoundingBox TILE_BOUNDING_BOX;
 
     static {
         // Initialize the tile model
@@ -54,6 +55,7 @@ public class ChunkModel implements RenderableProvider {
                                                  Tile.NUM_SIDES, new Material(),
                                                  VertexAttributes.Usage.Position
                                                  | VertexAttributes.Usage.Normal);
+        TILE_BOUNDING_BOX = TILE_MODEL.calculateBoundingBox(new BoundingBox());
     }
 
     /**
@@ -161,13 +163,13 @@ public class ChunkModel implements RenderableProvider {
                                               (float) tilePos.y());    // Set z based on position
         final Quaternion rotate = new Quaternion(); // No rotation
         final Vector3 scale = new Vector3(1f, tileHeight, 1f); // Scale based on height
+        final Matrix4 transform = new Matrix4(translate, rotate, scale);
 
-        final ModelInstance modelInst = new ModelInstance(TILE_MODEL,
-                                                          new Matrix4(translate, rotate, scale));
+        final ModelInstance modelInst = new ModelInstance(TILE_MODEL, transform);
 
         // Save the model instance and a bounding box for the instance
         tileModelInsts.put(tile, modelInst);
-        tileBoundingBoxes.put(tile, modelInst.calculateBoundingBox(new BoundingBox()));
+        tileBoundingBoxes.put(tile, new BoundingBox(TILE_BOUNDING_BOX).mul(transform));
 
         // Build the necessary models for each overlay, and each one to its respect cache
         for (TileOverlay overlay : TileOverlay.values()) {
