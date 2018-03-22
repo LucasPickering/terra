@@ -1,7 +1,9 @@
 # Terra
 Generate terrain and civilizations.
 
-Uses the Lightweight Java Game Library.
+![Terra](http://lucaspickering.me/wp-content/uploads/2018/02/java_2018-02-22_06-38-02.png)
+
+Uses [libgdx](https://libgdx.badlogicgames.com/)
 ## Installation instructions for Development:
 #### IntelliJ
 1. Clone the repo
